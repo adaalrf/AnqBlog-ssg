@@ -45,8 +45,7 @@ const generateIntermediatePostHtmlFiles = (posts) => {
       },
     );
 
-    const postContent =
-      dom.window.document.querySelector('#post-content').outerHTML;
+    const postContent = dom.window.document.querySelector('#main').outerHTML;
 
     const outputFilePath = path.join(postOutputDirectory, htmlFileName);
     fs.writeFileSync(outputFilePath, postContent);
@@ -135,6 +134,43 @@ const generateBlogHtmlFile = (posts) => {
   console.log(`Generated ${blogOutputPath}`);
 };
 
+// Apply layout to all HTML files in a directory
+const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
+  const files = fs.readdirSync(inputDir);
+
+  files.forEach((file) => {
+    const inputFilePath = path.join(inputDir, file);
+    const outputFilePath = path.join(outputDir, file);
+
+    // Skip the posts directory
+    if (file === 'posts') {
+      return;
+    }
+
+    if (fs.statSync(inputFilePath).isDirectory()) {
+      ensureDirectoryExists(outputFilePath);
+      applyLayoutToHtmlFiles(inputFilePath, outputFilePath);
+    } else if (file.endsWith('.html')) {
+      const fileContent = readFileContent(inputFilePath);
+      const mainLayoutContent = readFileContent(mainLayoutPath);
+
+      const dom = new JSDOM(fileContent);
+      const mainContent = dom.window.document.querySelector('#main').innerHTML;
+
+      const finalHtml = mainLayoutContent
+        .replace('{{title}}', 'Document')
+        .replace('{{children}}', mainContent)
+        .replace('{{stylesPath}}', 'styles/styles.css')
+        .replace('{{faviconPath}}', 'assets/favicon.webp')
+        .replace('{{scriptPath}}', 'js/bundle.js');
+
+      fs.writeFileSync(outputFilePath, finalHtml);
+
+      console.log(`Processed ${outputFilePath}`);
+    }
+  });
+};
+
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
   ensureDirectoryExists(postOutputDirectory);
@@ -144,6 +180,11 @@ const generateAllHtmlFiles = () => {
   generateIntermediatePostHtmlFiles(posts);
   generateFinalPostHtmlFiles(posts);
   generateBlogHtmlFile(posts);
+
+  // Apply layout to all HTML files in src/content directory, excluding posts
+  const contentDirectory = fr('src/content');
+  const publicContentDirectory = fr('public');
+  applyLayoutToHtmlFiles(contentDirectory, publicContentDirectory);
 };
 
 // Execute the HTML file generation
