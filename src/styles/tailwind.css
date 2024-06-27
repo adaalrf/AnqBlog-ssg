@@ -49,7 +49,7 @@
   }
 
   h1 {
-    @apply text-4xl font-black mb-4;
+    @apply text-4xl font-black;
   }
 
   h2 {

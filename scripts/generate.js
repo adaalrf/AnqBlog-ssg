@@ -45,7 +45,8 @@ const generateIntermediatePostHtmlFiles = (posts) => {
       },
     );
 
-    const postContent = dom.window.document.querySelector('#main').outerHTML;
+    const postContent =
+      dom.window.document.querySelector('.content-div').outerHTML; // content of intermediate post HTML file
 
     const outputFilePath = path.join(postOutputDirectory, htmlFileName);
     fs.writeFileSync(outputFilePath, postContent);
@@ -63,9 +64,17 @@ const generateFinalPostHtmlFiles = (posts) => {
     const postContentPath = path.join(postOutputDirectory, htmlFileName);
     const postContent = readFileContent(postContentPath);
 
-    const finalHtml = mainLayoutContent
+    const dom = new JSDOM(mainLayoutContent);
+    const document = dom.window.document;
+    const mainElementLayout = document.querySelector('#main'); // {{children}}
+    if (!mainElementLayout) {
+      throw new Error('Main element not found in layout template');
+    }
+    mainElementLayout.innerHTML = postContent;
+
+    const finalHtml = dom
+      .serialize()
       .replace('{{title}}', title)
-      .replace('{{children}}', postContent)
       .replace('{{stylesPath}}', '../styles/styles.css')
       .replace('{{faviconPath}}', '../assets/favicon.webp')
       .replace('{{scriptPath}}', '../js/bundle.js');
@@ -84,7 +93,7 @@ const generateBlogHtmlFile = (posts) => {
 
   const dom = new JSDOM(blogTemplateContent);
   const document = dom.window.document;
-  const postItemTemplate = document.getElementById('post-item-template');
+  const postItemTemplate = document.querySelector('.post-item-template');
   const postLinksDiv = document.getElementById('post-links-div');
 
   if (!postItemTemplate || !postLinksDiv) {
@@ -97,7 +106,7 @@ const generateBlogHtmlFile = (posts) => {
     const { title, date, tags, htmlFileName, previewContent } = post;
     const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;
 
-    const postItem = postItemTemplate.cloneNode(true);
+    const postItem = postItemTemplate.cloneNode(true); // the blog-template
     postItem.style.display = 'list-item';
     postItem.querySelector('h1').innerHTML = titleLink;
     postItem.querySelector('h2').innerHTML = date;
@@ -114,17 +123,25 @@ const generateBlogHtmlFile = (posts) => {
         if (tagDivider) tagDivider.remove();
       }
     }
-
+    // finished processing the blog-template
     postLinksDiv.appendChild(postItem);
   });
 
   postItemTemplate.remove();
 
-  const blogContent = document.querySelector('#content-div').innerHTML;
+  const blogContent = document.querySelector('.main').outerHTML; // finished blog-template HTML
 
-  const finalBlogHtml = mainLayoutContent
+  const domLayout = new JSDOM(mainLayoutContent);
+  const documentLayout = domLayout.window.document;
+  const mainElementLayout = documentLayout.querySelector('#main'); // {{children}}
+  if (!mainElementLayout) {
+    throw new Error('Main element not found in layout template');
+  }
+  mainElementLayout.innerHTML = blogContent;
+
+  const finalBlogHtml = domLayout
+    .serialize()
     .replace('{{title}}', 'Blog')
-    .replace('{{children}}', blogContent)
     .replace('{{stylesPath}}', 'styles/styles.css')
     .replace('{{faviconPath}}', 'assets/favicon.webp')
     .replace('{{scriptPath}}', 'js/bundle.js');
@@ -155,7 +172,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
       const mainLayoutContent = readFileContent(mainLayoutPath);
 
       const dom = new JSDOM(fileContent);
-      const mainContent = dom.window.document.querySelector('#main').innerHTML;
+      const mainContent = dom.window.document.querySelector('#main').outerHTML;
 
       const finalHtml = mainLayoutContent
         .replace('{{title}}', 'Document')

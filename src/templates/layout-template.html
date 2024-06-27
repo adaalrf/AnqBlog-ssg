@@ -9,7 +9,7 @@
   </head>
   <body class="bg-background text-foreground flex flex-col min-h-screen">
     <header class="bg-primary text-primary-foreground shadow-md p-4 mb-6">
-      <div class="max-w-screen-lg mx-auto">
+      <div class="flex max-w-screen-lg mx-auto">
         <a href="/" class="text-secondary-foreground hover:text-foreground">
           <h1 class="text-2xl font-bold">. adaalrf.dev</h1>
         </a>
@@ -47,7 +47,9 @@
         </nav>
       </div>
     </header>
-    <main class="min-max-w mx-auto p-6 bg-card rounded-lg shadow-md flex-grow">
+    <main
+      id="main"
+      class="min-max-w mx-auto p-6 bg-card rounded-lg shadow-md flex-grow">
       {{children}}
     </main>
     <footer class="bg-primary text-primary-foreground shadow-inner mt-6 p-4">
