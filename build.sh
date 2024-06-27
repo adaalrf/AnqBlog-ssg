@@ -19,11 +19,7 @@ node scripts/build-css.js
 cp -r src/assets public/
 
 # Run the generation scripts to generate the output files
-node scripts/generate-md-to-html.js
-node scripts/generate-blog.js
-
-# Apply the layout to the generated files
-node scripts/apply-layout.js
+node scripts/generate.js
 
 # End timer
 end_time=$(date +%s%3N)
