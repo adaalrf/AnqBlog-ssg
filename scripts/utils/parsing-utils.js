@@ -89,9 +89,25 @@ const processMarkdownFiles = (directory, options = {}) => {
   });
 };
 
+// Ensure output directory exists
+const ensureDirectoryExists = (directory) => {
+  if (!fs.existsSync(directory)) {
+    fs.mkdirSync(directory, { recursive: true });
+  }
+};
+
+// Replace placeholders with corresponding values
+const replacePlaceholders = (template, values) => {
+  return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
+    return key in values ? values[key] : placeholder;
+  });
+};
+
 module.exports = {
   readConfig,
   readFileContent,
   injectContentIntoTemplate,
   processMarkdownFiles,
+  ensureDirectoryExists,
+  replacePlaceholders,
 };

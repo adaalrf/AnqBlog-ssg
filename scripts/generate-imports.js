@@ -1,6 +1,5 @@
 const fs = require('fs');
-const path = require('path');
-const { fr, rp } = require('./resolve-path');
+const { fr } = require('./utils/resolve-path');
 
 const dirPath = fr('src/ts');
 const outputPath = fr('src/ts/main.ts');

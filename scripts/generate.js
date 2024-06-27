@@ -1,12 +1,14 @@
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
-const { fr } = require('./resolve-path');
+const { fr, rp } = require('./utils/resolve-path');
 const {
   readConfig,
   readFileContent,
   injectContentIntoTemplate,
   processMarkdownFiles,
+  replacePlaceholders,
+  ensureDirectoryExists,
 } = require('./utils/parsing-utils');
 
 // Paths
@@ -21,13 +23,6 @@ const publicPostsDirectory = fr('public/posts');
 
 // Read and parse configuration
 readConfig(configPath);
-
-// Ensure output directory exists
-const ensureDirectoryExists = (directory) => {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
-};
 
 // Generate intermediate post HTML files
 const generateIntermediatePostHtmlFiles = (posts) => {
@@ -46,8 +41,7 @@ const generateIntermediatePostHtmlFiles = (posts) => {
     );
 
     const postContent =
-      dom.window.document.querySelector('.content-div').outerHTML; // content of intermediate post HTML file
-
+      dom.window.document.querySelector('.content-div').outerHTML;
     const outputFilePath = path.join(postOutputDirectory, htmlFileName);
     fs.writeFileSync(outputFilePath, postContent);
 
@@ -64,20 +58,19 @@ const generateFinalPostHtmlFiles = (posts) => {
     const postContentPath = path.join(postOutputDirectory, htmlFileName);
     const postContent = readFileContent(postContentPath);
 
-    const dom = new JSDOM(mainLayoutContent);
-    const document = dom.window.document;
-    const mainElementLayout = document.querySelector('#main'); // {{children}}
-    if (!mainElementLayout) {
-      throw new Error('Main element not found in layout template');
-    }
-    mainElementLayout.innerHTML = postContent;
+    const relativeOutputPath = rp(
+      publicPostsDirectory,
+      htmlFileName,
+      fr('public'),
+    );
 
-    const finalHtml = dom
-      .serialize()
-      .replace('{{title}}', title)
-      .replace('{{stylesPath}}', '../styles/styles.css')
-      .replace('{{faviconPath}}', '../assets/favicon.webp')
-      .replace('{{scriptPath}}', '../js/bundle.js');
+    const finalHtml = replacePlaceholders(mainLayoutContent, {
+      title,
+      children: postContent,
+      stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+      faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+      scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+    });
 
     const outputFilePath = path.join(publicPostsDirectory, htmlFileName);
     fs.writeFileSync(outputFilePath, finalHtml);
@@ -102,11 +95,12 @@ const generateBlogHtmlFile = (posts) => {
     );
   }
 
+  // TODO: got to rewrite this at some point, should work with gray-matter too
   posts.forEach((post) => {
     const { title, date, tags, htmlFileName, previewContent } = post;
     const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;
 
-    const postItem = postItemTemplate.cloneNode(true); // the blog-template
+    const postItem = postItemTemplate.cloneNode(true);
     postItem.style.display = 'list-item';
     postItem.querySelector('h1').innerHTML = titleLink;
     postItem.querySelector('h2').innerHTML = date;
@@ -123,28 +117,26 @@ const generateBlogHtmlFile = (posts) => {
         if (tagDivider) tagDivider.remove();
       }
     }
-    // finished processing the blog-template
     postLinksDiv.appendChild(postItem);
   });
 
   postItemTemplate.remove();
 
-  const blogContent = document.querySelector('.main').outerHTML; // finished blog-template HTML
+  const blogContent = document.querySelector('#blog').outerHTML;
 
-  const domLayout = new JSDOM(mainLayoutContent);
-  const documentLayout = domLayout.window.document;
-  const mainElementLayout = documentLayout.querySelector('#main'); // {{children}}
-  if (!mainElementLayout) {
-    throw new Error('Main element not found in layout template');
-  }
-  mainElementLayout.innerHTML = blogContent;
+  const relativeOutputPath = rp(
+    path.dirname(blogOutputPath),
+    'blog.html',
+    fr('public'),
+  );
 
-  const finalBlogHtml = domLayout
-    .serialize()
-    .replace('{{title}}', 'Blog')
-    .replace('{{stylesPath}}', 'styles/styles.css')
-    .replace('{{faviconPath}}', 'assets/favicon.webp')
-    .replace('{{scriptPath}}', 'js/bundle.js');
+  const finalBlogHtml = replacePlaceholders(mainLayoutContent, {
+    title: 'Blog',
+    children: blogContent,
+    stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+    faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+    scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+  });
 
   fs.writeFileSync(blogOutputPath, finalBlogHtml);
 
@@ -159,7 +151,6 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
     const inputFilePath = path.join(inputDir, file);
     const outputFilePath = path.join(outputDir, file);
 
-    // Skip the posts directory
     if (file === 'posts') {
       return;
     }
@@ -169,17 +160,46 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
       applyLayoutToHtmlFiles(inputFilePath, outputFilePath);
     } else if (file.endsWith('.html')) {
       const fileContent = readFileContent(inputFilePath);
+
+      const templateFilePath = path.join(
+        fr('src/templates'),
+        `${path.basename(file, '.html')}-template.html`,
+      );
+      const specificTemplateExists = fs.existsSync(templateFilePath);
+
+      let mainContent;
+      if (specificTemplateExists) {
+        const templateContent = readFileContent(templateFilePath);
+        const dom = new JSDOM(templateContent);
+        const document = dom.window.document;
+        const mainElementTemplate = document.querySelector('#main');
+        if (!mainElementTemplate) {
+          throw new Error('Main element not found in specific template');
+        }
+        const contentDom = new JSDOM(fileContent);
+        const content =
+          contentDom.window.document.querySelector('#main').innerHTML;
+        mainElementTemplate.innerHTML = content;
+        mainContent = mainElementTemplate.innerHTML;
+      } else {
+        const contentDom = new JSDOM(fileContent);
+        mainContent =
+          contentDom.window.document.querySelector('#main').outerHTML;
+      }
+
+      const relativeOutputPath = rp(
+        path.dirname(outputFilePath),
+        file,
+        fr('public'),
+      );
       const mainLayoutContent = readFileContent(mainLayoutPath);
-
-      const dom = new JSDOM(fileContent);
-      const mainContent = dom.window.document.querySelector('#main').outerHTML;
-
-      const finalHtml = mainLayoutContent
-        .replace('{{title}}', 'Document')
-        .replace('{{children}}', mainContent)
-        .replace('{{stylesPath}}', 'styles/styles.css')
-        .replace('{{faviconPath}}', 'assets/favicon.webp')
-        .replace('{{scriptPath}}', 'js/bundle.js');
+      const finalHtml = replacePlaceholders(mainLayoutContent, {
+        title: path.basename(file, '.html'),
+        children: mainContent,
+        stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+        faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+        scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+      });
 
       fs.writeFileSync(outputFilePath, finalHtml);
 
@@ -198,7 +218,6 @@ const generateAllHtmlFiles = () => {
   generateFinalPostHtmlFiles(posts);
   generateBlogHtmlFile(posts);
 
-  // Apply layout to all HTML files in src/content directory, excluding posts
   const contentDirectory = fr('src/content');
   const publicContentDirectory = fr('public');
   applyLayoutToHtmlFiles(contentDirectory, publicContentDirectory);

@@ -39,10 +39,11 @@ const projectRoot = findRoot(__dirname);
 const resolvePath = (relativePath) => path.join(projectRoot, relativePath);
 
 // Function to calculate the relative path based on the depth
-const calculateRelativePath = (outputFilePath, outputDir) => {
+const calculateRelativePath = (outputDir, file, baseDir) => {
+  const outputFilePath = path.join(outputDir, file);
   const relativePath = path.posix.relative(
     path.posix.dirname(outputFilePath),
-    outputDir,
+    baseDir,
   );
   return relativePath ? relativePath + '/' : '';
 };

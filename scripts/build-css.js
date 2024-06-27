@@ -3,7 +3,7 @@ const path = require('path');
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
-const { fr, rp } = require('./resolve-path');
+const { fr } = require('./utils/resolve-path');
 
 // Define input and output paths
 const inputFilePath = fr('src/styles/tailwind.css');
