@@ -95,7 +95,8 @@ const generateBlogHtmlFile = (posts) => {
     );
   }
 
-  // TODO: got to rewrite this at some point, should work with gray-matter too
+  // TODO: got to rewrite this at some point, could work with gray-matter too
+  // or, just make JSX from scratch...
   posts.forEach((post) => {
     const { title, date, tags, htmlFileName, previewContent } = post;
     const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;

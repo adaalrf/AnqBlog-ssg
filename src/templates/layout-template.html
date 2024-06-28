@@ -8,8 +8,9 @@
     <link rel="icon" href="{{faviconPath}}" type="image/x-icon" />
   </head>
   <body class="bg-background text-foreground flex flex-col min-h-screen">
-    <header class="bg-primary text-primary-foreground shadow-md p-4 mb-6">
-      <div class="flex max-w-screen-lg mx-auto">
+    <header class="bg-primary text-primary-foreground shadow-md p-1 mb-6">
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto">
         <a href="/" class="text-secondary-foreground hover:text-foreground">
           <h1 class="text-2xl font-bold">. adaalrf.dev</h1>
         </a>
@@ -49,11 +50,12 @@
     </header>
     <main
       id="main"
-      class="min-max-w mx-auto p-6 bg-card rounded-lg shadow-md flex-grow">
+      class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto p-6 rounded-sm bg-card shadow-md flex-grow">
       {{children}}
     </main>
     <footer class="bg-primary text-primary-foreground shadow-inner mt-6 p-4">
-      <div class="max-w-screen-lg mx-auto text-center">
+      <div
+        class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto text-center">
         <p class="text-secondary-foreground">
           © 2024 . adaalrf.dev. All rights reserved.
         </p>
