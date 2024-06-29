@@ -1,7 +1,7 @@
 module.exports = {
   enabled: true,
   content: ['./src/**/*.html', './src/**/*.ts'],
-  darkMode: 'class', // Enable dark mode
+  darkMode: 'class', // Enable dark mode, use class="dark" in html
   theme: {
     extend: {
       colors: {

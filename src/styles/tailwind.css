@@ -3,9 +3,9 @@
 @tailwind utilities;
 
 @layer base {
-  :root {
-    --background: hsl(210, 15%, 15%);
-    --foreground: hsl(0, 0%, 95%);
+  .light {
+    --background: hsl(208, 11%, 72%);
+    --foreground: hsl(0, 4%, 14%);
     --card: hsl(210, 15%, 20%);
     --card-foreground: hsl(0, 0%, 95%);
     --popover: hsl(210, 15%, 20%);
