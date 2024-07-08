@@ -90,17 +90,17 @@
   }
 
   h1 {
-    @apply text-4xl;
+    @apply text-4xl mb-2;
   }
 
   h2 {
-    @apply text-lg;
+    @apply text-lg mb-1;
   }
   #toggle-theme-btn {
     @apply hover:opacity-60; /* maching the anchortag's 'text-muted-foreground' */
   }
   pre:has(> code) {
-    @apply p-2 font-mono size-fit rounded-sm bg-code text-code-foreground;
+    @apply my-2 p-2 font-mono size-fit rounded-sm bg-muted-foreground text-background;
   }
 }
 

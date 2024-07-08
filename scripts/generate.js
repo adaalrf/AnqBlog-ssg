@@ -70,6 +70,7 @@ const generateFinalPostHtmlFiles = (posts) => {
       stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
       faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
       scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+      gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
     });
 
     const outputFilePath = path.join(publicPostsDirectory, htmlFileName);
@@ -137,6 +138,7 @@ const generateBlogHtmlFile = (posts) => {
     stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
     faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
     scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+    gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
   });
 
   fs.writeFileSync(blogOutputPath, finalBlogHtml);
@@ -200,6 +202,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
         stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
         faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
         scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+        gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
       });
 
       fs.writeFileSync(outputFilePath, finalHtml);
