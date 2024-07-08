@@ -4,56 +4,180 @@
 
 @layer base {
   .light {
-    --background: hsl(208, 11%, 72%);
-    --foreground: hsl(0, 4%, 14%);
-    --card: hsl(210, 15%, 20%);
-    --card-foreground: hsl(0, 0%, 95%);
-    --popover: hsl(210, 15%, 20%);
-    --popover-foreground: hsl(0, 0%, 95%);
-    --primary: hsl(210, 20%, 30%);
-    --primary-foreground: hsl(0, 0%, 95%);
-    --secondary: hsl(210, 20%, 25%);
-    --secondary-foreground: hsl(0, 0%, 95%);
-    --muted: hsl(210, 15%, 25%);
-    --muted-foreground: hsl(0, 0%, 75%);
-    --accent: hsl(210, 20%, 40%);
-    --accent-foreground: hsl(0, 0%, 95%);
+    /* set your color here for light-mode */
+    --background-hue: 60;
+    --background-saturation: 4%;
+    --background-lightness: 95%;
+
+    --foreground-hue: 0;
+    --foreground-saturation: 5%;
+    --foreground-lightness: 15%;
+
+    /* set your opacity here for light-mode */
+    --color-opacity-primary: 1;
+    --color-opacity-secondary: 0.8;
+    --color-opacity-muted: 0.6;
+    --color-opacity-accent: 0.7;
+
+    --background: hsl(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness)
+    );
+    --foreground: hsl(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness)
+    );
+    --primary: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-primary)
+    );
+    --primary-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-primary)
+    );
+    --secondary: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-secondary)
+    );
+    --secondary-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-secondary)
+    );
+    --muted: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-muted)
+    );
+    --muted-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-muted)
+    );
+    --accent: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-accent)
+    );
+    --accent-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-accent)
+    );
+
     --destructive: hsl(0, 70%, 50%);
-    --destructive-foreground: hsl(0, 0%, 95%);
-    --border: hsl(210, 20%, 25%);
-    --input: hsl(210, 20%, 25%);
-    --ring: hsl(210, 20%, 30%);
-    --radius: 0.5rem;
+    --destructive-foreground: var(--foreground);
   }
 
   .dark {
-    --background: hsl(210, 20%, 10%);
-    --foreground: hsl(0, 0%, 90%);
-    --card: hsl(210, 20%, 15%);
-    --card-foreground: hsl(0, 0%, 90%);
-    --popover: hsl(210, 20%, 15%);
-    --popover-foreground: hsl(0, 0%, 90%);
-    --primary: hsl(210, 20%, 30%);
-    --primary-foreground: hsl(0, 0%, 95%);
-    --secondary: hsl(210, 20%, 20%);
-    --secondary-foreground: hsl(0, 0%, 90%);
-    --muted: hsl(210, 20%, 25%);
-    --muted-foreground: hsl(0, 0%, 75%);
-    --accent: hsl(210, 20%, 35%);
-    --accent-foreground: hsl(0, 0%, 95%);
-    --destructive: hsl(0, 60%, 45%);
-    --destructive-foreground: hsl(0, 0%, 95%);
-    --border: hsl(210, 20%, 20%);
-    --input: hsl(210, 20%, 20%);
-    --ring: hsl(210, 20%, 30%);
+    /* set your colors here for dark-mode */
+    --background-hue: 0;
+    --background-saturation: 5%;
+    --background-lightness: 15%;
+
+    --foreground-hue: 60;
+    --foreground-saturation: 4%;
+    --foreground-lightness: 95%;
+
+    /* set your opacity here for dark-mode */
+    --color-opacity-primary: 1;
+    --color-opacity-secondary: 0.8;
+    --color-opacity-muted: 0.6;
+    --color-opacity-accent: 0.7;
+
+    --background: hsl(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness)
+    );
+    --foreground: hsl(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness)
+    );
+
+    --primary: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-primary)
+    );
+    --primary-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-primary)
+    );
+
+    --secondary: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-secondary)
+    );
+    --secondary-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-secondary)
+    );
+
+    --muted: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-muted)
+    );
+    --muted-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-muted)
+    );
+
+    --accent: hsla(
+      var(--background-hue),
+      var(--background-saturation),
+      var(--background-lightness),
+      var(--color-opacity-accent)
+    );
+    --accent-foreground: hsla(
+      var(--foreground-hue),
+      var(--foreground-saturation),
+      var(--foreground-lightness),
+      var(--color-opacity-accent)
+    );
+
+    --destructive: hsl(0, 70%, 50%);
+    --destructive-foreground: var(--foreground);
+  }
+
+  a {
+    @apply text-foreground hover:text-muted-foreground;
   }
 
   h1 {
-    @apply text-4xl font-black;
+    @apply text-4xl;
   }
 
   h2 {
-    @apply text-lg text-gray-500;
+    @apply text-lg;
+  }
+  #toggle-theme-btn {
+    @apply hover:opacity-60; /* maching the anchortag's 'text-muted-foreground' */
   }
 }
 

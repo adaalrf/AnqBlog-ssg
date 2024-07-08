@@ -8,42 +8,31 @@
     <link href="{{stylesPath}}" rel="stylesheet" />
     <link rel="icon" href="{{faviconPath}}" type="image/x-icon" />
   </head>
-  <body class="bg-background text-foreground flex flex-col min-h-screen">
-    <header class="bg-primary text-primary-foreground shadow-md p-1 mb-6">
+  <body class="bg-background flex flex-col min-h-screen">
+    <header class="bg-background text-foreground shadow-md p-1 mb-6">
       <div
         class="flex flex-col sm:flex-row items-center justify-between min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto">
-        <a href="/" class="text-secondary-foreground hover:text-foreground">
+        <a href="/">
           <h1 class="text-2xl font-bold">. adaalrf.dev</h1>
         </a>
         <nav>
           <ul class="flex space-x-4">
             <li>
-              <a
-                href="/"
-                class="text-secondary-foreground hover:text-foreground"
-                >Home</a
-              >
+              <a href="/">Home</a>
             </li>
             <li>
-              <a
-                href="/about"
-                class="text-secondary-foreground hover:text-foreground"
-                >About</a
-              >
+              <a href="/about">About</a>
             </li>
             <li>
-              <a
-                href="/blog"
-                class="text-secondary-foreground hover:text-foreground"
-                >Blog</a
-              >
+              <a href="/blog">Blog</a>
             </li>
             <li>
-              <a
-                href="/contact"
-                class="text-secondary-foreground hover:text-foreground"
-                >Contact</a
-              >
+              <a href="/contact">Contact</a>
+            </li>
+            <li>
+              <button id="toggle-theme-btn" class="hidden">
+                <!-- Toggle Theme -->
+              </button>
             </li>
           </ul>
         </nav>
@@ -51,13 +40,13 @@
     </header>
     <main
       id="main"
-      class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto p-6 rounded-sm bg-card shadow-md flex-grow">
+      class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto p-6 rounded-md bg-background text-foreground drop-shadow-md flex-grow">
       {{children}}
     </main>
-    <footer class="bg-primary text-primary-foreground shadow-inner mt-6 p-4">
+    <footer class="bg-background text-foreground shadow-inner mt-6 p-4">
       <div
         class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto text-center">
-        <p class="text-secondary-foreground">
+        <p class="text-foreground">
           © 2024 . adaalrf.dev. All rights reserved.
         </p>
       </div>

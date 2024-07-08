@@ -1,5 +1,6 @@
 
 import './fetch-posts.ts';
+import './toggle-theme.ts';
 
 // Initialization logic
 document.addEventListener('DOMContentLoaded', () => {
