@@ -29,7 +29,7 @@ function setTheme(theme: 'light' | 'dark'): void {
       toggleThemeBtn.innerHTML = moonIcon;
       localStorage.setItem('theme', 'dark');
     }
-    toggleThemeBtn.classList.replace('hidden', 'block');
+    toggleThemeBtn.classList.remove('hidden');
   }
 }
 

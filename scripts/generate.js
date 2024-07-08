@@ -103,8 +103,8 @@ const generateBlogHtmlFile = (posts) => {
 
     const postItem = postItemTemplate.cloneNode(true);
     postItem.style.display = 'list-item';
-    postItem.querySelector('h1').innerHTML = titleLink;
-    postItem.querySelector('h2').innerHTML = date;
+    postItem.querySelector('.post-title').innerHTML = titleLink;
+    postItem.querySelector('.post-date').innerHTML = date;
     postItem.querySelector('.content').innerHTML = previewContent;
 
     const tagsContainer = postItem.querySelector('.tags');

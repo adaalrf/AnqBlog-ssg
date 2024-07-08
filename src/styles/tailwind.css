@@ -14,10 +14,7 @@
     --foreground-lightness: 15%;
 
     /* set your opacity here for light-mode */
-    --color-opacity-primary: 1;
-    --color-opacity-secondary: 0.8;
     --color-opacity-muted: 0.6;
-    --color-opacity-accent: 0.7;
 
     --background: hsl(
       var(--background-hue),
@@ -28,30 +25,6 @@
       var(--foreground-hue),
       var(--foreground-saturation),
       var(--foreground-lightness)
-    );
-    --primary: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-primary)
-    );
-    --primary-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-primary)
-    );
-    --secondary: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-secondary)
-    );
-    --secondary-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-secondary)
     );
     --muted: hsla(
       var(--background-hue),
@@ -65,21 +38,10 @@
       var(--foreground-lightness),
       var(--color-opacity-muted)
     );
-    --accent: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-accent)
-    );
-    --accent-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-accent)
-    );
-
     --destructive: hsl(0, 70%, 50%);
     --destructive-foreground: var(--foreground);
+    --code: hsl(0, 0%, 15%);
+    --code-foreground: hsl(0, 0%, 95%);
   }
 
   .dark {
@@ -93,10 +55,7 @@
     --foreground-lightness: 95%;
 
     /* set your opacity here for dark-mode */
-    --color-opacity-primary: 1;
-    --color-opacity-secondary: 0.8;
     --color-opacity-muted: 0.6;
-    --color-opacity-accent: 0.7;
 
     --background: hsl(
       var(--background-hue),
@@ -108,33 +67,6 @@
       var(--foreground-saturation),
       var(--foreground-lightness)
     );
-
-    --primary: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-primary)
-    );
-    --primary-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-primary)
-    );
-
-    --secondary: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-secondary)
-    );
-    --secondary-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-secondary)
-    );
-
     --muted: hsla(
       var(--background-hue),
       var(--background-saturation),
@@ -147,22 +79,10 @@
       var(--foreground-lightness),
       var(--color-opacity-muted)
     );
-
-    --accent: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-accent)
-    );
-    --accent-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-accent)
-    );
-
     --destructive: hsl(0, 70%, 50%);
     --destructive-foreground: var(--foreground);
+    --code: hsl(0, 0%, 95%);
+    --code-foreground: hsl(0, 0%, 15%);
   }
 
   a {
@@ -178,6 +98,9 @@
   }
   #toggle-theme-btn {
     @apply hover:opacity-60; /* maching the anchortag's 'text-muted-foreground' */
+  }
+  pre:has(> code) {
+    @apply p-2 font-mono size-fit rounded-sm bg-code text-code-foreground;
   }
 }
 
