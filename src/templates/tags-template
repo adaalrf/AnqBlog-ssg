@@ -1,0 +1,13 @@
+<div id="tags">
+  <div id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    <div class="post-item-template hidden">
+      <h1 class="post-title">{{ titleLink }}</h1>
+      <div class="mb-4 flex items-center space-x-2">
+        <p class="post-date">{{ date }}</p>
+        <span id="tag-divider">|</span>
+        <span class="tags flex gap-2"></span>
+      </div>
+      <div class="content leading-relaxed">{{ previewContent }}</div>
+    </div>
+  </div>
+</div>
