@@ -7,7 +7,7 @@ cd "$(dirname "$0")"
 start_time=$(date +%s%3N)
 
 # Generate dynamic imports
-node scripts/generate-imports.js
+node scripts/utils/generate-imports.js
 
 # Bundle website code using Webpack
 npx webpack --config webpack.config.js
@@ -19,7 +19,7 @@ cp -r src/assets public/
 node scripts/generate.js
 
 # Process Tailwind CSS using PostCSS
-node scripts/build-css.js
+node scripts/utils/build-css.js
 
 # End timer
 end_time=$(date +%s%3N)
