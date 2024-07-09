@@ -11,6 +11,7 @@ const {
   replacePlaceholders,
   ensureDirectoryExists,
 } = require('./utils/parsing-utils');
+const { log } = require('console');
 
 // Paths
 const configPath = fr('marked.json');
@@ -44,7 +45,6 @@ const generateHtmlContent = (templatePath, data, outputPath) => {
   const htmlContent =
     dom.window.document.querySelector('.content-div').outerHTML;
   fs.writeFileSync(outputPath, htmlContent);
-  console.log(`Generated ${outputPath}`);
 };
 
 // Generate intermediate post HTML files
@@ -115,7 +115,8 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
       );
     }
 
-    pagePosts.forEach((post) => {
+    // Helper function to create a post item element
+    const createPostItem = (post) => {
       const { title, date, tags, htmlFileName, previewContent } = post;
       const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;
 
@@ -127,6 +128,7 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
 
       const tagsContainer = postItem.querySelector('.tags');
       const tagDivider = postItem.querySelector('#tag-divider');
+
       if (tagsContainer) {
         if (tags && tags.length > 0) {
           const tagsList = tags
@@ -138,52 +140,64 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
           if (tagDivider) tagDivider.remove();
         }
       }
-      postLinksDiv.appendChild(postItem);
-    });
 
-    // Add pagination links
+      return postItem;
+    };
+
+    // Add each post to the post links container
+    pagePosts.forEach((post) => postLinksDiv.appendChild(createPostItem(post)));
+
+    // Helper function to update pagination links
+    const updatePaginationLink = (pageLink, index, isCurrentPage) => {
+      pageLink.className = '';
+      const classNames = isCurrentPage
+        ? classesCurrentPageLink
+        : classesNormalPageLink;
+      pageLink.classList.add(...classNames);
+      pageLink.href = index === 0 ? 'blog.html' : `blog-page-${index + 1}.html`;
+      pageLink.textContent = index + 1;
+      pageLink.classList.remove('hidden');
+    };
+
+    // Determine the range of pages to display
+    const totalPages = paginatedPosts.length;
+    const startPage = Math.max(0, Math.min(totalPages - 5, pageIndex - 2));
+    const endPage = Math.min(totalPages, startPage + 5);
+
     const paginationDiv = document.querySelector('.pagination');
-    if (pageIndex > 0) {
-      const previousLink = document.querySelector('.previous-blog-page');
-      previousLink.classList.remove('hidden');
+    const previousLink = paginationDiv.querySelector('.previous-blog-page');
+    const nextLink = paginationDiv.querySelector('.next-blog-page');
+
+    const classesNormalPageLink = document
+      .getElementById('page-link-1')
+      .className.split(' ');
+    const classesCurrentPageLink = document
+      .getElementById('page-link-3')
+      .className.split(' ');
+
+    // Update pagination links
+    for (let i = startPage; i < endPage; i++) {
+      const pageLink = paginationDiv.querySelector(
+        `#page-link-${i - startPage + 1}`,
+      );
+      const isActivePage = i === pageIndex; // Determine if the current page is the active page
+      updatePaginationLink(pageLink, i, isActivePage); // Update the pagination link with the appropriate details
+    }
+
+    // Next page link
+    nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
+    if (!nextLink.classList.contains('hidden')) {
+      nextLink.href = `blog-page-${pageIndex + 2}.html`;
+    }
+
+    // Previous page link
+    previousLink.classList.toggle('hidden', pageIndex <= 0);
+    if (!previousLink.classList.contains('hidden')) {
       previousLink.href =
         pageIndex === 1 ? 'blog.html' : `blog-page-${pageIndex}.html`;
-      paginationDiv.appendChild(previousLink);
-
-      for (let i = 1; i <= pageIndex; i++) {
-        const pageLink = document.createElement('a');
-        pageLink.href = `blog-page-${i}.html`;
-        pageLink.innerHTML = pageIndex;
-        // Change the link text for the first page, hacky I know but works for now
-        if (pageLink.href === `blog-page-1.html`) {
-          pageLink.href = `blog.html`;
-          pageLink.innerHTML = `1`;
-        }
-        paginationDiv.appendChild(pageLink);
-      }
-      // Add the current page link
-      const currentPageLink = document.querySelector('.current-page');
-      currentPageLink.href = `blog-page-${pageIndex + 1}.html`;
-      currentPageLink.innerHTML = pageIndex + 1;
-      paginationDiv.appendChild(currentPageLink);
     }
 
-    if (pageIndex < paginatedPosts.length - 1) {
-      const nextLink = document.querySelector('.next-blog-page');
-      nextLink.classList.remove('hidden');
-      nextLink.href = `blog-page-${pageIndex + 2}.html`;
-
-      for (let i = pageIndex + 1; i < paginatedPosts.length; i++) {
-        const pageLink = document.createElement('a');
-        pageLink.href = `blog-page-${i + 1}.html`;
-        pageLink.innerHTML = i + 1;
-        paginationDiv.appendChild(pageLink);
-      }
-
-      paginationDiv.appendChild(nextLink);
-    }
     postLinksDiv.appendChild(paginationDiv);
-
     postItemTemplate.remove();
 
     const blogContent = document.querySelector('#blog').outerHTML;
@@ -287,7 +301,7 @@ const generateAllHtmlFiles = () => {
 
   generateIntermediatePostHtmlFiles(posts);
   generateFinalPostHtmlFiles(posts);
-  generateBlogHtmlFiles(posts, 5); // 5 posts per page
+  generateBlogHtmlFiles(posts, 2); // 5 posts per page
 
   const contentDirectory = fr('src/content');
   const publicContentDirectory = fr('public');
