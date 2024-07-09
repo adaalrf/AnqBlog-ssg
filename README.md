@@ -1,126 +1,166 @@
-# Markdown Blog
+# Static site generator with Markdown blog features
 
-A simple Markdown blog generator using Tailwind CSS, PostCSS, and TypeScript.
+Version 0.2
 
-## Features
+### Overview
 
-- Convert Markdown files to HTML
-- Use Tailwind CSS for styling
-- Optimize CSS with PostCSS
-- Bundle TypeScript files with Webpack
-- Automated build and installation scripts
+This project is designed to generate static HTML files for a blog and other content pages. It utilizes a modular structure to ensure maintainability, ease of use, and separation of concerns. The primary components include parsing markdown files, generating HTML content, and applying layout templates.
 
-## Project Structure
+### Features
+
+- **Markdown to HTML Conversion**: Convert markdown files to HTML with front matter support.
+- **Template Injection**: Inject content into HTML templates with placeholder replacement.
+- **Pagination**: Generate paginated blog pages.
+- **Tag Pages**: Generate tag-specific pages for blog posts.
+- **Intermediate and Final Post Generation**: Separate steps for generating intermediate and final HTML files for blog posts.
+- **CSS Processing**: Build CSS using Tailwind CSS and Autoprefixer.
+
+### Directory Structure
 
 ```plaintext
-markdown-blog/
-├── node_modules/ # Should be in .gitignore, not included in repo
-├── public/ # Generated, not included in repo
-│ ├── styles/
-│ │ └── styles.css
+project-root/
+├── public/
 │ ├── assets/
+│ │ ├── icons/
+│ │ └── styles/
+│ ├── blog/
+│ │ ├── tags/
+│ │ ├── blog-page-1.html
+│ │ ├── blog-page-2.html
+│ │ └── ...
 │ ├── posts/
-│ └── js/
-│ └── bundle.js
+│ │ ├── post1.html
+│ │ ├── post2.html
+│ │ └── ...
+│ └── index.html
 ├── scripts/
-│ ├── generate.js
+│ ├── blog/
+│ │ ├── generate-final-posts.js
+│ │ ├── generate-intermediate-posts.js
+│ │ ├── generate-paginated-blog.js
+│ │ └── generate-tag-pages.js
+│ └── utils/
+│ ├── build-css.js
+│ ├── date-utils.js
 │ ├── generate-imports.js
-│ └── build-css.js
+│ ├── parsing-utils.js
+│ └── resolve-path.js
 ├── src/
-│ ├── styles/
-│ │ └── tailwind.css
-│ ├── ts/
-│ │ ├── main.ts
-│ │ ├── store.ts
-│ │ ├── analytics.ts
-│ │ ├── helper.ts
-│ │ └── another.ts
-│ ├── posts/
-│ │ └── hello-world.md # Example Markdown file
 │ ├── assets/
-│ └── index.html # Example HTML file
-├── package.json
-├── tsconfig.json
-├── webpack.config.js
-├── postcss.config.js
-├── tailwind.config.js
+│ │ └── icons/
+│ ├── content/
+│ │ ├── posts/
+│ │ └── styles/
+│ ├── templates/
+│ │ ├── about-template.html
+│ │ ├── blog-template.html
+│ │ ├── layout-template.html
+│ │ └── post-template.html
+│ └── ts/
+│ ├── fetch-posts.ts
+│ ├── main.ts
+│ └── toggle-theme.ts
+├── .gitignore
 ├── build.sh
-├── install.sh
-└── .gitignore
+├── marked.json
+├── package.json
+├── README.md
+└── ...
 ```
-
-## Getting Started
-
-### Prerequisites
-
-- [Node.js](https://nodejs.org/)
-- [npm](https://www.npmjs.com/)
 
 ### Installation
 
 1. **Clone the Repository**:
-
    ```sh
-   git clone <repository-url>
-   cd markdown-blog
+   git clone https://github.com/your-repo/project-name.git
+   cd project-name
    ```
-
+2. **Install Dependencies**:
    ```sh
-   ./install.sh
+   npm install
    ```
+3. **Configure Project**:
+   Ensure marked.json is properly configured with your markdown parsing options.
 
-   ```sh
-   ./build.sh
-   ```
+### Usage
 
-## Serving the Project
-
-To serve the public directory, you can use a simple HTTP server:
+**Build**
+To build the project, run the following command:
 
 ```sh
-npx http-server public
+./build.sh
 ```
 
-Or configure a web server like Nginx to serve the public directory.
-Project Scripts
+This script performs the following actions:
 
-**install.sh**
+- Generates dynamic imports.
+- Bundles website code using Webpack.
+- Copies necessary assets to the public directory.
+- Runs the generation scripts to generate the output files.
+- Processes Tailwind CSS using PostCSS.
+- Displays the build time.
 
-This script initializes the project, installs dependencies, and sets up configuration files.
+**The build.sh script**:
 
-**build.sh**
+```sh
+#!/bin/bash
 
-This script builds the project, processes CSS, and generates the necessary output files.
+# Ensure script is being run from the project root
+cd "$(dirname "$0")"
 
-**scripts/generate.js**
+# Start timer
+start_time=$(date +%s%3N)
 
-This script converts Markdown files in the src/posts directory to HTML.
+# Generate dynamic imports
+node scripts/utils/generate-imports.js
 
-**scripts/generate-imports.js**
+# Bundle website code using Webpack
+npx webpack --config webpack.config.js
 
-This script dynamically generates import statements for all TypeScript files in the src/ts directory.
+# Copy necessary assets to the public directory
+cp -r src/assets public/
 
-**scripts/build-css.js**
+# Run the generation scripts to generate the output files
+node scripts/generate.js
 
-This script processes Tailwind CSS using PostCSS and generates an optimized CSS file.
-Example HTML File\*\*
+# Process Tailwind CSS using PostCSS
+node scripts/utils/build-css.js
 
-### src/index.html:
+# End timer
+end_time=$(date +%s%3N)
 
-```html
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Markdown Blog</title>
-    <link rel="stylesheet" href="styles/styles.css" />
-  </head>
-  <body>
-    <div id="app">
-      <!-- Your content here -->
-    </div>
-    <script src="js/bundle.js"></script>
-  </body>
-</html>
+# Calculate duration in milliseconds
+build_time_ms=$((end_time - start_time))
+
+# Convert milliseconds to seconds and milliseconds
+build_time_sec=$((build_time_ms / 1000))
+build_time_ms=$((build_time_ms % 1000))
+
+echo "Build complete. Generated files are in the 'public' directory."
+echo "Build time: ${build_time_sec}s ${build_time_ms}ms."
+
+http-server public
 ```
+
+### Deploy
+
+To deploy the project to your VPS, run the following command:
+
+```sh
+./deploy.sh
+```
+
+The deploy.sh script:
+
+```
+#!/bin/bash
+
+# Transfer files to VPS
+scp -r public/* root@<yourHostIp>:/var/www/myWebsite/
+```
+
+Replace <yourHostIp> with the IP address of your VPS.
+
+### Configuration
+
+marked.json: Configuration file for the markdown parser.

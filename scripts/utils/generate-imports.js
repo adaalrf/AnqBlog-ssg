@@ -1,5 +1,6 @@
+// Description: This script generates the main.ts file by reading all .ts files in the src/ts directory except main.ts.
 const fs = require('fs');
-const { fr } = require('./utils/resolve-path');
+const { fr } = require('./resolve-path');
 
 const dirPath = fr('src/ts');
 const outputPath = fr('src/ts/main.ts');

@@ -5,20 +5,38 @@ const matter = require('gray-matter');
 const { marked } = require('marked');
 const truncate = require('html-truncate');
 
-// Read and parse configuration
+/**
+ * Reads and parses configuration from a file.
+ * @param {string} configPath - The path to the configuration file.
+ */
 const readConfig = (configPath) => {
   const markedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   marked.setOptions(markedConfig);
 };
 
-// Read a file's content
+/**
+ * Reads the content of a file.
+ * @param {string} filePath - The path to the file.
+ * @returns {string} - The content of the file.
+ */
 const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
 
-// Utility function to get the first 250 characters of HTML content while preserving structure
+/**
+ * Gets the first N characters of HTML content while preserving structure.
+ * @param {string} htmlContent - The HTML content.
+ * @param {number} length - The number of characters to truncate to.
+ * @returns {string} - The truncated HTML content.
+ */
 const getFirstNthCharacters = (htmlContent, length = 250) =>
   truncate(htmlContent, length, { ellipsis: '...' });
 
-// Inject content into template
+/**
+ * Injects content into a template.
+ * @param {string} templateContent - The template content.
+ * @param {object} data - The data to inject.
+ * @param {object} [options] - Options for injecting tags.
+ * @returns {object} - The DOM object with injected content.
+ */
 const injectContentIntoTemplate = (templateContent, data, options = {}) => {
   const {
     tagWrapper = (tag) => `<a href="#">${tag}</a>`,
@@ -55,14 +73,23 @@ const injectContentIntoTemplate = (templateContent, data, options = {}) => {
   return dom;
 };
 
-// Parse and convert markdown to HTML
+/**
+ * Parses and converts markdown to HTML.
+ * @param {string} fileContent - The markdown file content.
+ * @returns {object} - The parsed data and HTML content.
+ */
 const parseMarkdown = (fileContent) => {
   const { data, content } = matter(fileContent);
   const htmlContent = marked(content);
   return { data, htmlContent };
 };
 
-// Process markdown files
+/**
+ * Processes markdown files in a directory.
+ * @param {string} directory - The directory containing markdown files.
+ * @param {object} [options] - Options for processing markdown files.
+ * @returns {Array} - An array of processed posts.
+ */
 const processMarkdownFiles = (directory, options = {}) => {
   const { previewLength = 250 } = options;
   const files = fs
@@ -89,14 +116,22 @@ const processMarkdownFiles = (directory, options = {}) => {
   });
 };
 
-// Ensure output directory exists
+/**
+ * Ensures a directory exists, creating it if necessary.
+ * @param {string} directory - The directory to ensure exists.
+ */
 const ensureDirectoryExists = (directory) => {
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory, { recursive: true });
   }
 };
 
-// Replace placeholders with corresponding values
+/**
+ * Replaces placeholders in a template with corresponding values.
+ * @param {string} template - The template content.
+ * @param {object} values - The values to replace the placeholders with.
+ * @returns {string} - The template with placeholders replaced.
+ */
 const replacePlaceholders = (template, values) => {
   return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
     return key in values ? values[key] : placeholder;

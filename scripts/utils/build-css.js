@@ -1,9 +1,10 @@
+// Description: This script reads the input CSS file, processes it with PostCSS, Tailwind CSS, and Autoprefixer, and writes the processed CSS to the output file.
 const fs = require('fs');
 const path = require('path');
 const postcss = require('postcss');
 const tailwindcss = require('tailwindcss');
 const autoprefixer = require('autoprefixer');
-const { fr } = require('./utils/resolve-path');
+const { fr } = require('./resolve-path');
 
 // Define input and output paths
 const inputFilePath = fr('src/styles/tailwind.css');
