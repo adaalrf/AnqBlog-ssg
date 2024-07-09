@@ -84,7 +84,11 @@
     --code: hsl(0, 0%, 95%);
     --code-foreground: hsl(0, 0%, 15%);
   }
-
+  html {
+    padding-left: calc(
+      100vw - 100%
+    ); /* Prevent horizontal scrollbar making the page jumnp */
+  }
   a {
     @apply text-foreground hover:text-muted-foreground;
   }
@@ -103,7 +107,7 @@
     @apply hover:opacity-60; /* maching the anchortag's 'text-muted-foreground' */
   }
   pre:has(> code) {
-    @apply my-2 p-2 font-mono size-fit rounded-sm bg-muted-foreground text-background;
+    @apply size-fit/*  my-2 p-2 font-mono rounded-sm bg-muted-foreground text-background */;
   }
 }
 
@@ -111,5 +115,9 @@
   .min-max-w {
     max-width: 768px;
     min-width: 768px;
+  }
+  .scrollbar-padding {
+    --scrollbar-width: 0px;
+    --scrollbar-padding: 0px;
   }
 }

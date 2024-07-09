@@ -46,5 +46,5 @@ if (toggleThemeBtn) {
 }
 
 window.addEventListener('DOMContentLoaded', () => {
-  setTheme(savedTheme === 'dark' ? 'dark' : 'light');
+  setTheme(savedTheme === 'light' ? 'light' : 'dark');
 });

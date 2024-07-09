@@ -12,14 +12,14 @@ node scripts/generate-imports.js
 # Bundle website code using Webpack
 npx webpack --config webpack.config.js
 
-# Process Tailwind CSS using PostCSS
-node scripts/build-css.js
-
 # Copy necessary assets to the public directory
 cp -r src/assets public/
 
 # Run the generation scripts to generate the output files
 node scripts/generate.js
+
+# Process Tailwind CSS using PostCSS
+node scripts/build-css.js
 
 # End timer
 end_time=$(date +%s%3N)
