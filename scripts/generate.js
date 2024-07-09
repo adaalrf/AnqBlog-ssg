@@ -20,8 +20,9 @@ const postTemplatePath = fr('src/templates/post-template.html');
 const mainLayoutPath = fr('src/templates/layout-template.html');
 const postOutputDirectory = fr('src/content/posts');
 const blogTemplatePath = fr('src/templates/blog-template.html');
-const blogOutputPath = fr('public/blog.html');
+const blogOutputPath = fr('public/blog');
 const publicPostsDirectory = fr('public/posts');
+const tagsOutputDirectory = fr('public/blog/tags');
 
 // Read and parse configuration
 readConfig(configPath);
@@ -34,6 +35,9 @@ const parseDate = (dateString) => {
 
 // Helper function to format the date for display
 const formatDate = (date) => {
+  if (!(date instanceof Date)) {
+    throw new Error('Invalid date object');
+  }
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
 };
@@ -42,8 +46,15 @@ const formatDate = (date) => {
 const generateHtmlContent = (templatePath, data, outputPath) => {
   const templateContent = readFileContent(templatePath);
   const dom = injectContentIntoTemplate(templateContent, data);
-  const htmlContent =
-    dom.window.document.querySelector('.content-div').outerHTML;
+  const contentDiv = dom.window.document.querySelector('.content-div');
+
+  if (!contentDiv) {
+    throw new Error(
+      `Element '.content-div' not found in template ${templatePath}`,
+    );
+  }
+
+  const htmlContent = contentDiv.outerHTML;
   fs.writeFileSync(outputPath, htmlContent);
 };
 
@@ -88,6 +99,83 @@ const generateFinalPostHtmlFiles = (posts) => {
   });
 };
 
+// Generate tag pages
+const generateTagPages = (tags, posts) => {
+  ensureDirectoryExists(tagsOutputDirectory); // Ensure the tags directory exists
+
+  Object.keys(tags).forEach((tag) => {
+    const tagPosts = posts.filter((post) => post.tags.includes(tag));
+    const tagContent = tagPosts.map((post) => ({
+      title: post.title,
+      date: new Date(post.date),
+      tags: post.tags,
+      htmlFileName: post.htmlFileName,
+      previewContent: post.previewContent,
+    }));
+
+    const dom = new JSDOM(readFileContent(blogTemplatePath));
+    const document = dom.window.document;
+    const postLinksDiv = document.getElementById('post-links-div');
+    const postItemTemplate = document.querySelector('.post-item-template');
+
+    if (!postItemTemplate || !postLinksDiv) {
+      throw new Error(
+        'Template or placeholder element not found in the HTML template.',
+      );
+    }
+
+    tagContent.forEach((post) => {
+      const { title, date, tags, htmlFileName, previewContent } = post;
+      const titleLink = `<a href="../posts/${htmlFileName}">${title}</a>`;
+
+      const postItem = postItemTemplate.cloneNode(true);
+      postItem.style.display = 'list-item';
+      postItem.querySelector('.post-title').innerHTML = titleLink;
+      postItem.querySelector('.post-date').innerHTML = formatDate(date);
+      postItem.querySelector('.content').innerHTML = previewContent;
+
+      const tagsContainer = postItem.querySelector('.tags');
+      const tagDivider = postItem.querySelector('#tag-divider');
+
+      if (tagsContainer) {
+        if (tags && tags.length > 0) {
+          const tagsList = tags
+            .map((tag) => `<a href="./${tag}.html">${tag}</a>`)
+            .join(' ');
+          tagsContainer.innerHTML = tagsList;
+        } else {
+          tagsContainer.remove();
+          if (tagDivider) tagDivider.remove();
+        }
+      }
+
+      postLinksDiv.appendChild(postItem);
+    });
+
+    postItemTemplate.remove();
+    const tagPageContent = document.querySelector('#blog').outerHTML;
+
+    const outputPath = path.join(tagsOutputDirectory, `${tag}.html`);
+    const relativeOutputPath = rp(
+      tagsOutputDirectory,
+      `${tag}.html`,
+      fr('public'),
+    );
+
+    const finalHtml = replacePlaceholders(readFileContent(mainLayoutPath), {
+      title: `Posts tagged with "${tag}"`,
+      children: tagPageContent,
+      stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+      faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+      scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+      gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
+    });
+
+    fs.writeFileSync(outputPath, finalHtml);
+    console.log(`Generated tag page for ${tag}: ${outputPath}`);
+  });
+};
+
 // Split posts into pages
 const paginatePosts = (posts, postsPerPage) => {
   const paginatedPosts = [];
@@ -101,6 +189,8 @@ const paginatePosts = (posts, postsPerPage) => {
 const generateBlogHtmlFiles = (posts, postsPerPage) => {
   const paginatedPosts = paginatePosts(posts, postsPerPage);
   const mainLayoutContent = readFileContent(mainLayoutPath);
+
+  ensureDirectoryExists(blogOutputPath); // Ensure the directory exists
 
   paginatedPosts.forEach((pagePosts, pageIndex) => {
     const blogTemplateContent = readFileContent(blogTemplatePath);
@@ -132,7 +222,7 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
       if (tagsContainer) {
         if (tags && tags.length > 0) {
           const tagsList = tags
-            .map((tag) => `<a href="#">${tag}</a>`)
+            .map((tag) => `<a href="./tags/${tag}.html">${tag}</a>`)
             .join(' ');
           tagsContainer.innerHTML = tagsList;
         } else {
@@ -202,7 +292,9 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
 
     const blogContent = document.querySelector('#blog').outerHTML;
     const relativeOutputPath = rp(
-      path.dirname(blogOutputPath),
+      path.dirname(
+        path.join(blogOutputPath, `blog-page-${pageIndex + 1}.html`),
+      ),
       `blog-page-${pageIndex + 1}.html`,
       fr('public'),
     );
@@ -218,8 +310,8 @@ const generateBlogHtmlFiles = (posts, postsPerPage) => {
 
     const outputFilePath =
       pageIndex === 0
-        ? blogOutputPath
-        : path.join(fr('public'), `blog-page-${pageIndex + 1}.html`);
+        ? path.join(blogOutputPath, `index.html`)
+        : path.join(blogOutputPath, `blog-page-${pageIndex + 1}.html`);
     fs.writeFileSync(outputFilePath, finalBlogHtml);
     console.log(`Generated ${outputFilePath}`);
   });
@@ -294,14 +386,30 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
 const generateAllHtmlFiles = () => {
   ensureDirectoryExists(postOutputDirectory);
   ensureDirectoryExists(publicPostsDirectory);
+  ensureDirectoryExists(blogOutputPath); // Ensure the blog directory exists
+  ensureDirectoryExists(tagsOutputDirectory); // Ensure the tags directory exists inside blog
 
+  // Ensure all dates are parsed as Date objects
   const posts = processMarkdownFiles(postsDirectory)
     .map((post) => ({ ...post, date: parseDate(post.date) }))
-    .sort((a, b) => b.date - a.date);
+    .sort((a, b) => b.date - a.date)
+    .map((post) => ({ ...post, date: new Date(post.date) }));
+
+  // Collect all tags
+  const tags = {};
+  posts.forEach((post) => {
+    post.tags.forEach((tag) => {
+      if (!tags[tag]) {
+        tags[tag] = [];
+      }
+      tags[tag].push(post);
+    });
+  });
 
   generateIntermediatePostHtmlFiles(posts);
   generateFinalPostHtmlFiles(posts);
   generateBlogHtmlFiles(posts, 2); // 5 posts per page
+  generateTagPages(tags, posts); // Generate tag pages
 
   const contentDirectory = fr('src/content');
   const publicContentDirectory = fr('public');
