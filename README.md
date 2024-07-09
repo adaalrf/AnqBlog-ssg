@@ -139,7 +139,7 @@ build_time_ms=$((build_time_ms % 1000))
 echo "Build complete. Generated files are in the 'public' directory."
 echo "Build time: ${build_time_sec}s ${build_time_ms}ms."
 
-# Chenge to whatever local server you are using
+# Change to whatever local server you want to use (e.g. http-server, live-server, etc.)
 http-server public
 ```
 
