@@ -1,4 +1,3 @@
-// Description: This script generates all HTML files for the blog and content pages.
 const {
   generateIntermediatePostHtmlFiles,
 } = require('./blog/generate-intermediate-posts');
@@ -11,37 +10,24 @@ const {
   processMarkdownFiles,
   ensureDirectoryExists,
   replacePlaceholders,
+  readFileContent,
 } = require('./utils/parsing-utils');
-const { readConfig, readFileContent } = require('./utils/parsing-utils');
 const { fr, rp } = require('./utils/resolve-path');
 const { parseDate } = require('./utils/date-utils');
+const config = require('./config');
 const fs = require('fs');
-const { JSDOM } = require('jsdom');
 const path = require('path');
-
-// Paths
-const configPath = fr('marked.json');
-const postsDirectory = fr('src/posts');
-const postTemplatePath = fr('src/templates/post-template.html');
-const mainLayoutPath = fr('src/templates/layout-template.html');
-const postOutputDirectory = fr('src/content/posts');
-const blogTemplatePath = fr('src/templates/blog-template.html');
-const blogOutputPath = fr('public/blog');
-const publicPostsDirectory = fr('public/blog/posts');
-const tagsOutputDirectory = fr('public/blog/tags');
-
-// Read and parse configuration
-readConfig(configPath);
+const { JSDOM } = require('jsdom');
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
-  ensureDirectoryExists(postOutputDirectory);
-  ensureDirectoryExists(publicPostsDirectory);
-  ensureDirectoryExists(blogOutputPath); // Ensure the blog directory exists
-  ensureDirectoryExists(tagsOutputDirectory); // Ensure the tags directory exists inside blog
+  ensureDirectoryExists(config.postOutputDirectory);
+  ensureDirectoryExists(config.publicPostsDirectory);
+  ensureDirectoryExists(config.blogOutputPath);
+  ensureDirectoryExists(config.tagsOutputDirectory);
 
   // Ensure all dates are parsed as Date objects
-  const posts = processMarkdownFiles(postsDirectory)
+  const posts = processMarkdownFiles(config.postsDirectory)
     .map((post) => ({ ...post, date: parseDate(post.date) }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
@@ -59,37 +45,49 @@ const generateAllHtmlFiles = () => {
 
   generateIntermediatePostHtmlFiles(
     posts,
-    postTemplatePath,
-    postOutputDirectory,
+    config.postTemplatePath,
+    config.postOutputDirectory,
   );
   generateFinalPostHtmlFiles(
     posts,
-    mainLayoutPath,
-    postOutputDirectory,
-    publicPostsDirectory,
+    config.mainLayoutPath,
+    config.postOutputDirectory,
+    config.publicPostsDirectory,
   );
   generatePaginatedBlogHtmlFiles(
     posts,
     5,
-    blogTemplatePath,
-    mainLayoutPath,
-    blogOutputPath,
-  ); // 5 posts per page
+    config.blogTemplatePath,
+    config.mainLayoutPath,
+    config.blogOutputPath,
+  );
   generateTagPages(
     tags,
     posts,
-    blogTemplatePath,
-    mainLayoutPath,
-    tagsOutputDirectory,
-  ); // Generate tag pages
+    config.blogTemplatePath,
+    config.mainLayoutPath,
+    config.tagsOutputDirectory,
+  );
 
   const contentDirectory = fr('src/content');
   const publicContentDirectory = fr('public');
+
+  if (!contentDirectory || !publicContentDirectory) {
+    console.error(
+      'Error: contentDirectory or publicContentDirectory is not defined.',
+    );
+    return;
+  }
+
   applyLayoutToHtmlFiles(contentDirectory, publicContentDirectory);
 };
 
 // Apply layout to all HTML files in a directory
 const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
+  if (!inputDir || !outputDir) {
+    throw new Error('Invalid inputDir or outputDir');
+  }
+
   const files = fs.readdirSync(inputDir);
 
   files.forEach((file) => {
@@ -137,7 +135,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
         file,
         fr('public'),
       );
-      const mainLayoutContent = readFileContent(mainLayoutPath);
+      const mainLayoutContent = readFileContent(config.mainLayoutPath);
       const finalHtml = replacePlaceholders(mainLayoutContent, {
         title: path.basename(file, '.html'),
         children: mainContent,

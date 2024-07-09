@@ -1,4 +1,3 @@
-// Description: Utility functions for parsing and processing markdown files.
 const fs = require('fs');
 const path = require('path');
 const { JSDOM } = require('jsdom');
