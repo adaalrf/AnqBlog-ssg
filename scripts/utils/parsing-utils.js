@@ -78,6 +78,16 @@ export const injectContentIntoTemplate = (
 };
 
 /**
+ * Parses front matter from HTML files.
+ * @param {string} fileContent - The HTML file content.
+ * @returns {object} - The parsed data and HTML content.
+ */
+export const parseHtmlFrontMatter = (fileContent) => {
+  const { data, content } = matter(fileContent);
+  return { data, content };
+};
+
+/**
  * Parses and converts markdown to HTML.
  * @param {string} fileContent - The markdown file content.
  * @returns {object} - The parsed data and HTML content.

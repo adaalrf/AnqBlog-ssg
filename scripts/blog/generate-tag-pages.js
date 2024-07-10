@@ -87,7 +87,7 @@ export const generateTagPages = (
     );
 
     const finalHtml = replacePlaceholders(readFileContent(mainLayoutPath), {
-      title: `Posts tagged with "${tag}"`,
+      title: `${tag}`,
       children: tagPageContent,
       stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
       faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),

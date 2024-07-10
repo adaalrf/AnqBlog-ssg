@@ -1,4 +1,3 @@
-// Description: This script generates intermediate post HTML files from the post template.
 import {
   readFileContent,
   injectContentIntoTemplate,
@@ -16,7 +15,9 @@ import { formatDate } from '../utils/date-utils.js';
  */
 const generateHtmlContent = (templatePath, data, outputPath) => {
   const templateContent = readFileContent(templatePath);
-  const dom = injectContentIntoTemplate(templateContent, data);
+  const dom = injectContentIntoTemplate(templateContent, data, {
+    tagWrapper: (tag) => `<a href="../tags/${tag}.html">${tag}</a>`, // Customize tag wrapper
+  });
   const contentDiv = dom.window.document.querySelector('.content-div');
 
   if (!contentDiv) {

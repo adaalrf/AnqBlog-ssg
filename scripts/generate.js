@@ -7,6 +7,8 @@ import {
   ensureDirectoryExists,
   replacePlaceholders,
   readFileContent,
+  injectContentIntoTemplate,
+  parseHtmlFrontMatter,
 } from './utils/parsing-utils.js';
 import { fr, rp } from './utils/resolve-path.js';
 import { parseDate } from './utils/date-utils.js';
@@ -65,25 +67,14 @@ const generateAllHtmlFiles = () => {
     config.tagsOutputDirectory,
   );
 
-  const contentDirectory = fr('src/content');
-  const publicContentDirectory = fr('public');
-
-  if (!contentDirectory || !publicContentDirectory) {
-    console.error(
-      'Error: contentDirectory or publicContentDirectory is not defined.',
-    );
-    return;
-  }
-
-  applyLayoutToHtmlFiles(contentDirectory, publicContentDirectory);
+  applyLayoutToHtmlFiles(
+    config.contentDirectory,
+    config.publicContentDirectory,
+  );
 };
 
 // Apply layout to all HTML files in a directory
 const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
-  if (!inputDir || !outputDir) {
-    throw new Error('Invalid inputDir or outputDir');
-  }
-
   const files = fs.readdirSync(inputDir);
 
   files.forEach((file) => {
@@ -99,6 +90,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
       applyLayoutToHtmlFiles(inputFilePath, outputFilePath);
     } else if (file.endsWith('.html')) {
       const fileContent = readFileContent(inputFilePath);
+      const { data, content } = parseHtmlFrontMatter(fileContent);
 
       const templateFilePath = path.join(
         fr('src/templates'),
@@ -109,21 +101,13 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
       let mainContent;
       if (specificTemplateExists) {
         const templateContent = readFileContent(templateFilePath);
-        const dom = new JSDOM(templateContent);
-        const document = dom.window.document;
-        const mainElementTemplate = document.querySelector('#main');
-        if (!mainElementTemplate) {
-          throw new Error('Main element not found in specific template');
-        }
-        const contentDom = new JSDOM(fileContent);
-        const content =
-          contentDom.window.document.querySelector('#main').innerHTML;
-        mainElementTemplate.innerHTML = content;
-        mainContent = mainElementTemplate.innerHTML;
+        const dom = injectContentIntoTemplate(templateContent, {
+          ...data,
+          content,
+        });
+        mainContent = dom.window.document.querySelector('body').innerHTML;
       } else {
-        const contentDom = new JSDOM(fileContent);
-        mainContent =
-          contentDom.window.document.querySelector('#main').outerHTML;
+        mainContent = content;
       }
 
       const relativeOutputPath = rp(
@@ -133,7 +117,13 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
       );
       const mainLayoutContent = readFileContent(config.mainLayoutPath);
       const finalHtml = replacePlaceholders(mainLayoutContent, {
-        title: path.basename(file, '.html'),
+        title:
+          data.title ||
+          path
+            .basename(file, '.html')
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase()),
+        ...data,
         children: mainContent,
         stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
         faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
