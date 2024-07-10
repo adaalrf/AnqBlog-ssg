@@ -50,7 +50,6 @@ export const generateTagPages = (
       // Add each post to the post links container
       pagePosts.forEach((post) => {
         const postItem = createPostItem(document, post, postItemTemplate);
-        console.log(`Post item HTML after replacement: ${postItem.outerHTML}`); // Debugging log
         postLinksDiv.appendChild(postItem);
       });
 
@@ -71,7 +70,7 @@ export const generateTagPages = (
             );
 
       fs.writeFileSync(outputPath, tagPageContent);
-      console.log(`Generated content for tag page ${tag}: ${outputPath}`);
+      console.log(`(Tags.js): Generated tag page ${tag}: ${outputPath}`);
     });
   });
 };

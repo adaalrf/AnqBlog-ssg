@@ -26,10 +26,10 @@ const generateTagsDropdown = (tags, currentFilePath) => {
     .map((tag) => {
       const relativePath = rp(
         path.dirname(currentFilePath),
-        `tags/${tag}.html`,
-        fr('public/blog'),
+        `${tag}.html`,
+        fr('public/blog/tags'),
       );
-      return `<li><a href="${relativePath}" class="dropdown-item">${tag}</a></li>`;
+      return `<li><a href="${relativePath}${tag}.html" class="dropdown-item">${tag}</a></li>`;
     })
     .join('\n');
 };
@@ -56,7 +56,7 @@ export const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
  */
 const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
   if (processedDirs.has(inputDir)) {
-    console.log(`Skipping already processed directory: ${inputDir}`);
+    // console.log(`Skipping already processed directory: ${inputDir}`);
     return;
   }
   processedDirs.add(inputDir);

@@ -25,7 +25,7 @@ fs.readFile(inputFilePath, 'utf8', (err, css) => {
     .then((result) => {
       // Write the processed CSS to the output file
       fs.writeFile(outputFilePath, result.css, () =>
-        console.log(`Generated ${outputFilePath}`),
+        console.log(`(CSS.js): Generated ${outputFilePath}`),
       );
       if (result.map) {
         fs.writeFile(

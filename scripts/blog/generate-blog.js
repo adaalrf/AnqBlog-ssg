@@ -28,11 +28,7 @@ export const generatePaginatedBlogHtmlFiles = (
 ) => {
   ensureDirectoryExists(tempBlogOutputPath); // Ensure the directory exists
   const posts = readIntermediatePosts(tempPostsOutputDirectory);
-
-  console.log('Read intermediate posts:', posts); // Debugging log
-
   const paginatedPosts = paginatePosts(posts, postsPerPage);
-  console.log('Paginated posts:', paginatedPosts); // Debugging log
 
   paginatedPosts.forEach((pagePosts, pageIndex) => {
     const blogTemplateContent = readFileContent(blogTemplatePath);
@@ -50,7 +46,6 @@ export const generatePaginatedBlogHtmlFiles = (
     // Add each post to the post links container
     pagePosts.forEach((post) => {
       const postItem = createPostItem(document, post, postItemTemplate);
-      console.log(`Post item HTML after replacement: ${postItem.outerHTML}`); // Debugging log
       postLinksDiv.appendChild(postItem);
     });
 
@@ -61,9 +56,6 @@ export const generatePaginatedBlogHtmlFiles = (
 
     // Update blogContent after appending the post items
     const blogContent = document.querySelector('#blog').outerHTML;
-
-    console.log(`Final blog HTML before writing: ${blogContent}`); // Debugging log
-
     const outputFilePath =
       pageIndex === 0
         ? path.join(tempBlogOutputPath, `index.html`)

@@ -27,4 +27,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Write the main.ts file
 fs.writeFileSync(outputPath, mainContent);
 
-console.log(`Generated ${outputPath}`);
+console.log(`(Imports.js): Generated ${outputPath}`);

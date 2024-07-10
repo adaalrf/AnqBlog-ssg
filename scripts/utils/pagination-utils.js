@@ -60,7 +60,6 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
  */
 export const createPostItem = (document, post, postItemTemplate) => {
   const { title, date, tags, htmlFileName, previewContent } = post;
-  console.log(`Creating post item for ${title} with date ${date}`); // Debugging log
   const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
@@ -84,7 +83,6 @@ export const createPostItem = (document, post, postItemTemplate) => {
     }
   }
 
-  console.log(`Post item HTML before replacement: ${postItem.outerHTML}`); // Debugging log
   return postItem;
 };
 

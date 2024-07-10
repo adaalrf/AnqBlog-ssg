@@ -42,6 +42,6 @@ export const generateIntermediatePostHtmlFiles = (
     const htmlContent = contentDiv.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, htmlFileName);
     fs.writeFileSync(outputPath, htmlContent);
-    console.log(`Generated intermediate post HTML: ${outputPath}`);
+    console.log(`(Posts.js): Generated post: ${outputPath}`);
   });
 };
