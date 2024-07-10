@@ -17,6 +17,16 @@ import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
 
+// Function to generate tags dropdown HTML
+const generateTagsDropdown = (tags) => {
+  return Object.keys(tags)
+    .map(
+      (tag) =>
+        `<li><a href="./blog/tags/${tag}.html" class="dropdown-item">${tag}</a></li>`,
+    )
+    .join('\n');
+};
+
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
   ensureDirectoryExists(config.postOutputDirectory);
@@ -70,11 +80,12 @@ const generateAllHtmlFiles = () => {
   applyLayoutToHtmlFiles(
     config.contentDirectory,
     config.publicContentDirectory,
+    generateTagsDropdown(tags), // Pass the generated tags dropdown HTML
   );
 };
 
 // Apply layout to all HTML files in a directory
-const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
+const applyLayoutToHtmlFiles = (inputDir, outputDir, tagsDropdown) => {
   const files = fs.readdirSync(inputDir);
 
   files.forEach((file) => {
@@ -87,7 +98,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
 
     if (fs.statSync(inputFilePath).isDirectory()) {
       ensureDirectoryExists(outputFilePath);
-      applyLayoutToHtmlFiles(inputFilePath, outputFilePath);
+      applyLayoutToHtmlFiles(inputFilePath, outputFilePath, tagsDropdown);
     } else if (file.endsWith('.html')) {
       const fileContent = readFileContent(inputFilePath);
       const { data, content } = parseHtmlFrontMatter(fileContent);
@@ -125,6 +136,7 @@ const applyLayoutToHtmlFiles = (inputDir, outputDir) => {
             .replace(/\b\w/g, (char) => char.toUpperCase()),
         ...data,
         children: mainContent,
+        tagsDropdown, // Add tags dropdown HTML
         stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
         faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
         scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),

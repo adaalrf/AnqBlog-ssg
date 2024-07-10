@@ -1,4 +1,5 @@
 
+import './tags-dropdown.ts';
 import './toggle-theme.ts';
 
 // Initialization logic

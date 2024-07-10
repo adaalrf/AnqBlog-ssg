@@ -1,3 +1,5 @@
+// toggle-theme.ts
+
 const htmlElement = document.querySelector<HTMLElement>('html');
 const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
 const savedTheme = localStorage.getItem('theme');
