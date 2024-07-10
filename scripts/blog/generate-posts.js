@@ -6,6 +6,7 @@ import {
 } from '../utils/parsing-utils.js';
 import fs from 'fs';
 import path from 'path';
+import { formatDate } from '../utils/date-utils.js';
 
 /**
  * Generates intermediate post HTML files.
@@ -22,10 +23,11 @@ export const generateIntermediatePostHtmlFiles = (
 
   posts.forEach((post) => {
     const { title, date, tags, htmlFileName, content } = post;
+    const formattedDate = formatDate(date); // Format the date
     const templateContent = readFileContent(postTemplatePath);
     const dom = injectContentIntoTemplate(templateContent, {
       title,
-      date,
+      date: formattedDate, // Use the formatted date
       tags,
       content,
     });

@@ -1,38 +1,14 @@
-import { generateIntermediatePostHtmlFiles } from './blog/generate-intermediate-posts.js';
-import { generatePaginatedBlogHtmlFiles } from './blog/generate-paginated-blog.js';
+import { generateIntermediatePostHtmlFiles } from './blog/generate-posts.js';
+import { generatePaginatedBlogHtmlFiles } from './blog/generate-blog.js';
 import { generateTagPages } from './blog/generate-tag-pages.js';
+import { applyLayoutToHtmlFiles } from './apply-layout.js';
 import {
   processMarkdownFiles,
   ensureDirectoryExists,
-  replacePlaceholders,
-  readFileContent,
-  injectContentIntoTemplate,
-  parseHtmlFrontMatter,
 } from './utils/parsing-utils.js';
-import { fr, rp } from './utils/resolve-path.js';
 import { parseDate } from './utils/date-utils.js';
 import config from './config.js';
 import fs from 'fs';
-import path from 'path';
-
-// Function to generate tags dropdown HTML
-const generateTagsDropdown = (tags, currentFilePath) => {
-  if (!currentFilePath) {
-    console.error('Error: currentFilePath is undefined.');
-    return '';
-  }
-
-  return Object.keys(tags)
-    .map((tag) => {
-      const relativePath = rp(
-        path.dirname(currentFilePath),
-        `tags/${tag}.html`,
-        fr('public/blog'),
-      );
-      return `<li><a href="${relativePath}" class="dropdown-item">${tag}</a></li>`;
-    })
-    .join('\n');
-};
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
@@ -66,17 +42,15 @@ const generateAllHtmlFiles = () => {
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
   );
-
   generatePaginatedBlogHtmlFiles(
-    posts,
+    config.tempPostsOutputDirectory,
     5,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
-
   generateTagPages(
     tags,
-    posts,
+    config.tempPostsOutputDirectory,
     config.templateBlogPath,
     config.tempTagsOutputDirectory,
   );
@@ -101,87 +75,6 @@ const generateAllHtmlFiles = () => {
   ];
 
   applyLayoutToHtmlFiles(directoryPairs, tags);
-};
-
-// Apply layout to all HTML files in multiple directories
-const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
-  const processedDirs = new Set();
-
-  directoryPairs.forEach(({ inputDir, outputDir }) => {
-    processDirectory(inputDir, outputDir, tags, processedDirs);
-  });
-};
-
-// Process a single directory
-const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
-  if (processedDirs.has(inputDir)) {
-    console.log(`Skipping already processed directory: ${inputDir}`);
-    return;
-  }
-  processedDirs.add(inputDir);
-
-  const files = fs.readdirSync(inputDir);
-
-  files.forEach((file) => {
-    const inputFilePath = path.join(inputDir, file);
-    const outputFilePath = path.join(outputDir, file);
-
-    if (file === 'posts') {
-      return;
-    }
-
-    if (fs.statSync(inputFilePath).isDirectory()) {
-      ensureDirectoryExists(outputFilePath);
-      processDirectory(inputFilePath, outputFilePath, tags, processedDirs);
-    } else if (file.endsWith('.html')) {
-      const fileContent = readFileContent(inputFilePath);
-      const { data, content } = parseHtmlFrontMatter(fileContent);
-
-      const templateFilePath = path.join(
-        fr('src/templates'),
-        `${path.basename(file, '.html')}-template.html`,
-      );
-      const specificTemplateExists = fs.existsSync(templateFilePath);
-
-      let mainContent;
-      if (specificTemplateExists) {
-        const templateContent = readFileContent(templateFilePath);
-        const dom = injectContentIntoTemplate(templateContent, {
-          ...data,
-          content,
-        });
-        mainContent = dom.window.document.querySelector('body').innerHTML;
-      } else {
-        mainContent = content;
-      }
-
-      const relativeOutputPath = rp(
-        path.dirname(outputFilePath),
-        file,
-        fr('public'),
-      );
-      const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
-      const mainLayoutContent = readFileContent(config.mainLayoutPath);
-      const finalHtml = replacePlaceholders(mainLayoutContent, {
-        title:
-          data.title ||
-          path
-            .basename(file, '.html')
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, (char) => char.toUpperCase()),
-        ...data,
-        children: mainContent,
-        tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
-        stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-        faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
-        scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-        gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
-      });
-
-      fs.writeFileSync(outputFilePath, finalHtml);
-      console.log(`(Generate.js): Processed ${outputFilePath}`);
-    }
-  });
 };
 
 // Execute the HTML file generation
