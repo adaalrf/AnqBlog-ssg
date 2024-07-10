@@ -1,12 +1,12 @@
 // Description: This script generates intermediate post HTML files from the post template.
-const {
+import {
   readFileContent,
   injectContentIntoTemplate,
   ensureDirectoryExists,
-} = require('../utils/parsing-utils');
-const fs = require('fs');
-const path = require('path');
-const { formatDate } = require('../utils/date-utils');
+} from '../utils/parsing-utils.js';
+import fs from 'fs';
+import path from 'path';
+import { formatDate } from '../utils/date-utils.js';
 
 /**
  * Helper function to generate HTML content.
@@ -35,7 +35,7 @@ const generateHtmlContent = (templatePath, data, outputPath) => {
  * @param {string} postTemplatePath - The path to the post template.
  * @param {string} postOutputDirectory - The directory to save the generated files.
  */
-const generateIntermediatePostHtmlFiles = (
+export const generateIntermediatePostHtmlFiles = (
   posts,
   postTemplatePath,
   postOutputDirectory,
@@ -51,5 +51,3 @@ const generateIntermediatePostHtmlFiles = (
     );
   });
 };
-
-module.exports = { generateIntermediatePostHtmlFiles };

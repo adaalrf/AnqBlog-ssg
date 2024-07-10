@@ -1,14 +1,14 @@
 // Description: Generates tag pages for the blog.
-const {
+import {
   readFileContent,
   replacePlaceholders,
   ensureDirectoryExists,
-} = require('../utils/parsing-utils');
-const { fr, rp } = require('../utils/resolve-path');
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require('jsdom');
-const { formatDate } = require('../utils/date-utils');
+} from '../utils/parsing-utils.js';
+import { fr, rp } from '../utils/resolve-path.js';
+import fs from 'fs';
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import { formatDate } from '../utils/date-utils.js';
 
 /**
  * Generates tag pages.
@@ -18,7 +18,7 @@ const { formatDate } = require('../utils/date-utils');
  * @param {string} mainLayoutPath - The path to the main layout template.
  * @param {string} tagsOutputDirectory - The directory to save the tag pages.
  */
-const generateTagPages = (
+export const generateTagPages = (
   tags,
   posts,
   blogTemplatePath,
@@ -99,5 +99,3 @@ const generateTagPages = (
     console.log(`Generated tag page for ${tag}: ${outputPath}`);
   });
 };
-
-module.exports = { generateTagPages };

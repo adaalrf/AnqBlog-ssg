@@ -1,23 +1,19 @@
-const {
-  generateIntermediatePostHtmlFiles,
-} = require('./blog/generate-intermediate-posts');
-const { generateFinalPostHtmlFiles } = require('./blog/generate-final-posts');
-const {
-  generatePaginatedBlogHtmlFiles,
-} = require('./blog/generate-paginated-blog');
-const { generateTagPages } = require('./blog/generate-tag-pages');
-const {
+import { generateIntermediatePostHtmlFiles } from './blog/generate-intermediate-posts.js';
+import { generateFinalPostHtmlFiles } from './blog/generate-final-posts.js';
+import { generatePaginatedBlogHtmlFiles } from './blog/generate-paginated-blog.js';
+import { generateTagPages } from './blog/generate-tag-pages.js';
+import {
   processMarkdownFiles,
   ensureDirectoryExists,
   replacePlaceholders,
   readFileContent,
-} = require('./utils/parsing-utils');
-const { fr, rp } = require('./utils/resolve-path');
-const { parseDate } = require('./utils/date-utils');
-const config = require('./config');
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require('jsdom');
+} from './utils/parsing-utils.js';
+import { fr, rp } from './utils/resolve-path.js';
+import { parseDate } from './utils/date-utils.js';
+import config from './config.js';
+import fs from 'fs';
+import path from 'path';
+import { JSDOM } from 'jsdom';
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {

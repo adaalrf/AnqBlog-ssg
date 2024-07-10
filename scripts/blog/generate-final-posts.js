@@ -1,12 +1,12 @@
-// Discription: This script generates final post HTML files with layout.
-const {
+// Description: This script generates final post HTML files with layout.
+import {
   readFileContent,
   replacePlaceholders,
   ensureDirectoryExists,
-} = require('../utils/parsing-utils');
-const fs = require('fs');
-const path = require('path');
-const { fr, rp } = require('../utils/resolve-path');
+} from '../utils/parsing-utils.js';
+import fs from 'fs';
+import path from 'path';
+import { fr, rp } from '../utils/resolve-path.js';
 
 /**
  * Generates final post HTML files with layout.
@@ -15,7 +15,7 @@ const { fr, rp } = require('../utils/resolve-path');
  * @param {string} postOutputDirectory - The directory where intermediate posts are stored.
  * @param {string} publicPostsDirectory - The directory to save the final posts.
  */
-const generateFinalPostHtmlFiles = (
+export const generateFinalPostHtmlFiles = (
   posts,
   mainLayoutPath,
   postOutputDirectory,
@@ -48,5 +48,3 @@ const generateFinalPostHtmlFiles = (
     console.log(`Generated ${path.join(publicPostsDirectory, htmlFileName)}`);
   });
 };
-
-module.exports = { generateFinalPostHtmlFiles };
