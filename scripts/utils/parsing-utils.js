@@ -1,15 +1,15 @@
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require('jsdom');
-const matter = require('gray-matter');
-const { marked } = require('marked');
-const truncate = require('html-truncate');
+import fs from 'fs';
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import matter from 'gray-matter';
+import { marked } from 'marked';
+import truncate from 'html-truncate';
 
 /**
  * Reads and parses configuration from a file.
  * @param {string} configPath - The path to the configuration file.
  */
-const readConfig = (configPath) => {
+export const readConfig = (configPath) => {
   const markedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
   marked.setOptions(markedConfig);
 };
@@ -19,7 +19,7 @@ const readConfig = (configPath) => {
  * @param {string} filePath - The path to the file.
  * @returns {string} - The content of the file.
  */
-const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
+export const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
 
 /**
  * Gets the first N characters of HTML content while preserving structure.
@@ -27,7 +27,7 @@ const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
  * @param {number} length - The number of characters to truncate to.
  * @returns {string} - The truncated HTML content.
  */
-const getFirstNthCharacters = (htmlContent, length = 250) =>
+export const getFirstNthCharacters = (htmlContent, length = 250) =>
   truncate(htmlContent, length, { ellipsis: '...' });
 
 /**
@@ -37,7 +37,11 @@ const getFirstNthCharacters = (htmlContent, length = 250) =>
  * @param {object} [options] - Options for injecting tags.
  * @returns {object} - The DOM object with injected content.
  */
-const injectContentIntoTemplate = (templateContent, data, options = {}) => {
+export const injectContentIntoTemplate = (
+  templateContent,
+  data,
+  options = {},
+) => {
   const {
     tagWrapper = (tag) => `<a href="#">${tag}</a>`,
     tagsContainerSelector = '.tags',
@@ -78,7 +82,7 @@ const injectContentIntoTemplate = (templateContent, data, options = {}) => {
  * @param {string} fileContent - The markdown file content.
  * @returns {object} - The parsed data and HTML content.
  */
-const parseMarkdown = (fileContent) => {
+export const parseMarkdown = (fileContent) => {
   const { data, content } = matter(fileContent);
   const htmlContent = marked(content);
   return { data, htmlContent };
@@ -90,7 +94,7 @@ const parseMarkdown = (fileContent) => {
  * @param {object} [options] - Options for processing markdown files.
  * @returns {Array} - An array of processed posts.
  */
-const processMarkdownFiles = (directory, options = {}) => {
+export const processMarkdownFiles = (directory, options = {}) => {
   const { previewLength = 250 } = options;
   const files = fs
     .readdirSync(directory)
@@ -120,7 +124,7 @@ const processMarkdownFiles = (directory, options = {}) => {
  * Ensures a directory exists, creating it if necessary.
  * @param {string} directory - The directory to ensure exists.
  */
-const ensureDirectoryExists = (directory) => {
+export const ensureDirectoryExists = (directory) => {
   if (!fs.existsSync(directory)) {
     fs.mkdirSync(directory, { recursive: true });
   }
@@ -132,17 +136,8 @@ const ensureDirectoryExists = (directory) => {
  * @param {object} values - The values to replace the placeholders with.
  * @returns {string} - The template with placeholders replaced.
  */
-const replacePlaceholders = (template, values) => {
+export const replacePlaceholders = (template, values) => {
   return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
     return key in values ? values[key] : placeholder;
   });
-};
-
-module.exports = {
-  readConfig,
-  readFileContent,
-  injectContentIntoTemplate,
-  processMarkdownFiles,
-  ensureDirectoryExists,
-  replacePlaceholders,
 };

@@ -1,25 +1,5 @@
-/**
- * This is a small helper script to find the project root by looking for a marker file:
- * ('package.json' in my case, but change this as you see fit).
- * The function recursively traverses up the directory tree until it finds the marker file.
- *
- * It also provides a function to resolve paths relative to the project root.
- *
- * __dirname is a global variable in node.js that contains the directory name of the current module.
- * fs is the file system module in node.js
- * and path is the path module in node.js
- *
- * this might differ in other environments.
- *
- * fr = find root
- * rp = relative path
- *
- * use case: Calculate the relative path
- *     const relativePath = rp(outputFilePath, fr('public'));
- **/
-
-const path = require('path');
-const fs = require('fs');
+import path from 'path';
+import fs from 'fs';
 
 // Function to find the project root by looking for a marker file (e.g., package.json)
 const findRoot = (dir) => {
@@ -33,22 +13,17 @@ const findRoot = (dir) => {
   return findRoot(parentDir);
 };
 
-const projectRoot = findRoot(__dirname);
+const projectRoot = findRoot(process.cwd());
 
 // Function to resolve paths relative to the project root
-const resolvePath = (relativePath) => path.join(projectRoot, relativePath);
+export const fr = (relativePath) => path.join(projectRoot, relativePath);
 
 // Function to calculate the relative path based on the depth
-const calculateRelativePath = (outputDir, file, baseDir) => {
+export const rp = (outputDir, file, baseDir) => {
   const outputFilePath = path.join(outputDir, file);
   const relativePath = path.posix.relative(
     path.posix.dirname(outputFilePath),
     baseDir,
   );
   return relativePath ? relativePath + '/' : '';
-};
-
-module.exports = {
-  fr: resolvePath,
-  rp: calculateRelativePath,
 };

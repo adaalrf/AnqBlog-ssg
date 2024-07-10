@@ -1,6 +1,6 @@
-const { fr } = require('./utils/resolve-path');
+import { fr } from './utils/resolve-path.js';
 
-module.exports = {
+export default {
   configPath: fr('marked.json'),
   postsDirectory: fr('src/posts'),
   postTemplatePath: fr('src/templates/post-template.html'),

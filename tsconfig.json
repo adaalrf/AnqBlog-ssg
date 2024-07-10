@@ -10,6 +10,11 @@
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": true
   },
-  "include": ["src/**/*.ts", "src/ts/generate-index.js"],
-  "exclude": ["node_modules", "public"]
+  "include": [
+    "src/**/*.ts",
+    "src/ts/generate-index.js",
+    "src/ts/fetch-posts.ts",
+    "src/ts/toggle-theme.ts"
+  ],
+  "exclude": ["node_modules", "public", "legacy"]
 }

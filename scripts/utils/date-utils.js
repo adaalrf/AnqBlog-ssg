@@ -4,7 +4,7 @@
  * @param {string} dateString - The date string to parse.
  * @returns {Date} - The parsed Date object.
  */
-const parseDate = (dateString) => {
+export const parseDate = (dateString) => {
   const [day, month, year] = dateString.split('.').map(Number);
   return new Date(year, month - 1, day);
 };
@@ -15,15 +15,10 @@ const parseDate = (dateString) => {
  * @returns {string} - The formatted date string.
  * @throws {Error} - If the date object is invalid.
  */
-const formatDate = (date) => {
+export const formatDate = (date) => {
   if (!(date instanceof Date)) {
     throw new Error('Invalid date object');
   }
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
   return date.toLocaleDateString('en-US', options);
-};
-
-module.exports = {
-  parseDate,
-  formatDate,
 };

@@ -1,14 +1,14 @@
 // Description: Generates the full blog HTML files with pagination.
-const {
+import {
   readFileContent,
   replacePlaceholders,
   ensureDirectoryExists,
-} = require('../utils/parsing-utils');
-const { fr, rp } = require('../utils/resolve-path');
-const fs = require('fs');
-const path = require('path');
-const { JSDOM } = require('jsdom');
-const { formatDate } = require('../utils/date-utils');
+} from '../utils/parsing-utils.js';
+import { fr, rp } from '../utils/resolve-path.js';
+import fs from 'fs';
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import { formatDate } from '../utils/date-utils.js';
 
 /**
  * Splits posts into pages.
@@ -32,7 +32,7 @@ const paginatePosts = (posts, postsPerPage) => {
  * @param {string} mainLayoutPath - The path to the main layout template.
  * @param {string} blogOutputPath - The directory to save the paginated blog pages.
  */
-const generatePaginatedBlogHtmlFiles = (
+export const generatePaginatedBlogHtmlFiles = (
   posts,
   postsPerPage,
   blogTemplatePath,
@@ -168,5 +168,3 @@ const generatePaginatedBlogHtmlFiles = (
     console.log(`Generated ${outputFilePath}`);
   });
 };
-
-module.exports = { generatePaginatedBlogHtmlFiles };
