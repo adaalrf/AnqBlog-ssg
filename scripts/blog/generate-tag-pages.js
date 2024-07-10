@@ -1,10 +1,8 @@
 // Description: Generates tag pages for the blog.
 import {
   readFileContent,
-  replacePlaceholders,
   ensureDirectoryExists,
 } from '../utils/parsing-utils.js';
-import { fr, rp } from '../utils/resolve-path.js';
 import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
@@ -15,17 +13,15 @@ import { formatDate } from '../utils/date-utils.js';
  * @param {object} tags - The tags with associated posts.
  * @param {Array} posts - The array of posts.
  * @param {string} blogTemplatePath - The path to the blog template.
- * @param {string} mainLayoutPath - The path to the main layout template.
- * @param {string} tagsOutputDirectory - The directory to save the tag pages.
+ * @param {string} publicTagsOutputDirectory - The directory to save the tag pages.
  */
 export const generateTagPages = (
   tags,
   posts,
   blogTemplatePath,
-  mainLayoutPath,
-  tagsOutputDirectory,
+  publicTagsOutputDirectory,
 ) => {
-  ensureDirectoryExists(tagsOutputDirectory); // Ensure the tags directory exists
+  ensureDirectoryExists(publicTagsOutputDirectory); // Ensure the tags directory exists
 
   Object.keys(tags).forEach((tag) => {
     const tagPosts = posts.filter((post) => post.tags.includes(tag));
@@ -79,23 +75,8 @@ export const generateTagPages = (
     postItemTemplate.remove();
     const tagPageContent = document.querySelector('#blog').outerHTML;
 
-    const outputPath = path.join(tagsOutputDirectory, `${tag}.html`);
-    const relativeOutputPath = rp(
-      tagsOutputDirectory,
-      `${tag}.html`,
-      fr('public'),
-    );
-
-    const finalHtml = replacePlaceholders(readFileContent(mainLayoutPath), {
-      title: `${tag}`,
-      children: tagPageContent,
-      stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-      faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
-      scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-      gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
-    });
-
-    fs.writeFileSync(outputPath, finalHtml);
-    console.log(`Generated tag page for ${tag}: ${outputPath}`);
+    const outputPath = path.join(publicTagsOutputDirectory, `${tag}.html`);
+    fs.writeFileSync(outputPath, tagPageContent);
+    console.log(`Generated content for tag page ${tag}: ${outputPath}`);
   });
 };

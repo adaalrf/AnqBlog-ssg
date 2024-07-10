@@ -1,10 +1,8 @@
 // Description: Generates the full blog HTML files with pagination.
 import {
   readFileContent,
-  replacePlaceholders,
   ensureDirectoryExists,
 } from '../utils/parsing-utils.js';
-import { fr, rp } from '../utils/resolve-path.js';
 import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
@@ -29,19 +27,16 @@ const paginatePosts = (posts, postsPerPage) => {
  * @param {Array} posts - The array of posts.
  * @param {number} postsPerPage - The number of posts per page.
  * @param {string} blogTemplatePath - The path to the blog template.
- * @param {string} mainLayoutPath - The path to the main layout template.
- * @param {string} blogOutputPath - The directory to save the paginated blog pages.
+ * @param {string} tempBlogOutputPath - The directory to save the paginated blog pages.
  */
 export const generatePaginatedBlogHtmlFiles = (
   posts,
   postsPerPage,
   blogTemplatePath,
-  mainLayoutPath,
-  blogOutputPath,
+  tempBlogOutputPath,
 ) => {
-  ensureDirectoryExists(blogOutputPath); // Ensure the directory exists
+  ensureDirectoryExists(tempBlogOutputPath); // Ensure the directory exists
   const paginatedPosts = paginatePosts(posts, postsPerPage);
-  const mainLayoutContent = readFileContent(mainLayoutPath);
 
   paginatedPosts.forEach((pagePosts, pageIndex) => {
     const blogTemplateContent = readFileContent(blogTemplatePath);
@@ -143,28 +138,13 @@ export const generatePaginatedBlogHtmlFiles = (
     postItemTemplate.remove();
 
     const blogContent = document.querySelector('#blog').outerHTML;
-    const relativeOutputPath = rp(
-      path.dirname(
-        path.join(blogOutputPath, `blog-page-${pageIndex + 1}.html`),
-      ),
-      `blog-page-${pageIndex + 1}.html`,
-      fr('public'),
-    );
-
-    const finalBlogHtml = replacePlaceholders(mainLayoutContent, {
-      title: 'Blog',
-      children: blogContent,
-      stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-      faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
-      scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-      gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
-    });
-
     const outputFilePath =
       pageIndex === 0
-        ? path.join(blogOutputPath, `index.html`)
-        : path.join(blogOutputPath, `blog-page-${pageIndex + 1}.html`);
-    fs.writeFileSync(outputFilePath, finalBlogHtml);
-    console.log(`Generated ${outputFilePath}`);
+        ? path.join(tempBlogOutputPath, `index.html`)
+        : path.join(tempBlogOutputPath, `blog-page-${pageIndex + 1}.html`);
+    fs.writeFileSync(outputFilePath, blogContent);
+    console.log(
+      `Generated content for blog page ${pageIndex + 1}: ${outputFilePath}`,
+    );
   });
 };

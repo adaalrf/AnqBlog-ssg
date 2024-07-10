@@ -1,15 +1,17 @@
 import { fr } from './utils/resolve-path.js';
 
 export default {
-  configPath: fr('marked.json'),
-  postsDirectory: fr('src/posts'),
-  postTemplatePath: fr('src/templates/post-template.html'),
-  mainLayoutPath: fr('src/templates/layout-template.html'),
-  postOutputDirectory: fr('src/content/posts'),
-  blogTemplatePath: fr('src/templates/blog-template.html'),
-  blogOutputPath: fr('public/blog'),
-  publicPostsDirectory: fr('public/blog/posts'),
-  tagsOutputDirectory: fr('public/blog/tags'),
+  markedConfigPath: fr('marked.json'),
   contentDirectory: fr('src/content'),
-  publicContentDirectory: fr('public'),
+  postsContentDirectory: fr('src/content/blog/posts'),
+  templatePostsPath: fr('src/templates/post-template.html'),
+  templateBlogPath: fr('src/templates/blog-template.html'),
+  mainLayoutPath: fr('src/templates/layout-template.html'),
+  tempPostsOutputDirectory: fr('src/temp/blog/posts'),
+  tempTagsOutputDirectory: fr('src/temp/blog/tags'),
+  tempBlogOutputPath: fr('src/temp/blog'),
+  publicContentOutputDirectory: fr('public'),
+  publicBlogOutputPath: fr('public/blog'),
+  publicPostsOutputDirectory: fr('public/blog/posts'),
+  publicTagsOutputDirectory: fr('public/blog/tags'),
 };

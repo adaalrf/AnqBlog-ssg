@@ -1,5 +1,4 @@
 import { generateIntermediatePostHtmlFiles } from './blog/generate-intermediate-posts.js';
-import { generateFinalPostHtmlFiles } from './blog/generate-final-posts.js';
 import { generatePaginatedBlogHtmlFiles } from './blog/generate-paginated-blog.js';
 import { generateTagPages } from './blog/generate-tag-pages.js';
 import {
@@ -15,27 +14,38 @@ import { parseDate } from './utils/date-utils.js';
 import config from './config.js';
 import fs from 'fs';
 import path from 'path';
-import { JSDOM } from 'jsdom';
 
 // Function to generate tags dropdown HTML
-const generateTagsDropdown = (tags) => {
+const generateTagsDropdown = (tags, currentFilePath) => {
+  if (!currentFilePath) {
+    console.error('Error: currentFilePath is undefined.');
+    return '';
+  }
+
   return Object.keys(tags)
-    .map(
-      (tag) =>
-        `<li><a href="./blog/tags/${tag}.html" class="dropdown-item">${tag}</a></li>`,
-    )
+    .map((tag) => {
+      const relativePath = rp(
+        path.dirname(currentFilePath),
+        `tags/${tag}.html`,
+        fr('public/blog'),
+      );
+      return `<li><a href="${relativePath}" class="dropdown-item">${tag}</a></li>`;
+    })
     .join('\n');
 };
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
-  ensureDirectoryExists(config.postOutputDirectory);
-  ensureDirectoryExists(config.publicPostsDirectory);
-  ensureDirectoryExists(config.blogOutputPath);
-  ensureDirectoryExists(config.tagsOutputDirectory);
+  ensureDirectoryExists(config.tempPostsOutputDirectory);
+  ensureDirectoryExists(config.tempTagsOutputDirectory);
+  ensureDirectoryExists(config.tempBlogOutputPath);
+  ensureDirectoryExists(config.publicContentOutputDirectory);
+  ensureDirectoryExists(config.publicBlogOutputPath);
+  ensureDirectoryExists(config.publicPostsOutputDirectory);
+  ensureDirectoryExists(config.publicTagsOutputDirectory);
 
   // Ensure all dates are parsed as Date objects
-  const posts = processMarkdownFiles(config.postsDirectory)
+  const posts = processMarkdownFiles(config.postsContentDirectory)
     .map((post) => ({ ...post, date: parseDate(post.date) }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
@@ -53,99 +63,112 @@ const generateAllHtmlFiles = () => {
 
   generateIntermediatePostHtmlFiles(
     posts,
-    config.postTemplatePath,
-    config.postOutputDirectory,
-  );
-  generateFinalPostHtmlFiles(
-    posts,
-    config.mainLayoutPath,
-    config.postOutputDirectory,
-    config.publicPostsDirectory,
+    config.templatePostsPath,
+    config.tempPostsOutputDirectory,
   );
   generatePaginatedBlogHtmlFiles(
     posts,
     5,
-    config.blogTemplatePath,
-    config.mainLayoutPath,
-    config.blogOutputPath,
+    config.templateBlogPath,
+    config.tempBlogOutputPath,
   );
   generateTagPages(
     tags,
     posts,
-    config.blogTemplatePath,
-    config.mainLayoutPath,
-    config.tagsOutputDirectory,
+    config.templateBlogPath,
+    config.tempTagsOutputDirectory,
   );
 
-  applyLayoutToHtmlFiles(
-    config.contentDirectory,
-    config.publicContentDirectory,
-    generateTagsDropdown(tags), // Pass the generated tags dropdown HTML
-  );
+  const directoryPairs = [
+    {
+      inputDir: config.tempPostsOutputDirectory,
+      outputDir: config.publicPostsOutputDirectory,
+    },
+    {
+      inputDir: config.tempTagsOutputDirectory,
+      outputDir: config.publicTagsOutputDirectory,
+    },
+    {
+      inputDir: config.tempBlogOutputPath,
+      outputDir: config.publicBlogOutputPath,
+    },
+    {
+      inputDir: config.contentDirectory,
+      outputDir: config.publicContentOutputDirectory,
+    },
+  ];
+
+  applyLayoutToHtmlFiles(directoryPairs, tags);
 };
 
-// Apply layout to all HTML files in a directory
-const applyLayoutToHtmlFiles = (inputDir, outputDir, tagsDropdown) => {
-  const files = fs.readdirSync(inputDir);
+// Apply layout to all HTML files in multiple directories
+const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
+  directoryPairs.forEach(({ inputDir, outputDir }) => {
+    const files = fs.readdirSync(inputDir);
 
-  files.forEach((file) => {
-    const inputFilePath = path.join(inputDir, file);
-    const outputFilePath = path.join(outputDir, file);
+    files.forEach((file) => {
+      const inputFilePath = path.join(inputDir, file);
+      const outputFilePath = path.join(outputDir, file);
 
-    if (file === 'posts') {
-      return;
-    }
-
-    if (fs.statSync(inputFilePath).isDirectory()) {
-      ensureDirectoryExists(outputFilePath);
-      applyLayoutToHtmlFiles(inputFilePath, outputFilePath, tagsDropdown);
-    } else if (file.endsWith('.html')) {
-      const fileContent = readFileContent(inputFilePath);
-      const { data, content } = parseHtmlFrontMatter(fileContent);
-
-      const templateFilePath = path.join(
-        fr('src/templates'),
-        `${path.basename(file, '.html')}-template.html`,
-      );
-      const specificTemplateExists = fs.existsSync(templateFilePath);
-
-      let mainContent;
-      if (specificTemplateExists) {
-        const templateContent = readFileContent(templateFilePath);
-        const dom = injectContentIntoTemplate(templateContent, {
-          ...data,
-          content,
-        });
-        mainContent = dom.window.document.querySelector('body').innerHTML;
-      } else {
-        mainContent = content;
+      if (file === 'posts') {
+        return;
       }
 
-      const relativeOutputPath = rp(
-        path.dirname(outputFilePath),
-        file,
-        fr('public'),
-      );
-      const mainLayoutContent = readFileContent(config.mainLayoutPath);
-      const finalHtml = replacePlaceholders(mainLayoutContent, {
-        title:
-          data.title ||
-          path
-            .basename(file, '.html')
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, (char) => char.toUpperCase()),
-        ...data,
-        children: mainContent,
-        tagsDropdown, // Add tags dropdown HTML
-        stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-        faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
-        scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-        gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
-      });
+      if (fs.statSync(inputFilePath).isDirectory()) {
+        ensureDirectoryExists(outputFilePath);
+        applyLayoutToHtmlFiles(
+          [{ inputDir: inputFilePath, outputDir: outputFilePath }],
+          tags,
+        );
+      } else if (file.endsWith('.html')) {
+        const fileContent = readFileContent(inputFilePath);
+        const { data, content } = parseHtmlFrontMatter(fileContent);
 
-      fs.writeFileSync(outputFilePath, finalHtml);
-      console.log(`Processed ${outputFilePath}`);
-    }
+        const templateFilePath = path.join(
+          fr('src/templates'),
+          `${path.basename(file, '.html')}-template.html`,
+        );
+        const specificTemplateExists = fs.existsSync(templateFilePath);
+
+        let mainContent;
+        if (specificTemplateExists) {
+          const templateContent = readFileContent(templateFilePath);
+          const dom = injectContentIntoTemplate(templateContent, {
+            ...data,
+            content,
+          });
+          mainContent = dom.window.document.querySelector('body').innerHTML;
+        } else {
+          mainContent = content;
+        }
+
+        const relativeOutputPath = rp(
+          path.dirname(outputFilePath),
+          file,
+          fr('public'),
+        );
+        const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
+        const mainLayoutContent = readFileContent(config.mainLayoutPath);
+        const finalHtml = replacePlaceholders(mainLayoutContent, {
+          title:
+            data.title ||
+            path
+              .basename(file, '.html')
+              .replace(/-/g, ' ')
+              .replace(/\b\w/g, (char) => char.toUpperCase()),
+          ...data,
+          children: mainContent,
+          tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
+          stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+          faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+          scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+          gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
+        });
+
+        fs.writeFileSync(outputFilePath, finalHtml);
+        console.log(`(Generate.js): Processed ${outputFilePath}`);
+      }
+    });
   });
 };
 
