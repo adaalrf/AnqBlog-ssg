@@ -142,9 +142,8 @@ export const generatePaginatedBlogHtmlFiles = (
       pageIndex === 0
         ? path.join(tempBlogOutputPath, `index.html`)
         : path.join(tempBlogOutputPath, `blog-page-${pageIndex + 1}.html`);
+
     fs.writeFileSync(outputFilePath, blogContent);
-    console.log(
-      `Generated content for blog page ${pageIndex + 1}: ${outputFilePath}`,
-    );
+    console.log(`Generated blog page: ${outputFilePath}`);
   });
 };

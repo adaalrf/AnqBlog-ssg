@@ -13,15 +13,15 @@ import { formatDate } from '../utils/date-utils.js';
  * @param {object} tags - The tags with associated posts.
  * @param {Array} posts - The array of posts.
  * @param {string} blogTemplatePath - The path to the blog template.
- * @param {string} publicTagsOutputDirectory - The directory to save the tag pages.
+ * @param {string} tempTagsOutputDirectory - The directory to save the tag pages.
  */
 export const generateTagPages = (
   tags,
   posts,
   blogTemplatePath,
-  publicTagsOutputDirectory,
+  tempTagsOutputDirectory,
 ) => {
-  ensureDirectoryExists(publicTagsOutputDirectory); // Ensure the tags directory exists
+  ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the tags directory exists
 
   Object.keys(tags).forEach((tag) => {
     const tagPosts = posts.filter((post) => post.tags.includes(tag));
@@ -75,7 +75,7 @@ export const generateTagPages = (
     postItemTemplate.remove();
     const tagPageContent = document.querySelector('#blog').outerHTML;
 
-    const outputPath = path.join(publicTagsOutputDirectory, `${tag}.html`);
+    const outputPath = path.join(tempTagsOutputDirectory, `${tag}.html`);
     fs.writeFileSync(outputPath, tagPageContent);
     console.log(`Generated content for tag page ${tag}: ${outputPath}`);
   });

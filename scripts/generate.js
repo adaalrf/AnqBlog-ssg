@@ -66,12 +66,14 @@ const generateAllHtmlFiles = () => {
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
   );
+
   generatePaginatedBlogHtmlFiles(
     posts,
     5,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
+
   generateTagPages(
     tags,
     posts,
@@ -103,72 +105,82 @@ const generateAllHtmlFiles = () => {
 
 // Apply layout to all HTML files in multiple directories
 const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
+  const processedDirs = new Set();
+
   directoryPairs.forEach(({ inputDir, outputDir }) => {
-    const files = fs.readdirSync(inputDir);
+    processDirectory(inputDir, outputDir, tags, processedDirs);
+  });
+};
 
-    files.forEach((file) => {
-      const inputFilePath = path.join(inputDir, file);
-      const outputFilePath = path.join(outputDir, file);
+// Process a single directory
+const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
+  if (processedDirs.has(inputDir)) {
+    console.log(`Skipping already processed directory: ${inputDir}`);
+    return;
+  }
+  processedDirs.add(inputDir);
 
-      if (file === 'posts') {
-        return;
-      }
+  const files = fs.readdirSync(inputDir);
 
-      if (fs.statSync(inputFilePath).isDirectory()) {
-        ensureDirectoryExists(outputFilePath);
-        applyLayoutToHtmlFiles(
-          [{ inputDir: inputFilePath, outputDir: outputFilePath }],
-          tags,
-        );
-      } else if (file.endsWith('.html')) {
-        const fileContent = readFileContent(inputFilePath);
-        const { data, content } = parseHtmlFrontMatter(fileContent);
+  files.forEach((file) => {
+    const inputFilePath = path.join(inputDir, file);
+    const outputFilePath = path.join(outputDir, file);
 
-        const templateFilePath = path.join(
-          fr('src/templates'),
-          `${path.basename(file, '.html')}-template.html`,
-        );
-        const specificTemplateExists = fs.existsSync(templateFilePath);
+    if (file === 'posts') {
+      return;
+    }
 
-        let mainContent;
-        if (specificTemplateExists) {
-          const templateContent = readFileContent(templateFilePath);
-          const dom = injectContentIntoTemplate(templateContent, {
-            ...data,
-            content,
-          });
-          mainContent = dom.window.document.querySelector('body').innerHTML;
-        } else {
-          mainContent = content;
-        }
+    if (fs.statSync(inputFilePath).isDirectory()) {
+      ensureDirectoryExists(outputFilePath);
+      processDirectory(inputFilePath, outputFilePath, tags, processedDirs);
+    } else if (file.endsWith('.html')) {
+      const fileContent = readFileContent(inputFilePath);
+      const { data, content } = parseHtmlFrontMatter(fileContent);
 
-        const relativeOutputPath = rp(
-          path.dirname(outputFilePath),
-          file,
-          fr('public'),
-        );
-        const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
-        const mainLayoutContent = readFileContent(config.mainLayoutPath);
-        const finalHtml = replacePlaceholders(mainLayoutContent, {
-          title:
-            data.title ||
-            path
-              .basename(file, '.html')
-              .replace(/-/g, ' ')
-              .replace(/\b\w/g, (char) => char.toUpperCase()),
+      const templateFilePath = path.join(
+        fr('src/templates'),
+        `${path.basename(file, '.html')}-template.html`,
+      );
+      const specificTemplateExists = fs.existsSync(templateFilePath);
+
+      let mainContent;
+      if (specificTemplateExists) {
+        const templateContent = readFileContent(templateFilePath);
+        const dom = injectContentIntoTemplate(templateContent, {
           ...data,
-          children: mainContent,
-          tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
-          stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-          faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
-          scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-          gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
+          content,
         });
-
-        fs.writeFileSync(outputFilePath, finalHtml);
-        console.log(`(Generate.js): Processed ${outputFilePath}`);
+        mainContent = dom.window.document.querySelector('body').innerHTML;
+      } else {
+        mainContent = content;
       }
-    });
+
+      const relativeOutputPath = rp(
+        path.dirname(outputFilePath),
+        file,
+        fr('public'),
+      );
+      const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
+      const mainLayoutContent = readFileContent(config.mainLayoutPath);
+      const finalHtml = replacePlaceholders(mainLayoutContent, {
+        title:
+          data.title ||
+          path
+            .basename(file, '.html')
+            .replace(/-/g, ' ')
+            .replace(/\b\w/g, (char) => char.toUpperCase()),
+        ...data,
+        children: mainContent,
+        tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
+        stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
+        faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+        scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
+        gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
+      });
+
+      fs.writeFileSync(outputFilePath, finalHtml);
+      console.log(`(Generate.js): Processed ${outputFilePath}`);
+    }
   });
 };
 
