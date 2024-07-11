@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<!-- here you set the default theme -->
+<html class="dark" lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Tag1</title>
+    <link href="../../public/styles/styles.css" rel="stylesheet" />
+    <link rel="icon" href="../../public/assets/favicon.webp" type="image/x-icon" />
+  </head>
+  <body class="bg-background flex flex-col min-h-screen">
+    <header class="bg-muted text-muted-foreground shadow-md p-1 mb-6">
+      <div
+        class="flex flex-col sm:flex-row items-center justify-between min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto">
+        <a href="/">
+          <h1 class="text-2xl font-bold m-0">. adaalrf.dev</h1>
+        </a>
+        <nav>
+          <ul class="flex space-x-4">
+            <li>
+              <a href="/">Home</a>
+            </li>
+            <li>
+              <a href="/blog">Blog</a>
+            </li>
+            <li class="relative">
+              <a href="#" id="tagsDropdown" class="dropdown-toggle">Tags</a>
+              <ul
+                id="tagsDropdownMenu"
+                class="flex flex-col gap-4 absolute left-1/2 mt-4 p-4 transform -translate-x-1/2 min-w-36 w-fit bg-background border-t-2 border-t-foreground rounded-sm shadow-lg z-10 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
+                <li><a href="../../public/blog/tags/tag1.html" class="dropdown-item">tag1</a></li>
+<li><a href="../../public/blog/tags/tag2.html" class="dropdown-item">tag2</a></li>
+<li><a href="../../public/blog/tags/tag3.html" class="dropdown-item">tag3</a></li>
+              </ul>
+            </li>
+            <li>
+              <a
+                href="https://github.com/adaalrf"
+                target="_blank"
+                rel="noopener noreferrer"
+                >gitHub</a
+              >
+            </li>
+            <li>
+              <button id="toggle-theme-btn" class="hidden">
+                <!-- Toggle Theme -->
+              </button>
+            </li>
+          </ul>
+        </nav>
+      </div>
+    </header>
+    <main
+      id="main"
+      class="ring-4 ring-muted min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto p-6 rounded-md bg-background text-foreground drop-shadow-md flex-grow">
+      <div id="blog">
+  <div id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    
+  <div class="post-item-template hidden" style="display: list-item;">
+      <h1 class="post-title"><a href="public/FirstPost.html">My First Post</a></h1>
+      <div class="mb-4 flex items-center space-x-2">
+        <p class="post-date">Jun 24, 2024</p>
+        <span id="tag-divider">|</span>
+        <span class="tags flex gap-2"><a href="public/tag1.html">tag1</a> <a href="public/tag2.html">tag2</a> <a href="public/tag3.html">tag3</a></span>
+      </div>
+      <div class="content prose leading-relaxed"><p>This is content of the post.</p>
+</div>
+    </div></div>
+  <div class="pagination flex justify-center gap-4">
+    <a href="" class="previous-blog-page hidden">&lt;</a>
+    <a href="tag1.html" class="current-blog-page font-bold underline" id="page-link-1">1</a>
+    <a href="" class="hidden" id="page-link-2"></a>
+    <a href="" class="hidden current-blog-page font-bold underline" id="page-link-3"></a>
+    <a href="" class="hidden" id="page-link-4"></a>
+    <a href="" class="hidden" id="page-link-5"></a>
+    <a href="" class="next-blog-page hidden">&gt;</a>
+  </div>
+</div>
+    </main>
+    <footer class="bg-background text-foreground shadow-inner mt-6 p-4">
+      <div
+        class="min-w-72 max-w-sm sm:max-w-lg lg:min-max-w mx-auto text-center">
+        <p class="text-foreground">
+          © 2024 . adaalrf.dev |
+          <a href="https://github.com/adaalrf"
+            >adaalrf &nbsp;
+            <img
+              src="../../public/assets/github-icon.svg"
+              alt="gitLogo"
+              class="inline-block w-6 h-6" />
+          </a>
+        </p>
+      </div>
+    </footer>
+    <script type="module" src="../../public/js/bundle.js"></script>
+  </body>
+</html>

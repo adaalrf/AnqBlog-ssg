@@ -6,6 +6,12 @@ cd "$(dirname "$0")"
 # Start timer
 start_time=$(date +%s%3N)
 
+# Remove the public directory
+rm -rf public
+
+# Remove temp directory
+rm -rf src/temp
+
 # Generate dynamic imports
 node scripts/utils/generate-imports.js
 
