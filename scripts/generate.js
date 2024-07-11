@@ -51,6 +51,7 @@ const generateAllHtmlFiles = () => {
   generateTagPages(
     tags,
     config.tempPostsOutputDirectory,
+    5, // Assuming 5 posts per page for tags as well
     config.templateBlogPath,
     config.tempTagsOutputDirectory,
   );

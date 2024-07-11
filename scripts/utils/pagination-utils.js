@@ -1,10 +1,10 @@
-// pagination-utils.js
-
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
 import { readFileContent, parseHtmlFrontMatter } from './parsing-utils.js';
 import { formatDate } from './date-utils.js';
+import { rp, fr, fpr } from './resolve-path.js';
+import config from '../config.js';
 
 /**
  * Splits posts into pages.
@@ -56,11 +56,21 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
  * @param {Document} document - The DOM document.
  * @param {Object} post - The post data.
  * @param {HTMLElement} postItemTemplate - The post item template.
+ * @param {string} [basePath='.'] - The base path for the links.
  * @returns {HTMLElement} - The post item element.
  */
-export const createPostItem = (document, post, postItemTemplate) => {
+export const createPostItem = (
+  document,
+  post,
+  postItemTemplate,
+  postsPath = '', // fpr('.') to find root path from current directory
+  tagsPath = '', // fpr('tags') to find tags path from current directory
+) => {
   const { title, date, tags, htmlFileName, previewContent } = post;
-  const titleLink = `<a href="./posts/${htmlFileName}">${title}</a>`;
+  const postsPathSansPublic = postsPath.replace('public/', '');
+  const tagsPathSansPublic = tagsPath.replace('public/', '');
+
+  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName}">${title}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.style.display = 'list-item';
@@ -74,8 +84,9 @@ export const createPostItem = (document, post, postItemTemplate) => {
   if (tagsContainer) {
     if (tags && tags.length > 0) {
       const tagsList = tags
-        .map((tag) => `<a href="./tags/${tag}.html">${tag}</a>`)
+        .map((tag) => `<a href="${tagsPathSansPublic}/${tag}.html">${tag}</a>`)
         .join(' ');
+
       tagsContainer.innerHTML = tagsList;
     } else {
       tagsContainer.remove();
@@ -120,8 +131,8 @@ export const updatePaginationLinks = (
     pageLink.classList.add(...classNames);
     pageLink.href =
       index === 0
-        ? `${tag ? tag + '-' : ''}index.html`
-        : `${tag ? tag + '-' : ''}blog-page-${index + 1}.html`;
+        ? `${tag ? tag : 'index'}.html`
+        : `${tag ? tag + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
     pageLink.classList.remove('hidden');
   };
@@ -143,7 +154,9 @@ export const updatePaginationLinks = (
   // Next page link
   nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
   if (!nextLink.classList.contains('hidden')) {
-    nextLink.href = `${tag ? tag + '-' : ''}blog-page-${pageIndex + 2}.html`;
+    nextLink.href = `${tag ? tag + '-page-' : 'blog-page-'}${
+      pageIndex + 2
+    }.html`;
   }
 
   // Previous page link
@@ -151,7 +164,7 @@ export const updatePaginationLinks = (
   if (!previousLink.classList.contains('hidden')) {
     previousLink.href =
       pageIndex === 1
-        ? `${tag ? tag + '-' : ''}index.html`
-        : `${tag ? tag + '-' : ''}blog-page-${pageIndex}.html`;
+        ? `${tag ? tag : 'index'}.html`
+        : `${tag ? tag + '-page-' : 'blog-page-'}${pageIndex}.html`;
   }
 };

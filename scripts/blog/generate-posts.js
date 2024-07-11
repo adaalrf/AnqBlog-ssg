@@ -1,12 +1,12 @@
-// Description: Generates intermediate post HTML files.
-import {
-  readFileContent,
-  injectContentIntoTemplate,
-  ensureDirectoryExists,
-} from '../utils/parsing-utils.js';
 import fs from 'fs';
 import path from 'path';
-import { formatDate } from '../utils/date-utils.js';
+import { JSDOM } from 'jsdom';
+import { createPostItem } from '../utils/pagination-utils.js';
+import {
+  ensureDirectoryExists,
+  readFileContent,
+} from '../utils/parsing-utils.js';
+import config from '../config.js';
 
 /**
  * Generates intermediate post HTML files.
@@ -22,25 +22,20 @@ export const generateIntermediatePostHtmlFiles = (
   ensureDirectoryExists(tempPostsOutputDirectory);
 
   posts.forEach((post) => {
-    const { title, date, tags, htmlFileName, content } = post;
-    const formattedDate = formatDate(date); // Format the date
     const templateContent = readFileContent(postTemplatePath);
-    const dom = injectContentIntoTemplate(templateContent, {
-      title,
-      date: formattedDate, // Use the formatted date
-      tags,
-      content,
-    });
-    const contentDiv = dom.window.document.querySelector('.content-div');
-
-    if (!contentDiv) {
-      throw new Error(
-        `Element '.content-div' not found in template ${postTemplatePath}`,
-      );
-    }
-
-    const htmlContent = contentDiv.outerHTML;
-    const outputPath = path.join(tempPostsOutputDirectory, htmlFileName);
+    const dom = new JSDOM(templateContent);
+    const document = dom.window.document;
+    const postItemTemplate = document.querySelector('#post-content');
+    const postItem = createPostItem(
+      document,
+      post,
+      postItemTemplate,
+      `../../${config.publicPostsOutputDirectory}`,
+      `../../${config.publicTagsOutputDirectory}`,
+    );
+    console.log(`${config.publicPostsOutputDirectory}`);
+    const htmlContent = postItem.outerHTML;
+    const outputPath = path.join(tempPostsOutputDirectory, post.htmlFileName);
     fs.writeFileSync(outputPath, htmlContent);
     console.log(`(Posts.js): Generated post: ${outputPath}`);
   });

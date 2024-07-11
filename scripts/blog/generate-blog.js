@@ -1,17 +1,17 @@
-// Description: Generates the full blog HTML files with pagination.
+import {
+  readIntermediatePosts,
+  paginatePosts,
+  createPostItem,
+  updatePaginationLinks,
+} from '../utils/pagination-utils.js';
 import {
   readFileContent,
   ensureDirectoryExists,
 } from '../utils/parsing-utils.js';
-import {
-  paginatePosts,
-  readIntermediatePosts,
-  createPostItem,
-  updatePaginationLinks,
-} from '../utils/pagination-utils.js';
-import fs from 'fs';
 import path from 'path';
+import fs from 'fs';
 import { JSDOM } from 'jsdom';
+import config from '../config.js';
 
 /**
  * Generates paginated blog HTML files.
@@ -28,6 +28,7 @@ export const generatePaginatedBlogHtmlFiles = (
 ) => {
   ensureDirectoryExists(tempBlogOutputPath); // Ensure the directory exists
   const posts = readIntermediatePosts(tempPostsOutputDirectory);
+
   const paginatedPosts = paginatePosts(posts, postsPerPage);
 
   paginatedPosts.forEach((pagePosts, pageIndex) => {
@@ -35,27 +36,37 @@ export const generatePaginatedBlogHtmlFiles = (
     const dom = new JSDOM(blogTemplateContent);
     const document = dom.window.document;
     const postItemTemplate = document.querySelector('.post-item-template');
-    const postLinksDiv = document.getElementById('post-links-div');
 
-    if (!postItemTemplate || !postLinksDiv) {
+    if (!postItemTemplate) {
       throw new Error(
         'Template or placeholder element not found in the HTML template.',
       );
     }
 
+    const postLinksDiv = document.getElementById('post-links-div');
+    if (!postLinksDiv) {
+      throw new Error('Placeholder element not found in the HTML template.');
+    }
+
     // Add each post to the post links container
     pagePosts.forEach((post) => {
-      const postItem = createPostItem(document, post, postItemTemplate);
+      const postItem = createPostItem(
+        document,
+        post,
+        postItemTemplate,
+        `../${config.publicPostsOutputDirectory}`,
+        `../${config.publicTagsOutputDirectory}`,
+      );
       postLinksDiv.appendChild(postItem);
     });
 
-    // Update pagination links
     updatePaginationLinks(document, pageIndex, paginatedPosts);
 
     postItemTemplate.remove();
 
     // Update blogContent after appending the post items
     const blogContent = document.querySelector('#blog').outerHTML;
+
     const outputFilePath =
       pageIndex === 0
         ? path.join(tempBlogOutputPath, `index.html`)
