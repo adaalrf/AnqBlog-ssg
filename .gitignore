@@ -1,11 +1,18 @@
+# Directories
 node_modules/
 public/
-deploy.sh
+src/temp/
 
 # Ignore all files in content and templates directories
-src/content/*
-src/templates/*
+/content/*
+/templates/*
 
 # Except files with "example" in their name in content and templates directories
-!src/content/**/*example*
-!src/templates/**/*example*
+!content/**/example*
+!templates/**/example*
+
+
+# Files
+deploy.sh
+src/assets/favicon.ico
+src/assets/favicon.webp
