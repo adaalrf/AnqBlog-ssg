@@ -4,13 +4,12 @@ public/
 src/temp/
 
 # Ignore all files in content and templates directories
-/content/*
-/templates/*
+src/content/*
+src/templates/*
 
 # Except files with "example" in their name in content and templates directories
-!content/**/example*
-!templates/**/example*
-
+!src/content/**/example*
+!src/templates/**/example*
 
 # Files
 deploy.sh
