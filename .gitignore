@@ -1,3 +1,11 @@
 node_modules/
 public/
 deploy.sh
+
+# Ignore all files in content and templates directories
+/content/*
+/templates/*
+
+# Except files with "example" in their name in content and templates directories
+!content/**/*example*
+!templates/**/*example*
