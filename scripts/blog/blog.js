@@ -21,7 +21,6 @@ import config from '../config.js';
  * @param {string} tempBlogOutputPath - The directory to save the paginated blog pages.
  */
 export const generatePaginatedBlogHtmlFiles = (
-  tags,
   posts,
   postsPerPage,
   templateBlogPath,
@@ -29,40 +28,40 @@ export const generatePaginatedBlogHtmlFiles = (
 ) => {
   ensureDirectoryExists(tempBlogOutputPath); // Ensure the directory exists
 
-  Object.keys(tags).forEach((tag) => {
-    const tagPosts = posts.filter((post) => post.tags.includes(tag));
-    const tagContent = paginatePosts(tagPosts, postsPerPage);
+  const blogContent = paginatePosts(posts, postsPerPage);
 
-    tagContent.forEach((pagePosts, pageIndex) => {
-      const blogTemplateContent = readFileContent(templateBlogPath);
-      const dom = new JSDOM(blogTemplateContent);
-      const document = dom.window.document;
-      const postItemTemplate = document.querySelector('.post-item');
-      const postLinksDiv = document.getElementById('post-links-div');
+  const blogTemplateContent = readFileContent(templateBlogPath);
+  const dom = new JSDOM(blogTemplateContent);
+  const document = dom.window.document;
+  const postItemTemplate = document.querySelector('.post-item');
+  const postLinksDiv = document.getElementById('post-links-div');
+  const postIndex = [...Array(blogContent.length).keys()];
 
-      // Add each post to the post links container
-      pagePosts.forEach((post) => {
-        const postItem = createPostItem(
-          post,
-          postItemTemplate,
-          `../../${config.publicPostsOutputDirectory}`,
-          `../../${config.publicTagsOutputDirectory}`,
-        );
-        postLinksDiv.appendChild(postItem);
-      });
+  // Add each post to the post links container
+  posts.forEach((post) => {
+    const postItem = createPostItem(
+      post,
+      postItemTemplate,
+      `../../${config.publicPostsOutputDirectory}`,
+      `../../${config.publicTagsOutputDirectory}`,
+    );
+    postLinksDiv.appendChild(postItem);
+  });
 
-      postItemTemplate.remove();
-      updatePaginationLinks(document, pageIndex, tagContent);
+  console.log(`(Posts.js):`, postIndex.length + 1, `posts processed.`);
+  postItemTemplate.remove();
 
-      // Save the tag page
-      const content = document.querySelector('#blog').outerHTML;
-      //const filesWithDash = tag.split(' ').join('-');
-      const outputFilePath =
-        pageIndex === 0
-          ? path.join(tempBlogOutputPath, `index.html`)
-          : path.join(tempBlogOutputPath, `-page-${pageIndex + 1}.html`);
-      fs.writeFileSync(outputFilePath, content);
-      console.log(`(Blog.js): Generated ${outputFilePath}`);
-    });
+  postIndex.forEach((post, pageIndex) => {
+    updatePaginationLinks(document, pageIndex, blogContent);
+
+    // Save the tag page
+    const content = document.querySelector('#blog').outerHTML;
+    //const filesWithDash = tag.split(' ').join('-');
+    const outputFilePath =
+      post === 0
+        ? path.join(tempBlogOutputPath, `index.html`)
+        : path.join(tempBlogOutputPath, `-page-${post + 1}.html`);
+    fs.writeFileSync(outputFilePath, content);
+    console.log(`(Blog.js): Generated ${outputFilePath}`);
   });
 };

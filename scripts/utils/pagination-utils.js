@@ -69,7 +69,9 @@ export const createPostItem = (
   const postsPathSansPublic = postsPath.replace('public/', '');
   const tagsPathSansPublic = tagsPath.replace('public/', '');
 
-  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName}">${title}</a>`;
+  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName
+    .split(' ')
+    .join('-')}">${title}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.style.display = 'list-item';
@@ -117,6 +119,7 @@ export const updatePaginationLinks = (
   const paginationDiv = document.querySelector('.pagination');
   const previousLink = paginationDiv.querySelector('.previous-page');
   const nextLink = paginationDiv.querySelector('.next-page');
+  const tagWithDash = tag.split(' ').join('-');
 
   // Get the classes for normal and current page links
   const classesNormalPageLink = document
@@ -135,8 +138,8 @@ export const updatePaginationLinks = (
     pageLink.classList.add(...classNames);
     pageLink.href =
       index === 0
-        ? `${tag ? tag : 'index'}.html`
-        : `${tag ? tag + '-page-' : 'blog-page-'}${index + 1}.html`;
+        ? `${tag ? tagWithDash : 'index'}.html`
+        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
     pageLink.classList.remove('hidden');
   };
@@ -158,7 +161,7 @@ export const updatePaginationLinks = (
   // Next page link
   nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
   if (!nextLink.classList.contains('hidden')) {
-    nextLink.href = `${tag ? tag + '-page-' : 'blog-page-'}${
+    nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${
       pageIndex + 2
     }.html`;
   }
@@ -169,6 +172,6 @@ export const updatePaginationLinks = (
     previousLink.href =
       pageIndex === 1
         ? `${tag ? tag : 'index'}.html`
-        : `${tag ? tag + '-page-' : 'blog-page-'}${pageIndex}.html`;
+        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex}.html`;
   }
 };

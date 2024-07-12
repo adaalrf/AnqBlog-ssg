@@ -43,7 +43,6 @@ const generateAllHtmlFiles = () => {
     '',
   );
   generatePaginatedBlogHtmlFiles(
-    tags,
     posts,
     5,
     config.templateBlogPath,
