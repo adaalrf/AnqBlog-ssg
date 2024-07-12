@@ -17,6 +17,7 @@ export const paginatePosts = (posts, postsPerPage) => {
   for (let i = 0; i < posts.length; i += postsPerPage) {
     paginatedPosts.push(posts.slice(i, i + postsPerPage));
   }
+  console.log(`(Pagination-utils.js): Paginated posts: ${paginatedPosts}`);
   return paginatedPosts;
 };
 
@@ -60,7 +61,6 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
  * @returns {HTMLElement} - The post item element.
  */
 export const createPostItem = (
-  document,
   post,
   postItemTemplate,
   postsPath = '', // fpr('.') to find root path from current directory
@@ -84,7 +84,12 @@ export const createPostItem = (
   if (tagsContainer) {
     if (tags && tags.length > 0) {
       const tagsList = tags
-        .map((tag) => `<a href="${tagsPathSansPublic}/${tag}.html">${tag}</a>`)
+        .map(
+          (tag) =>
+            `<a href="${tagsPathSansPublic}/${tag
+              .split(' ')
+              .join('-')}.html">${tag}</a>`,
+        )
         .join(' ');
 
       tagsContainer.innerHTML = tagsList;
@@ -111,8 +116,8 @@ export const updatePaginationLinks = (
   tag = '',
 ) => {
   const paginationDiv = document.querySelector('.pagination');
-  const previousLink = paginationDiv.querySelector('.previous-blog-page');
-  const nextLink = paginationDiv.querySelector('.next-blog-page');
+  const previousLink = paginationDiv.querySelector('.previous-page');
+  const nextLink = paginationDiv.querySelector('.next-page');
 
   // Get the classes for normal and current page links
   const classesNormalPageLink = document

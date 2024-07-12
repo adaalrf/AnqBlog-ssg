@@ -1,6 +1,6 @@
-import { generateIntermediatePostHtmlFiles } from './blog/generate-posts.js';
-import { generatePaginatedBlogHtmlFiles } from './blog/generate-blog.js';
-import { generateTagPages } from './blog/generate-tag-pages.js';
+import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
+import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
+import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
 import {
   processMarkdownFiles,
@@ -8,7 +8,6 @@ import {
 } from './utils/parsing-utils.js';
 import { parseDate } from './utils/date-utils.js';
 import config from './config.js';
-import fs from 'fs';
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
@@ -41,18 +40,20 @@ const generateAllHtmlFiles = () => {
     posts,
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
+    '',
   );
   generatePaginatedBlogHtmlFiles(
-    config.tempPostsOutputDirectory,
+    tags,
+    posts,
     5,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
   generateTagPages(
     tags,
-    config.tempPostsOutputDirectory,
+    posts,
     5, // Assuming 5 posts per page for tags as well
-    config.templateBlogPath,
+    config.templateTagsPath,
     config.tempTagsOutputDirectory,
   );
 

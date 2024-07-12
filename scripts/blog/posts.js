@@ -18,6 +18,7 @@ export const generateIntermediatePostHtmlFiles = (
   posts,
   postTemplatePath,
   tempPostsOutputDirectory,
+  characters,
 ) => {
   ensureDirectoryExists(tempPostsOutputDirectory);
 
@@ -27,13 +28,12 @@ export const generateIntermediatePostHtmlFiles = (
     const document = dom.window.document;
     const postItemTemplate = document.querySelector('#post-content');
     const postItem = createPostItem(
-      document,
       post,
       postItemTemplate,
       `../../${config.publicPostsOutputDirectory}`,
       `../../${config.publicTagsOutputDirectory}`,
+      characters,
     );
-    console.log(`${config.publicPostsOutputDirectory}`);
     const htmlContent = postItem.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, post.htmlFileName);
     fs.writeFileSync(outputPath, htmlContent);

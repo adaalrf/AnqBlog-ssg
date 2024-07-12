@@ -29,7 +29,8 @@ const generateTagsDropdown = (tags, currentFilePath) => {
         `${tag}.html`,
         fr('public/blog/tags'),
       );
-      return `<li><a href="${relativePath}${tag}.html" class="dropdown-item">${tag}</a></li>`;
+      const filesWithDash = tag.split(' ').join('-');
+      return `<li><a href="${relativePath}${filesWithDash}.html" class="dropdown-item">${tag}</a></li>`;
     })
     .join('\n');
 };
