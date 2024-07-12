@@ -17,7 +17,6 @@ export const paginatePosts = (posts, postsPerPage) => {
   for (let i = 0; i < posts.length; i += postsPerPage) {
     paginatedPosts.push(posts.slice(i, i + postsPerPage));
   }
-  console.log(`(Pagination-utils.js): Paginated posts: ${paginatedPosts}`);
   return paginatedPosts;
 };
 

@@ -6,7 +6,6 @@
  */
 export const parseDate = (dateString) => {
   const [day, month, year] = dateString.split('.').map(Number);
-  console.log(`date-utils1.js: `, new Date(year, month - 1, day));
   return new Date(year, month - 1, day);
 };
 
@@ -17,7 +16,6 @@ export const parseDate = (dateString) => {
  * @throws {Error} - If the date object is invalid.
  */
 export const formatDate = (date) => {
-  console.log(`date-utils2.js: `, date);
   if (!(date instanceof Date)) {
     throw new Error('Invalid date object');
   }
