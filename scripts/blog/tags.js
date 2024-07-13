@@ -54,7 +54,8 @@ export const generateTagPages = (
 
       postItemTemplate.remove();
       updatePaginationLinks(document, pageIndex, tagContent, tag);
-
+      const blogPageTitle = document.getElementById('tagPageTitle');
+      blogPageTitle.textContent = `${tag}`;
       // Save the tag page
       const content = document.querySelector('#tag').outerHTML;
       const filesWithDash = tag.split(' ').join('-');

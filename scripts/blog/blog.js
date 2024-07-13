@@ -50,9 +50,11 @@ export const generatePaginatedBlogHtmlFiles = (
 
   postItemTemplate.remove();
 
+  // For each page
   postIndex.forEach((post, pageIndex) => {
     updatePaginationLinks(document, pageIndex, blogContent);
-
+    const blogPageTitle = document.getElementById('blogPageTitle');
+    blogPageTitle.textContent = `Blog`;
     // Save the tag page
     const content = document.querySelector('#blog').outerHTML;
     //const filesWithDash = tag.split(' ').join('-');
