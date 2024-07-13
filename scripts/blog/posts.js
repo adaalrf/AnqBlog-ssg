@@ -37,6 +37,6 @@ export const generateIntermediatePostHtmlFiles = (
     const htmlContent = postItem.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, filesWithDash);
     fs.writeFileSync(outputPath, htmlContent);
-    console.log(`(Posts.js): Generated post: ${outputPath}`);
+    console.log(`(Posts.js): Generated post -> ${outputPath}`);
   });
 };

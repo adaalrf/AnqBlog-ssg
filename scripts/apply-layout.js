@@ -124,7 +124,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       });
 
       fs.writeFileSync(outputFilePath, finalHtml);
-      console.log(`(Generate.js): Processed ${outputFilePath}`);
+      console.log(`(Apply-Layout.js): Processed page -> ${outputFilePath}`);
     }
   });
 };

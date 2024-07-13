@@ -67,7 +67,7 @@ export const generateTagPages = (
               `${filesWithDash}-${pageIndex + 1}.html`,
             );
       fs.writeFileSync(outputFilePath, content);
-      console.log(`(Tags.js): Generated ${outputFilePath}`);
+      console.log(`(Tags.js): Generated tag page -> ${outputFilePath}`);
     });
   });
 };
