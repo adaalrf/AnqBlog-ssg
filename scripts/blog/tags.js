@@ -16,6 +16,7 @@ import config from '../config.js';
  * Generates tag pages for the blog.
  * @param {object} tags - The tags with associated posts.
  * @param {array} posts - The array of posts.
+ * @param {number} characters - The number of characters to display in the preview.
  * @param {number} postsPerPage - The number of posts per page.
  * @param {string} templateTagsPath - The path to the tags template.
  * @param {string} tempTagsOutputDirectory - The directory to save the paginated tag pages.

@@ -5,10 +5,11 @@ import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 import { fr } from './resolve-path.js';
+import config from '../config.js';
 
 // Define input and output paths
-const inputFilePath = fr('src/styles/tailwind.css');
-const outputFilePath = fr('public/styles/styles.css');
+const inputFilePath = config.inputCSS;
+const outputFilePath = config.outputSS;
 
 // Ensure the output directory exists
 if (!fs.existsSync(path.dirname(outputFilePath))) {

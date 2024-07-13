@@ -105,7 +105,7 @@ export const parseMarkdown = (fileContent) => {
  * @returns {Array} - An array of processed posts.
  */
 export const processMarkdownFiles = (directory, options = {}) => {
-  const { previewLength = 250 } = options;
+  const { previewLength = Number.POSITIVE_INFINITY } = options;
   const files = fs
     .readdirSync(directory)
     .filter((file) => file.endsWith('.md'));

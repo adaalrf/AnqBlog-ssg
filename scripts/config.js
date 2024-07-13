@@ -1,6 +1,10 @@
 import { fpr } from './utils/resolve-path.js';
 
 export default {
+  siteName: '. adaalrf.dev',
+  inputCSS: fpr('src/styles/tailwind.css'),
+  outputSS: fpr('public/styles/styles.css'),
+
   markedConfigPath: fpr('marked.json'),
   contentDirectory: fpr('src/content'),
   postsContentDirectory: fpr('src/content/blog/posts'),

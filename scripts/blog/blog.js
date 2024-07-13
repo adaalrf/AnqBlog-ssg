@@ -48,7 +48,6 @@ export const generatePaginatedBlogHtmlFiles = (
     postLinksDiv.appendChild(postItem);
   });
 
-  console.log(`(Posts.js):`, postIndex.length + 1, `posts processed.`);
   postItemTemplate.remove();
 
   postIndex.forEach((post, pageIndex) => {

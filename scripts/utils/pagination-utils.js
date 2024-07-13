@@ -3,8 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { readFileContent, parseHtmlFrontMatter } from './parsing-utils.js';
 import { formatDate } from './date-utils.js';
-import { rp, fr, fpr } from './resolve-path.js';
-import config from '../config.js';
 
 /**
  * Splits posts into pages.
@@ -74,7 +72,6 @@ export const createPostItem = (
     .join('-')}">${title}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
-  postItem.style.display = 'list-item';
   postItem.querySelector('.post-title').innerHTML = titleLink;
   postItem.querySelector('.post-date').innerHTML = formatDate(date);
   postItem.querySelector('.content').innerHTML = previewContent;

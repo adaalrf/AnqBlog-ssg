@@ -11,6 +11,7 @@ import config from '../config.js';
 /**
  * Generates intermediate post HTML files.
  * @param {Array} posts - The array of posts.
+ * @param {number} characters - The number of characters to display in the preview.
  * @param {string} postTemplatePath - The path to the post template.
  * @param {string} tempPostsOutputDirectory - The directory to save the generated files.
  */
@@ -18,7 +19,6 @@ export const generateIntermediatePostHtmlFiles = (
   posts,
   postTemplatePath,
   tempPostsOutputDirectory,
-  characters,
 ) => {
   ensureDirectoryExists(tempPostsOutputDirectory);
 
@@ -32,7 +32,6 @@ export const generateIntermediatePostHtmlFiles = (
       postItemTemplate,
       `../../${config.publicPostsOutputDirectory}`,
       `../../${config.publicTagsOutputDirectory}`,
-      characters,
     );
     const filesWithDash = post.htmlFileName.split(' ').join('-');
     const htmlContent = postItem.outerHTML;

@@ -20,14 +20,21 @@ const generateAllHtmlFiles = () => {
   ensureDirectoryExists(config.publicTagsOutputDirectory);
 
   // Ensure all dates are parsed as Date objects
-  const posts = processMarkdownFiles(config.postsContentDirectory)
+  const truncatedPosts = processMarkdownFiles(config.postsContentDirectory, {
+    previewLength: 100,
+  })
+    .map((post) => ({ ...post, date: parseDate(post.date) }))
+    .sort((a, b) => b.date - a.date)
+    .map((post) => ({ ...post, date: new Date(post.date) }));
+
+  const fullPosts = processMarkdownFiles(config.postsContentDirectory)
     .map((post) => ({ ...post, date: parseDate(post.date) }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
 
   // Collect all tags
   const tags = {};
-  posts.forEach((post) => {
+  fullPosts.forEach((post) => {
     post.tags.forEach((tag) => {
       if (!tags[tag]) {
         tags[tag] = [];
@@ -37,20 +44,20 @@ const generateAllHtmlFiles = () => {
   });
 
   generateIntermediatePostHtmlFiles(
-    posts,
+    fullPosts,
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
     '',
   );
   generatePaginatedBlogHtmlFiles(
-    posts,
+    truncatedPosts,
     5,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
   generateTagPages(
     tags,
-    posts,
+    truncatedPosts,
     5, // Assuming 5 posts per page for tags as well
     config.templateTagsPath,
     config.tempTagsOutputDirectory,
