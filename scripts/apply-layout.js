@@ -5,7 +5,7 @@ import {
   parseHtmlFrontMatter,
   ensureDirectoryExists,
 } from './utils/parsing-utils.js';
-import { fr, rp } from './utils/resolve-path.js';
+import { fr, rp, fpr } from './utils/resolve-path.js';
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';
@@ -29,7 +29,8 @@ const generateTagsDropdown = (tags, currentFilePath) => {
         `${tag}.html`,
         fr('public/blog/tags'),
       );
-      return `<li><a href="${relativePath}${tag}.html" class="dropdown-item">${tag}</a></li>`;
+      const filesWithDash = tag.split(' ').join('-');
+      return `<li><a href="${relativePath}${filesWithDash}.html" class="dropdown-item">${tag}</a></li>`;
     })
     .join('\n');
 };
@@ -79,9 +80,11 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       const { data, content } = parseHtmlFrontMatter(fileContent);
 
       const templateFilePath = path.join(
-        fr('src/templates'),
+        fpr('src/templates'),
         `${path.basename(file, '.html')}-template.html`,
       );
+
+      //const dataPageExists = data && data.page && fs.existsSync(data.page); // Check if data.page exists
       const specificTemplateExists = fs.existsSync(templateFilePath);
 
       let mainContent;
@@ -102,14 +105,15 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
         fr('public'),
       );
       const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
-      const mainLayoutContent = readFileContent(config.mainLayoutPath);
+      let mainLayoutContent = readFileContent(config.mainLayoutPath);
+      let fileNameTitle = path
+        .basename(file, '.html')
+        .replace(/-/g, ' ')
+        .replace(/\b\w/g, (char) => char.toUpperCase());
+      const finalTitle = `${config.siteName} | ${fileNameTitle}`;
+
       const finalHtml = replacePlaceholders(mainLayoutContent, {
-        title:
-          data.title ||
-          path
-            .basename(file, '.html')
-            .replace(/-/g, ' ')
-            .replace(/\b\w/g, (char) => char.toUpperCase()),
+        title: finalTitle,
         ...data,
         children: mainContent,
         tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
@@ -120,7 +124,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       });
 
       fs.writeFileSync(outputFilePath, finalHtml);
-      console.log(`(Generate.js): Processed ${outputFilePath}`);
+      console.log(`(Apply-Layout.js): Processed page -> ${outputFilePath}`);
     }
   });
 };

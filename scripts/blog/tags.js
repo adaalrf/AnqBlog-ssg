@@ -1,5 +1,4 @@
 import {
-  readIntermediatePosts,
   paginatePosts,
   createPostItem,
   updatePaginationLinks,
@@ -16,43 +15,35 @@ import config from '../config.js';
 /**
  * Generates tag pages for the blog.
  * @param {object} tags - The tags with associated posts.
- * @param {string} tempPostsOutputDirectory - The directory to read the posts from.
+ * @param {array} posts - The array of posts.
+ * @param {number} characters - The number of characters to display in the preview.
  * @param {number} postsPerPage - The number of posts per page.
- * @param {string} blogTemplatePath - The path to the blog template.
- * @param {string} tempTagsOutputDirectory - The directory to save the tag pages.
+ * @param {string} templateTagsPath - The path to the tags template.
+ * @param {string} tempTagsOutputDirectory - The directory to save the paginated tag pages.
  */
 export const generateTagPages = (
   tags,
-  tempPostsOutputDirectory,
+  posts,
   postsPerPage,
-  blogTemplatePath,
+  templateTagsPath,
   tempTagsOutputDirectory,
 ) => {
-  ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the tags directory exists
-
-  const posts = readIntermediatePosts(tempPostsOutputDirectory);
-  const paginatedPosts = paginatePosts(posts, postsPerPage);
+  ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the directory exists
 
   Object.keys(tags).forEach((tag) => {
     const tagPosts = posts.filter((post) => post.tags.includes(tag));
     const tagContent = paginatePosts(tagPosts, postsPerPage);
 
     tagContent.forEach((pagePosts, pageIndex) => {
-      const blogTemplateContent = readFileContent(blogTemplatePath);
-      const dom = new JSDOM(blogTemplateContent);
+      const templateTapsContent = readFileContent(templateTagsPath);
+      const dom = new JSDOM(templateTapsContent);
       const document = dom.window.document;
+      const postItemTemplate = document.querySelector('.post-item');
       const postLinksDiv = document.getElementById('post-links-div');
-      const postItemTemplate = document.querySelector('.post-item-template');
 
-      if (!postItemTemplate || !postLinksDiv) {
-        throw new Error(
-          'Template or placeholder element not found in the HTML template.',
-        );
-      }
-
+      // Add each post to the post links container
       pagePosts.forEach((post) => {
         const postItem = createPostItem(
-          document,
           post,
           postItemTemplate,
           `../../${config.publicPostsOutputDirectory}`,
@@ -61,20 +52,22 @@ export const generateTagPages = (
         postLinksDiv.appendChild(postItem);
       });
 
-      updatePaginationLinks(document, pageIndex, tagContent, tag);
-
       postItemTemplate.remove();
-      const tagPageContent = document.querySelector('#blog').outerHTML;
-
-      const outputPath =
+      updatePaginationLinks(document, pageIndex, tagContent, tag);
+      const blogPageTitle = document.getElementById('tagPageTitle');
+      blogPageTitle.textContent = `${tag}`;
+      // Save the tag page
+      const content = document.querySelector('#tag').outerHTML;
+      const filesWithDash = tag.split(' ').join('-');
+      const outputFilePath =
         pageIndex === 0
-          ? path.join(tempTagsOutputDirectory, `${tag}.html`)
+          ? path.join(tempTagsOutputDirectory, `${filesWithDash}.html`)
           : path.join(
               tempTagsOutputDirectory,
-              `${tag}-blog-page-${pageIndex + 1}.html`,
+              `${filesWithDash}-${pageIndex + 1}.html`,
             );
-      fs.writeFileSync(outputPath, tagPageContent);
-      console.log(`Generated content for tag page ${tag}: ${outputPath}`);
+      fs.writeFileSync(outputFilePath, content);
+      console.log(`(Tags.js): Generated tag page -> ${outputFilePath}`);
     });
   });
 };

@@ -1,9 +1,9 @@
 // Description: This script generates the main.ts file by reading all .ts files in the src/ts directory except main.ts.
 import fs from 'fs';
-import { fr } from './resolve-path.js';
+import { fpr } from './resolve-path.js';
 
-const dirPath = fr('src/ts');
-const outputPath = fr('src/ts/main.ts');
+const dirPath = fpr('src/ts');
+const outputPath = fpr('src/ts/main.ts');
 
 // Read all .ts files in the directory except main.ts
 const files = fs
@@ -27,4 +27,4 @@ document.addEventListener('DOMContentLoaded', () => {
 // Write the main.ts file
 fs.writeFileSync(outputPath, mainContent);
 
-console.log(`(Imports.js): Generated ${outputPath}`);
+console.log(`(Imports.js): Generated imports file -> ${outputPath}`);

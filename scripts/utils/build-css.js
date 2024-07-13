@@ -4,11 +4,11 @@ import path from 'path';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
-import { fr } from './resolve-path.js';
+import config from '../config.js';
 
 // Define input and output paths
-const inputFilePath = fr('src/styles/tailwind.css');
-const outputFilePath = fr('public/styles/styles.css');
+const inputFilePath = config.inputCSS;
+const outputFilePath = config.outputSS;
 
 // Ensure the output directory exists
 if (!fs.existsSync(path.dirname(outputFilePath))) {
@@ -25,7 +25,7 @@ fs.readFile(inputFilePath, 'utf8', (err, css) => {
     .then((result) => {
       // Write the processed CSS to the output file
       fs.writeFile(outputFilePath, result.css, () =>
-        console.log(`(CSS.js): Generated ${outputFilePath}`),
+        console.log(`(CSS.js): Generated css file -> ${outputFilePath}`),
       );
       if (result.map) {
         fs.writeFile(
@@ -35,5 +35,7 @@ fs.readFile(inputFilePath, 'utf8', (err, css) => {
         );
       }
     })
-    .catch((error) => console.error('Failed to process CSS:', error));
+    .catch((error) =>
+      console.error('(CSS.js): Failed to process CSS file ->', error),
+    );
 });

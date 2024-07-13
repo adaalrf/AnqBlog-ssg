@@ -11,6 +11,7 @@ import config from '../config.js';
 /**
  * Generates intermediate post HTML files.
  * @param {Array} posts - The array of posts.
+ * @param {number} characters - The number of characters to display in the preview.
  * @param {string} postTemplatePath - The path to the post template.
  * @param {string} tempPostsOutputDirectory - The directory to save the generated files.
  */
@@ -27,16 +28,15 @@ export const generateIntermediatePostHtmlFiles = (
     const document = dom.window.document;
     const postItemTemplate = document.querySelector('#post-content');
     const postItem = createPostItem(
-      document,
       post,
       postItemTemplate,
       `../../${config.publicPostsOutputDirectory}`,
       `../../${config.publicTagsOutputDirectory}`,
     );
-    console.log(`${config.publicPostsOutputDirectory}`);
+    const filesWithDash = post.htmlFileName.split(' ').join('-');
     const htmlContent = postItem.outerHTML;
-    const outputPath = path.join(tempPostsOutputDirectory, post.htmlFileName);
+    const outputPath = path.join(tempPostsOutputDirectory, filesWithDash);
     fs.writeFileSync(outputPath, htmlContent);
-    console.log(`(Posts.js): Generated post: ${outputPath}`);
+    console.log(`(Posts.js): Generated post -> ${outputPath}`);
   });
 };

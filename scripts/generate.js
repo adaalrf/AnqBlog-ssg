@@ -1,6 +1,6 @@
-import { generateIntermediatePostHtmlFiles } from './blog/generate-posts.js';
-import { generatePaginatedBlogHtmlFiles } from './blog/generate-blog.js';
-import { generateTagPages } from './blog/generate-tag-pages.js';
+import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
+import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
+import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
 import {
   processMarkdownFiles,
@@ -8,7 +8,6 @@ import {
 } from './utils/parsing-utils.js';
 import { parseDate } from './utils/date-utils.js';
 import config from './config.js';
-import fs from 'fs';
 
 // Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
@@ -21,14 +20,21 @@ const generateAllHtmlFiles = () => {
   ensureDirectoryExists(config.publicTagsOutputDirectory);
 
   // Ensure all dates are parsed as Date objects
-  const posts = processMarkdownFiles(config.postsContentDirectory)
+  const truncatedPosts = processMarkdownFiles(config.postsContentDirectory, {
+    previewLength: 100,
+  })
+    .map((post) => ({ ...post, date: parseDate(post.date) }))
+    .sort((a, b) => b.date - a.date)
+    .map((post) => ({ ...post, date: new Date(post.date) }));
+
+  const fullPosts = processMarkdownFiles(config.postsContentDirectory)
     .map((post) => ({ ...post, date: parseDate(post.date) }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
 
   // Collect all tags
   const tags = {};
-  posts.forEach((post) => {
+  fullPosts.forEach((post) => {
     post.tags.forEach((tag) => {
       if (!tags[tag]) {
         tags[tag] = [];
@@ -38,21 +44,22 @@ const generateAllHtmlFiles = () => {
   });
 
   generateIntermediatePostHtmlFiles(
-    posts,
+    fullPosts,
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
+    '',
   );
   generatePaginatedBlogHtmlFiles(
-    config.tempPostsOutputDirectory,
+    truncatedPosts,
     5,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
   generateTagPages(
     tags,
-    config.tempPostsOutputDirectory,
+    truncatedPosts,
     5, // Assuming 5 posts per page for tags as well
-    config.templateBlogPath,
+    config.templateTagsPath,
     config.tempTagsOutputDirectory,
   );
 

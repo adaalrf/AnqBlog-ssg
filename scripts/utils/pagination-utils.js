@@ -3,8 +3,6 @@ import fs from 'fs';
 import path from 'path';
 import { readFileContent, parseHtmlFrontMatter } from './parsing-utils.js';
 import { formatDate } from './date-utils.js';
-import { rp, fr, fpr } from './resolve-path.js';
-import config from '../config.js';
 
 /**
  * Splits posts into pages.
@@ -60,7 +58,6 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
  * @returns {HTMLElement} - The post item element.
  */
 export const createPostItem = (
-  document,
   post,
   postItemTemplate,
   postsPath = '', // fpr('.') to find root path from current directory
@@ -70,10 +67,11 @@ export const createPostItem = (
   const postsPathSansPublic = postsPath.replace('public/', '');
   const tagsPathSansPublic = tagsPath.replace('public/', '');
 
-  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName}">${title}</a>`;
+  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName
+    .split(' ')
+    .join('-')}">${title}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
-  postItem.style.display = 'list-item';
   postItem.querySelector('.post-title').innerHTML = titleLink;
   postItem.querySelector('.post-date').innerHTML = formatDate(date);
   postItem.querySelector('.content').innerHTML = previewContent;
@@ -84,7 +82,12 @@ export const createPostItem = (
   if (tagsContainer) {
     if (tags && tags.length > 0) {
       const tagsList = tags
-        .map((tag) => `<a href="${tagsPathSansPublic}/${tag}.html">${tag}</a>`)
+        .map(
+          (tag) =>
+            `<a href="${tagsPathSansPublic}/${tag
+              .split(' ')
+              .join('-')}.html">${tag}</a>`,
+        )
         .join(' ');
 
       tagsContainer.innerHTML = tagsList;
@@ -111,8 +114,9 @@ export const updatePaginationLinks = (
   tag = '',
 ) => {
   const paginationDiv = document.querySelector('.pagination');
-  const previousLink = paginationDiv.querySelector('.previous-blog-page');
-  const nextLink = paginationDiv.querySelector('.next-blog-page');
+  const previousLink = paginationDiv.querySelector('.previous-page');
+  const nextLink = paginationDiv.querySelector('.next-page');
+  const tagWithDash = tag.split(' ').join('-');
 
   // Get the classes for normal and current page links
   const classesNormalPageLink = document
@@ -131,8 +135,8 @@ export const updatePaginationLinks = (
     pageLink.classList.add(...classNames);
     pageLink.href =
       index === 0
-        ? `${tag ? tag : 'index'}.html`
-        : `${tag ? tag + '-page-' : 'blog-page-'}${index + 1}.html`;
+        ? `${tag ? tagWithDash : 'index'}.html`
+        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
     pageLink.classList.remove('hidden');
   };
@@ -154,7 +158,7 @@ export const updatePaginationLinks = (
   // Next page link
   nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
   if (!nextLink.classList.contains('hidden')) {
-    nextLink.href = `${tag ? tag + '-page-' : 'blog-page-'}${
+    nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${
       pageIndex + 2
     }.html`;
   }
@@ -165,6 +169,6 @@ export const updatePaginationLinks = (
     previousLink.href =
       pageIndex === 1
         ? `${tag ? tag : 'index'}.html`
-        : `${tag ? tag + '-page-' : 'blog-page-'}${pageIndex}.html`;
+        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex}.html`;
   }
 };
