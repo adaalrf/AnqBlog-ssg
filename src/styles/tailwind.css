@@ -4,93 +4,38 @@
 
 @layer base {
   .light {
-    /* set your color here for light-mode */
-    --background-hue: 60;
-    --background-saturation: 4%;
-    --background-lightness: 95%;
-
-    --foreground-hue: 0;
-    --foreground-saturation: 5%;
-    --foreground-lightness: 15%;
-
-    /* set your opacity here for light-mode */
-    --color-opacity-muted: 0.6;
-
-    --background: hsl(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness)
-    );
-    --foreground: hsl(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness)
-    );
-    --muted: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-muted)
-    );
-    --muted-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-muted)
-    );
-    --destructive: hsl(0, 70%, 50%);
+    --background: hsl(30, 20%, 95%); /* Base (#eff1f5) */
+    --foreground: hsl(220, 13%, 20%); /* Text (#4c4f69) */
+    --muted: hsla(30, 20%, 95%, 0.6); /* Muted background */
+    --muted-foreground: hsla(220, 13%, 20%, 0.6); /* Muted foreground */
+    --accent: hsl(193, 100%, 70%); /* Red (#d20f39) */
+    --accent-foreground: var(--background);
+    --destructive: hsl(0, 80%, 60%); /* Destructive Red (#ff6e6e) */
     --destructive-foreground: var(--foreground);
-    --code: hsl(0, 0%, 15%);
-    --code-foreground: hsl(0, 0%, 95%);
+    --code: var(--foreground);
+    --code-foreground: hsl(30, 20%, 95%); /* Same as background */
   }
 
   .dark {
-    /* set your colors here for dark-mode */
-    --background-hue: 0;
-    --background-saturation: 5%;
-    --background-lightness: 15%;
-
-    --foreground-hue: 60;
-    --foreground-saturation: 4%;
-    --foreground-lightness: 95%;
-
-    /* set your opacity here for dark-mode */
-    --color-opacity-muted: 0.6;
-
-    --background: hsl(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness)
-    );
-    --foreground: hsl(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness)
-    );
-    --muted: hsla(
-      var(--background-hue),
-      var(--background-saturation),
-      var(--background-lightness),
-      var(--color-opacity-muted)
-    );
-    --muted-foreground: hsla(
-      var(--foreground-hue),
-      var(--foreground-saturation),
-      var(--foreground-lightness),
-      var(--color-opacity-muted)
-    );
-    --destructive: hsl(0, 70%, 50%);
+    --background: hsl(240, 15%, 15%); /* Base (#1e1e2e) */
+    --foreground: hsl(230, 33%, 90%); /* Text (#cdd6f4) */
+    --muted: hsla(240, 15%, 15%, 0.6); /* Muted background */
+    --muted-foreground: hsla(230, 33%, 90%, 0.6); /* Muted foreground */
+    --accent: hsl(341, 39%, 52%); /* Red (#f38ba8) */
+    --accent-foreground: var(--background);
+    --destructive: hsl(0, 76%, 70%); /* Destructive Red (#ff6e6e) */
     --destructive-foreground: var(--foreground);
-    --code: hsl(0, 0%, 95%);
-    --code-foreground: hsl(0, 0%, 15%);
+    --code: var(--foreground);
+    --code-foreground: hsl(240, 15%, 15%); /* Same as background */
   }
+
   html {
     padding-left: calc(
       100vw - 100%
     ); /* Prevent horizontal scrollbar making the page jumnp */
   }
   a {
-    @apply text-foreground hover:text-muted-foreground;
+    @apply transition-all duration-100 text-foreground hover:text-accent;
   }
 
   h1 {

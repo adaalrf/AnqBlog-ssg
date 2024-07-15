@@ -1,12 +1,15 @@
 import {
-  readFileContent,
   replacePlaceholders,
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
+} from './utils/content-utils.js';
+import {
+  rp,
+  fpr,
+  readFileContent,
   ensureDirectoryExists,
   writeFileContent,
-} from './utils/parsing-utils.js';
-import { rp, fpr } from './utils/resolve-path.js';
+} from './utils/path-and-file-utils.js';
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';

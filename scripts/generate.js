@@ -1,18 +1,14 @@
+// generate.js
+
 import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
 import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
-import {
-  processMarkdownFiles,
-  ensureDirectoryExists,
-} from './utils/parsing-utils.js';
+import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
 import { parseDate } from './utils/date-utils.js';
+import { processMarkdownFiles } from './utils/content-utils.js';
 import config from './config.js';
 
-/**
- * Generates all HTML files by processing markdown content, generating intermediate and final HTML files,
- * and applying layouts.
- */
 const generateAllHtmlFiles = () => {
   ensureDirectoriesExist([
     config.tempPostsOutputDirectory,
@@ -77,32 +73,20 @@ const generateAllHtmlFiles = () => {
   );
 };
 
-/**
- * Ensures that a list of directories exist, creating them if necessary.
- * @param {string[]} directories - The list of directories to ensure exist.
- */
 const ensureDirectoriesExist = (directories) => {
   directories.forEach(ensureDirectoryExists);
 };
 
-/**
- * Processes markdown files in a directory and sorts them by date.
- * @param {string} directory - The directory containing markdown files.
- * @param {object} [options] - Options for processing markdown files.
- * @returns {Array} - An array of processed and sorted posts.
- */
 const processAndSortMarkdownFiles = (directory, options = {}) => {
   return processMarkdownFiles(directory, options)
-    .map((post) => ({ ...post, date: parseDate(post.date) }))
+    .map((post) => ({
+      ...post,
+      date: post.date ? parseDate(post.date) : new Date(),
+    }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
 };
 
-/**
- * Collects tags from a list of posts.
- * @param {Array} posts - The array of posts.
- * @returns {object} - An object with tags as keys and arrays of associated posts as values.
- */
 const collectTags = (posts) => {
   const tags = {};
   posts.forEach((post) => {
@@ -116,5 +100,4 @@ const collectTags = (posts) => {
   return tags;
 };
 
-// Execute the HTML file generation
 generateAllHtmlFiles();

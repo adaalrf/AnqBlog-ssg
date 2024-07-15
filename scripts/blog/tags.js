@@ -3,12 +3,12 @@ import {
   createPostItem,
   updatePaginationLinks,
 } from '../utils/pagination-utils.js';
+import { generateFrontMatter } from '../utils/content-utils.js';
 import {
   readFileContent,
   ensureDirectoryExists,
   writeFileContent,
-  generateFrontMatter,
-} from '../utils/parsing-utils.js';
+} from '../utils/path-and-file-utils.js';
 import path from 'path';
 import { JSDOM } from 'jsdom';
 import config from '../config.js';
@@ -66,7 +66,7 @@ export const generateTagPages = (
               `${filesWithDash}-${pageIndex + 1}.html`,
             );
       const filesWithoutDash = tag.split('-').join(' ');
-      const modifiedPathBar = `<a href=/blog>Blog</a> / <em>${filesWithoutDash}</em>`;
+      const modifiedPathBar = ` / <em>${filesWithoutDash}</em>`;
       // Add dynamic front matter to the content
       const finalHtml = `${generateFrontMatter(posts, {
         page: modifiedPathBar,

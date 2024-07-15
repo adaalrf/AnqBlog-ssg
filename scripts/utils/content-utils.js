@@ -1,53 +1,12 @@
-import fs from 'fs';
-import path from 'path';
+// content-utils.js
+
 import { JSDOM } from 'jsdom';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import truncate from 'html-truncate';
-
-/**
- * Reads and parses configuration from a file.
- * @param {string} configPath - The path to the configuration file.
- */
-export const readConfig = (configPath) => {
-  const markedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  marked.setOptions(markedConfig);
-};
-
-/**
- * Reads the content of a file.
- * @param {string} filePath - The path to the file.
- * @returns {string} - The content of the file.
- */
-export const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
-
-/**
- * Writes content to a file.
- * @param {string} filePath - The path to the file.
- * @param {string} content - The content to write.
- */
-export const writeFileContent = (filePath, content) => {
-  fs.writeFileSync(filePath, content);
-};
-
-/**
- * Ensures that the directory for a given file path exists, and if the path itself is intended to be a directory, creates it.
- *
- * @param {string} filePath - The file path for which to ensure the directory exists.
- */
-export const ensureDirectoryExists = (filePath) => {
-  const dirPath = path.dirname(filePath);
-
-  // Ensure the directory containing the file path exists
-  if (!fs.existsSync(dirPath)) {
-    fs.mkdirSync(dirPath, { recursive: true });
-  }
-
-  // Ensure the file path itself is a directory if it's intended to be one
-  if (!fs.existsSync(filePath) && path.extname(filePath) === '') {
-    fs.mkdirSync(filePath, { recursive: true });
-  }
-};
+import fs from 'fs';
+import path from 'path';
+import { readFileContent } from './path-and-file-utils.js';
 
 /**
  * Gets the first N characters of HTML content while preserving structure.

@@ -1,6 +1,6 @@
 
-import './tags-dropdown.ts';
-import './toggle-theme.ts';
+import './tags-dropdown';
+import './toggle-theme';
 
 // Initialization logic
 document.addEventListener('DOMContentLoaded', () => {

@@ -1,5 +1,7 @@
+// generate-imports.js
+
 import fs from 'fs';
-import { fpr } from './resolve-path.js';
+import { fpr } from './utils/path-and-file-utils.js';
 
 const dirPath = fpr('src/ts');
 const outputPath = fpr('src/ts/main.ts');
@@ -14,7 +16,9 @@ const generateImports = () => {
     .filter((file) => file.endsWith('.ts') && file !== 'main.ts');
 
   // Generate import statements
-  const imports = files.map((file) => `import './${file}';`).join('\n');
+  const imports = files
+    .map((file) => `import './${file.replace('.ts', '')}';`)
+    .join('\n');
 
   // Add initialization logic to the main.ts content
   const mainContent = `
@@ -26,6 +30,11 @@ document.addEventListener('DOMContentLoaded', () => {
     // Additional website logic here
 });
 `;
+
+  // Ensure the output path is not a directory
+  if (fs.existsSync(outputPath) && fs.lstatSync(outputPath).isDirectory()) {
+    throw new Error(`Output path is a directory: ${outputPath}`);
+  }
 
   // Write the main.ts file
   fs.writeFileSync(outputPath, mainContent);

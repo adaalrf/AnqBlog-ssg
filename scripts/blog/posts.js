@@ -2,11 +2,13 @@ import path from 'path';
 import { JSDOM } from 'jsdom';
 import { createPostItem } from '../utils/pagination-utils.js';
 import {
-  ensureDirectoryExists,
-  readFileContent,
-  writeFileContent,
   generateFrontMatter, // Import the helper function
-} from '../utils/parsing-utils.js';
+} from '../utils/content-utils.js';
+import {
+  ensureDirectoryExists,
+  writeFileContent,
+  readFileContent,
+} from '../utils/path-and-file-utils.js';
 import config from '../config.js';
 
 /**
@@ -37,7 +39,7 @@ export const generateIntermediatePostHtmlFiles = (
     const htmlContent = postItem.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, filesWithDash);
 
-    const modifiedPathBar = `<a href=/blog>Blog</a> / <em>${post.title}</em>`;
+    const modifiedPathBar = `/ <a href=/blog>Blog</a> / <em>${post.title}</em>`;
     // Add dynamic front matter to the content
     const finalHtml = `${generateFrontMatter(post, {
       page: modifiedPathBar,

@@ -6,8 +6,8 @@ import {
 import {
   readFileContent,
   ensureDirectoryExists,
-  generateFrontMatter,
-} from '../utils/parsing-utils.js';
+} from '../utils/path-and-file-utils.js';
+import { generateFrontMatter } from '../utils/content-utils.js';
 import path from 'path';
 import fs from 'fs';
 import { JSDOM } from 'jsdom';
@@ -62,7 +62,7 @@ export const generatePaginatedBlogHtmlFiles = (
         ? path.join(tempBlogOutputPath, `index.html`)
         : path.join(tempBlogOutputPath, `-page-${post + 1}.html`);
 
-    const modifiedPathBar = `<em>Blog</em>`;
+    const modifiedPathBar = `/ <em>Blog</em>`;
     // Add dynamic front matter to the content
     const finalHtml = `${generateFrontMatter(post, {
       page: modifiedPathBar,

@@ -1,7 +1,8 @@
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
-import { readFileContent, parseHtmlFrontMatter } from './parsing-utils.js';
+import { parseHtmlFrontMatter } from './content-utils.js';
+import { readFileContent } from './path-and-file-utils.js';
 import { formatDate } from './date-utils.js';
 
 /**

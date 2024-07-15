@@ -2,8 +2,8 @@ import fs from 'fs';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
-import config from '../config.js';
-import { ensureDirectoryExists } from './parsing-utils.js';
+import config from './config.js';
+import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
 
 /**
  * Processes the input CSS file with PostCSS, Tailwind CSS, and Autoprefixer, and writes the output CSS file.

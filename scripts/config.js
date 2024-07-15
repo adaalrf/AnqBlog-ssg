@@ -1,4 +1,4 @@
-import { fpr } from './utils/resolve-path.js';
+import { fpr } from './utils/path-and-file-utils.js';
 
 /**
  * Site configuration settings for the static site generator.
