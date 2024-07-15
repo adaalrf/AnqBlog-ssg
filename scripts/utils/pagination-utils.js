@@ -51,17 +51,17 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
 
 /**
  * Creates a post item element.
- * @param {Document} document - The DOM document.
  * @param {Object} post - The post data.
  * @param {HTMLElement} postItemTemplate - The post item template.
- * @param {string} [basePath='.'] - The base path for the links.
+ * @param {string} [postsPath=''] - The base path for the posts links.
+ * @param {string} [tagsPath=''] - The base path for the tags links.
  * @returns {HTMLElement} - The post item element.
  */
 export const createPostItem = (
   post,
   postItemTemplate,
-  postsPath = '', // fpr('.') to find root path from current directory
-  tagsPath = '', // fpr('tags') to find tags path from current directory
+  postsPath = '',
+  tagsPath = '',
 ) => {
   const { title, date, tags, htmlFileName, previewContent } = post;
   const postsPathSansPublic = postsPath.replace('public/', '');

@@ -22,6 +22,34 @@ export const readConfig = (configPath) => {
 export const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
 
 /**
+ * Writes content to a file.
+ * @param {string} filePath - The path to the file.
+ * @param {string} content - The content to write.
+ */
+export const writeFileContent = (filePath, content) => {
+  fs.writeFileSync(filePath, content);
+};
+
+/**
+ * Ensures that the directory for a given file path exists, and if the path itself is intended to be a directory, creates it.
+ *
+ * @param {string} filePath - The file path for which to ensure the directory exists.
+ */
+export const ensureDirectoryExists = (filePath) => {
+  const dirPath = path.dirname(filePath);
+
+  // Ensure the directory containing the file path exists
+  if (!fs.existsSync(dirPath)) {
+    fs.mkdirSync(dirPath, { recursive: true });
+  }
+
+  // Ensure the file path itself is a directory if it's intended to be one
+  if (!fs.existsSync(filePath) && path.extname(filePath) === '') {
+    fs.mkdirSync(filePath, { recursive: true });
+  }
+};
+
+/**
  * Gets the first N characters of HTML content while preserving structure.
  * @param {string} htmlContent - The HTML content.
  * @param {number} length - The number of characters to truncate to.
@@ -53,7 +81,7 @@ export const injectContentIntoTemplate = (
 
   // Replace placeholders
   Object.keys(data).forEach((key) => {
-    const placeholder = new RegExp(`{{${key}}}`, 'g');
+    const placeholder = new RegExp(`{{{${key}}}}`, 'g');
     const value = data[key];
     document.body.innerHTML = document.body.innerHTML.replace(
       placeholder,
@@ -115,29 +143,13 @@ export const processMarkdownFiles = (directory, options = {}) => {
     const fileContent = readFileContent(filePath);
     const { data, htmlContent } = parseMarkdown(fileContent);
 
-    if (!data.title) {
-      throw new Error(`Title is missing in front matter of file: ${file}`);
-    }
-
     return {
-      title: data.title,
-      date: data.date,
-      tags: data.tags || [],
+      ...data, // Include all front matter data
       htmlFileName: file.replace('.md', '.html'),
       content: htmlContent,
       previewContent: getFirstNthCharacters(htmlContent, previewLength),
     };
   });
-};
-
-/**
- * Ensures a directory exists, creating it if necessary.
- * @param {string} directory - The directory to ensure exists.
- */
-export const ensureDirectoryExists = (directory) => {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
 };
 
 /**
@@ -150,4 +162,17 @@ export const replacePlaceholders = (template, values) => {
   return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
     return key in values ? values[key] : placeholder;
   });
+};
+
+/**
+ * Generates front matter string from a data object and additional options.
+ * @param {object} data - The metadata object.
+ * @param {object} [options={}] - Additional options to include in the front matter.
+ * @returns {string} - The front matter string.
+ */
+export const generateFrontMatter = (data, options = {}) => {
+  const mergedData = { ...data, ...options };
+  return `---\n${Object.entries(mergedData)
+    .map(([key, value]) => `${key}: "${value}"`)
+    .join('\n')}\n---`;
 };

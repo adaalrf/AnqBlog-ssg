@@ -1,10 +1,20 @@
 import { fpr } from './utils/resolve-path.js';
 
-export default {
+/**
+ * Site configuration settings for the static site generator.
+ * @type {Object}
+ */
+const siteConfig = {
   siteName: '. adaalrf.dev',
-  inputCSS: fpr('src/styles/tailwind.css'),
-  outputSS: fpr('public/styles/styles.css'),
+};
 
+/**
+ * Path configuration settings for the static site generator.
+ * @type {Object}
+ */
+const pathConfig = {
+  inputCSS: fpr('src/styles/tailwind.css'),
+  outputCSS: fpr('public/styles/styles.css'),
   markedConfigPath: fpr('marked.json'),
   contentDirectory: fpr('src/content'),
   postsContentDirectory: fpr('src/content/blog/posts'),
@@ -20,3 +30,14 @@ export default {
   publicPostsOutputDirectory: fpr('public/blog/posts'),
   publicTagsOutputDirectory: fpr('public/blog/tags'),
 };
+
+/**
+ * Exports the combined configuration settings.
+ * @type {Object}
+ */
+const config = {
+  ...siteConfig,
+  ...pathConfig,
+};
+
+export default config;

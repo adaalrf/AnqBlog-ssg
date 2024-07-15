@@ -4,8 +4,9 @@ import {
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
   ensureDirectoryExists,
+  writeFileContent,
 } from './utils/parsing-utils.js';
-import { fr, rp, fpr } from './utils/resolve-path.js';
+import { rp, fpr } from './utils/resolve-path.js';
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';
@@ -27,10 +28,11 @@ const generateTagsDropdown = (tags, currentFilePath) => {
       const relativePath = rp(
         path.dirname(currentFilePath),
         `${tag}.html`,
-        fr('public/blog/tags'),
+        fpr('public/blog/tags'),
       );
       const filesWithDash = tag.split(' ').join('-');
-      return `<li><a href="${relativePath}${filesWithDash}.html" class="dropdown-item">${tag}</a></li>`;
+      const filesWithoutDash = tag.split('-').join(' ');
+      return `<li><a href="${relativePath}${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
     })
     .join('\n');
 };
@@ -57,7 +59,6 @@ export const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
  */
 const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
   if (processedDirs.has(inputDir)) {
-    // console.log(`Skipping already processed directory: ${inputDir}`);
     return;
   }
   processedDirs.add(inputDir);
@@ -84,9 +85,9 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
         `${path.basename(file, '.html')}-template.html`,
       );
 
-      //const dataPageExists = data && data.page && fs.existsSync(data.page); // Check if data.page exists
       const specificTemplateExists = fs.existsSync(templateFilePath);
 
+      // If a specific template exists, inject the content into it
       let mainContent;
       if (specificTemplateExists) {
         const templateContent = readFileContent(templateFilePath);
@@ -95,6 +96,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
           content,
         });
         mainContent = dom.window.document.querySelector('body').innerHTML;
+        // Else, apply the main layout to the content
       } else {
         mainContent = content;
       }
@@ -102,28 +104,25 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       const relativeOutputPath = rp(
         path.dirname(outputFilePath),
         file,
-        fr('public'),
+        fpr('public'),
       );
       const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
       let mainLayoutContent = readFileContent(config.mainLayoutPath);
-      let fileNameTitle = path
-        .basename(file, '.html')
-        .replace(/-/g, ' ')
-        .replace(/\b\w/g, (char) => char.toUpperCase());
-      const finalTitle = `${config.siteName} | ${fileNameTitle}`;
 
+      const title = `${config.siteName} | ${data.title}`;
+      // Replace placeholders in the main layout
       const finalHtml = replacePlaceholders(mainLayoutContent, {
-        title: finalTitle,
         ...data,
+        title: title,
         children: mainContent,
-        tagsDropdown: tagsDropdownContent, // Add tags dropdown HTML
+        tagsDropdown: tagsDropdownContent,
         stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-        faviconPath: path.join(relativeOutputPath, 'assets/favicon.webp'),
+        faviconPath: path.join(relativeOutputPath, 'assets/favicon.ico'),
         scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
         gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
       });
 
-      fs.writeFileSync(outputFilePath, finalHtml);
+      writeFileContent(outputFilePath, finalHtml);
       console.log(`(Apply-Layout.js): Processed page -> ${outputFilePath}`);
     }
   });

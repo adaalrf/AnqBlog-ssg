@@ -1,8 +1,12 @@
 import path, { relative } from 'path';
 import fs from 'fs';
 
-// Function to find the project root by looking for a marker file (e.g., package.json)
-// in the full directory tree
+/**
+ * Finds the project root by looking for a marker file (e.g., package.json).
+ * @param {string} dir - The current directory.
+ * @returns {string} - The path to the project root.
+ * @throws {Error} - If the project root is not found.
+ */
 const findRoot = (dir) => {
   if (fs.existsSync(path.join(dir, 'package.json'))) {
     return dir;
@@ -16,11 +20,19 @@ const findRoot = (dir) => {
 
 const projectRoot = findRoot(process.cwd());
 
-// Function to resolve paths relative to the project root
+/**
+ * Resolves a path relative to the project root.
+ * @param {string} relativePath - The relative path to resolve.
+ * @returns {string} - The resolved absolute path.
+ */
 export const fr = (relativePath) => path.join(projectRoot, relativePath);
 
-// Function to find the project root by looking for a marker file (e.g., package.json)
-// and return the path to the project root
+/**
+ * Finds the project root by looking for a marker file (e.g., package.json) and returns the path to the project root.
+ * @param {string} dir - The current directory.
+ * @returns {string} - The path to the project root.
+ * @throws {Error} - If the project root is not found.
+ */
 const findProjectRoot = (dir) => {
   if (fs.existsSync(path.join(dir, 'package.json'))) {
     return dir;
@@ -31,11 +43,22 @@ const findProjectRoot = (dir) => {
   }
   return findProjectRoot(parentDir);
 };
-// Function to resolve paths relative to the project root
+
+/**
+ * Resolves a path relative to the project root.
+ * @param {string} relativePath - The relative path to resolve.
+ * @returns {string} - The resolved absolute path.
+ */
 export const fpr = (relativePath) =>
   path.join(path.basename(findProjectRoot(relativePath)), relativePath);
 
-// Function to calculate the relative path based on the depth
+/**
+ * Calculates the relative path based on the depth.
+ * @param {string} outputDir - The output directory.
+ * @param {string} file - The file name.
+ * @param {string} baseDir - The base directory.
+ * @returns {string} - The relative path.
+ */
 export const rp = (outputDir, file, baseDir) => {
   const outputFilePath = path.join(outputDir, file);
   const relativePath = path.posix.relative(

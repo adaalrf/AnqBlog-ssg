@@ -5,13 +5,13 @@ src/temp/
 
 # Ignore all files in content and templates directories
 src/content/*
-src/templates/*
+#src/templates/*
 
 # Except files with "example" in their name in content and templates directories
-!src/content/**/example*
-!src/templates/**/example*
+#!src/content/**/example*
+#!src/templates/**/example*
 
 # Files
 deploy.sh
-src/assets/favicon.ico
-src/assets/favicon.webp
+#src/assets/favicon.ico
+#src/assets/favicon.webp

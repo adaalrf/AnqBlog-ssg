@@ -1,5 +1,3 @@
-// toggle-theme.ts
-
 const htmlElement = document.querySelector<HTMLElement>('html');
 const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
 const savedTheme = localStorage.getItem('theme');
@@ -20,6 +18,10 @@ const moonIcon = `<image src="${rp(
   '../assets/icons/moon.svg',
 )}" alt="Moon icon" height="24" width="24" />`;
 
+/**
+ * Sets the theme of the website.
+ * @param {'light' | 'dark'} theme - The theme to set.
+ */
 function setTheme(theme: 'light' | 'dark'): void {
   if (htmlElement && toggleThemeBtn) {
     if (theme === 'light') {
@@ -35,6 +37,9 @@ function setTheme(theme: 'light' | 'dark'): void {
   }
 }
 
+/**
+ * Toggles the theme between light and dark.
+ */
 function toggleTheme(): void {
   if (htmlElement?.classList.contains('light')) {
     setTheme('dark');
