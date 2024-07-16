@@ -1,7 +1,10 @@
 import { JSDOM } from 'jsdom';
 import fs from 'fs';
 import path from 'path';
-import { parseHtmlFrontMatter } from './content-utils.js';
+import {
+  parseHtmlFrontMatter,
+  getFirstNthCharacters,
+} from './content-utils.js';
 import { readFileContent } from './path-and-file-utils.js';
 import { formatDate } from './date-utils.js';
 
@@ -35,7 +38,7 @@ export const readIntermediatePosts = (tempPostsOutputDirectory) => {
     .map((file) => {
       const filePath = path.join(tempPostsOutputDirectory, file);
       const fileContent = readFileContent(filePath);
-      const { data, content } = parseHtmlFrontMatter(fileContent);
+      const { content } = parseHtmlFrontMatter(fileContent);
       const dom = new JSDOM(content);
       const document = dom.window.document;
 
@@ -70,7 +73,7 @@ export const createPostItem = (
 
   const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName
     .split(' ')
-    .join('-')}">${title}</a>`;
+    .join('-')}">${getFirstNthCharacters(title, 25)}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.querySelector('.post-title').innerHTML = titleLink;
@@ -78,22 +81,25 @@ export const createPostItem = (
   postItem.querySelector('.content').innerHTML = previewContent;
 
   const tagsContainer = postItem.querySelector('.tags');
+  const tagsContainerMobile = postItem.querySelector('.tags-mobile');
   const tagDivider = postItem.querySelector('#tag-divider');
 
-  if (tagsContainer) {
+  if (tagsContainer && tagsContainerMobile) {
     if (tags && tags.length > 0) {
       const tagsList = tags
         .map(
           (tag) =>
             `<a href="${tagsPathSansPublic}/${tag
               .split(' ')
-              .join('-')}.html">${tag}</a>`,
+              .join('-')}.html">${tag.split('-').join(' ')}</a>`,
         )
         .join(' ');
 
       tagsContainer.innerHTML = tagsList;
+      tagsContainerMobile.innerHTML = tagsList;
     } else {
       tagsContainer.remove();
+      tagsContainerMobile.remove();
       if (tagDivider) tagDivider.remove();
     }
   }
@@ -122,10 +128,12 @@ export const updatePaginationLinks = (
   // Get the classes for normal and current page links
   const classesNormalPageLink = document
     .getElementById('page-link-1')
-    .className.split(' ');
+    .className.split(' ')
+    .filter(Boolean);
   const classesCurrentPageLink = document
     .getElementById('page-link-3')
-    .className.split(' ');
+    .className.split(' ')
+    .filter(Boolean);
 
   // Helper function to update pagination links
   const updatePaginationLink = (pageLink, index, isCurrentPage) => {
@@ -139,7 +147,10 @@ export const updatePaginationLinks = (
         ? `${tag ? tagWithDash : 'index'}.html`
         : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
-    pageLink.classList.remove('hidden');
+    // Show the page link if there are more than one page
+    if (index.length > 0) {
+      pageLink.classList.remove('hidden');
+    }
   };
 
   // Determine the range of pages to display
@@ -147,7 +158,7 @@ export const updatePaginationLinks = (
   const startPage = Math.max(0, Math.min(totalPages - 5, pageIndex - 2));
   const endPage = Math.min(totalPages, startPage + 5);
 
-  // Update pagination links
+  // Update the pagination links
   for (let i = startPage; i < endPage; i++) {
     const pageLink = paginationDiv.querySelector(
       `#page-link-${i - startPage + 1}`,

@@ -1,5 +1,3 @@
-const { inherits } = require('util');
-
 module.exports = {
   enabled: true,
   content: ['./src/**/*.html', './src/**/*.ts'],

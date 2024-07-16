@@ -112,11 +112,11 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
       let mainLayoutContent = readFileContent(config.mainLayoutPath);
 
-      const title = `${config.siteName} | ${data.title}`;
+      const finalTitle = `${config.siteName} | ${data.title}`;
       // Replace placeholders in the main layout
       const finalHtml = replacePlaceholders(mainLayoutContent, {
         ...data,
-        title: title,
+        title: finalTitle,
         children: mainContent,
         tagsDropdown: tagsDropdownContent,
         stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),

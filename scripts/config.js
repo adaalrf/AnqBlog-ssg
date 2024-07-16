@@ -20,6 +20,7 @@ const pathConfig = {
   postsContentDirectory: fpr('src/content/blog/posts'),
   templatePostsPath: fpr('src/templates/post-template.html'),
   templateBlogPath: fpr('src/templates/blog-template.html'),
+  templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
   templateTagsPath: fpr('src/templates/tags-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
   tempPostsOutputDirectory: fpr('src/temp/blog/posts'),

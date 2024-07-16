@@ -1,4 +1,5 @@
 
+import './burger-dropdown';
 import './tags-dropdown';
 import './toggle-theme';
 

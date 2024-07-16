@@ -1,6 +1,6 @@
 document.addEventListener('DOMContentLoaded', () => {
-  const dropdownToggle = document.getElementById('tags-dropdown');
-  const dropdownMenu = document.getElementById('tags-dropdown-menu');
+  const dropdownToggle = document.getElementById('burger-dropdown');
+  const dropdownMenu = document.getElementById('burger-dropdown-menu');
 
   if (dropdownMenu && dropdownToggle) {
     const showDropdown = () => {

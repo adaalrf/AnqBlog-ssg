@@ -4,10 +4,15 @@
       <h1 class="post-title">{{titleLink}}</h1>
       <div class="mb-4 flex items-center space-x-2">
         <p class="post-date">{{date}}</p>
-        <span id="tag-divider">|</span>
-        <span class="tags flex gap-2"></span>
+        <span id="tag-divider" class="hidden sm:block">|</span>
+        <span class="tags hidden sm:flex gap-2 italic">{{tags}}</span>
       </div>
       <div class="content prose leading-relaxed">{{previewContent}}</div>
+      <div>
+        <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"
+          >{{tags}}</span
+        >
+      </div>
     </div>
   </div>
   <div class="pagination flex justify-center gap-4">

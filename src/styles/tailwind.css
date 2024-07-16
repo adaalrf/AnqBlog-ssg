@@ -23,7 +23,7 @@
     --muted-foreground: hsla(230, 33%, 90%, 0.6); /* Muted foreground */
     --accent: hsl(341, 39%, 52%); /* Red (#f38ba8) */
     --accent-foreground: var(--background);
-    --destructive: hsl(0, 76%, 70%); /* Destructive Red (#ff6e6e) */
+    --destructive: hsl(0, 76%, 70%); /* Destructive Red (#ed7878) */
     --destructive-foreground: var(--foreground);
     --code: var(--foreground);
     --code-foreground: hsl(240, 15%, 15%); /* Same as background */
@@ -58,8 +58,8 @@
 
 @layer utilities {
   .min-max-w {
-    max-width: 768px;
-    min-width: 768px;
+    max-width: 724px;
+    min-width: 724px;
   }
   .scrollbar-padding {
     --scrollbar-width: 0px;

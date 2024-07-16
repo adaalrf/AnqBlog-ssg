@@ -2,7 +2,8 @@ import path from 'path';
 import { JSDOM } from 'jsdom';
 import { createPostItem } from '../utils/pagination-utils.js';
 import {
-  generateFrontMatter, // Import the helper function
+  generateFrontMatter,
+  getFirstNthCharacters,
 } from '../utils/content-utils.js';
 import {
   ensureDirectoryExists,
@@ -39,7 +40,10 @@ export const generateIntermediatePostHtmlFiles = (
     const htmlContent = postItem.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, filesWithDash);
 
-    const modifiedPathBar = `/ <a href=/blog>Blog</a> / <em>${post.title}</em>`;
+    const modifiedPathBar = `/ <a href=/blog>Blog</a> / <em>${getFirstNthCharacters(
+      post.title,
+      20,
+    )}</em>`;
     // Add dynamic front matter to the content
     const finalHtml = `${generateFrontMatter(post, {
       page: modifiedPathBar,

@@ -47,6 +47,7 @@ const generateAllHtmlFiles = () => {
     truncatedPosts,
     5, // Assuming 5 posts per page for tags as well
     config.templateTagsPath,
+    config.templateMainTagsPath,
     config.tempTagsOutputDirectory,
   );
 

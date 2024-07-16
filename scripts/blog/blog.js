@@ -66,6 +66,7 @@ export const generatePaginatedBlogHtmlFiles = (
     // Add dynamic front matter to the content
     const finalHtml = `${generateFrontMatter(post, {
       page: modifiedPathBar,
+      title: 'Blog',
     })}\n${content}`;
 
     fs.writeFileSync(outputFilePath, finalHtml);
