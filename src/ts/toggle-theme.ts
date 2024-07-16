@@ -1,7 +1,6 @@
-// toggle-theme.ts
-
 const htmlElement = document.querySelector<HTMLElement>('html');
 const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
+const burgerMenu = document.querySelector<HTMLElement>('#burger-dropdown');
 const savedTheme = localStorage.getItem('theme');
 
 const rp = (path: string): string => {
@@ -20,21 +19,37 @@ const moonIcon = `<image src="${rp(
   '../assets/icons/moon.svg',
 )}" alt="Moon icon" height="24" width="24" />`;
 
+const burgerLight = `<image src="${rp(
+  '../assets/icons/burger-light.svg',
+)}" alt="Burger menu" height="36" width="36" />`;
+const burgerDark = `<image src="${rp(
+  '../assets/icons/burger-dark.svg',
+)}" alt="Burger menu" height="36" width="36" />`;
+
+/**
+ * Sets the theme of the website.
+ * @param {'light' | 'dark'} theme - The theme to set.
+ */
 function setTheme(theme: 'light' | 'dark'): void {
-  if (htmlElement && toggleThemeBtn) {
+  if (htmlElement && toggleThemeBtn && burgerMenu) {
     if (theme === 'light') {
       htmlElement.classList.replace('dark', 'light');
       toggleThemeBtn.innerHTML = sunIcon;
+      burgerMenu.innerHTML = burgerLight;
       localStorage.setItem('theme', 'light');
     } else {
       htmlElement.classList.replace('light', 'dark');
       toggleThemeBtn.innerHTML = moonIcon;
+      burgerMenu.innerHTML = burgerDark;
       localStorage.setItem('theme', 'dark');
     }
     toggleThemeBtn.classList.remove('hidden');
   }
 }
 
+/**
+ * Toggles the theme between light and dark.
+ */
 function toggleTheme(): void {
   if (htmlElement?.classList.contains('light')) {
     setTheme('dark');

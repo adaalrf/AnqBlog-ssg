@@ -1,15 +1,26 @@
-import { fpr } from './utils/resolve-path.js';
+import { fpr } from './utils/path-and-file-utils.js';
 
-export default {
+/**
+ * Site configuration settings for the static site generator.
+ * @type {Object}
+ */
+const siteConfig = {
   siteName: '. adaalrf.dev',
-  inputCSS: fpr('src/styles/tailwind.css'),
-  outputSS: fpr('public/styles/styles.css'),
+};
 
+/**
+ * Path configuration settings for the static site generator.
+ * @type {Object}
+ */
+const pathConfig = {
+  inputCSS: fpr('src/styles/tailwind.css'),
+  outputCSS: fpr('public/styles/styles.css'),
   markedConfigPath: fpr('marked.json'),
   contentDirectory: fpr('src/content'),
   postsContentDirectory: fpr('src/content/blog/posts'),
   templatePostsPath: fpr('src/templates/post-template.html'),
   templateBlogPath: fpr('src/templates/blog-template.html'),
+  templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
   templateTagsPath: fpr('src/templates/tags-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
   tempPostsOutputDirectory: fpr('src/temp/blog/posts'),
@@ -20,3 +31,14 @@ export default {
   publicPostsOutputDirectory: fpr('public/blog/posts'),
   publicTagsOutputDirectory: fpr('public/blog/tags'),
 };
+
+/**
+ * Exports the combined configuration settings.
+ * @type {Object}
+ */
+const config = {
+  ...siteConfig,
+  ...pathConfig,
+};
+
+export default config;

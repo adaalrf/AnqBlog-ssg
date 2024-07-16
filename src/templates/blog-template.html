@@ -1,0 +1,30 @@
+<div id="blog">
+  <div id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    <div class="post-item">
+      <h1 class="post-title">{{titleLink}}</h1>
+      <div class="mb-4 flex items-center space-x-2">
+        <p class="post-date">{{date}}</p>
+        <span id="tag-divider" class="hidden sm:block">|</span>
+        <span class="tags hidden sm:flex gap-2 italic">{{tags}}</span>
+      </div>
+      <div class="content prose leading-relaxed">{{previewContent}}</div>
+      <div>
+        <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"
+          >{{tags}}</span
+        >
+      </div>
+    </div>
+  </div>
+  <div class="pagination flex justify-center gap-4">
+    <a href="" class="previous-page hidden">&lt;</a>
+    <a href="" class="hidden" id="page-link-1"></a>
+    <a href="" class="hidden" id="page-link-2"></a>
+    <a
+      href=""
+      class="hidden current-page font-bold underline"
+      id="page-link-3"></a>
+    <a href="" class="hidden" id="page-link-4"></a>
+    <a href="" class="hidden" id="page-link-5"></a>
+    <a href="" class="next-page hidden">&gt;</a>
+  </div>
+</div>

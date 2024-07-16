@@ -1,4 +1,3 @@
-// Description: Utility functions for parsing and formatting dates.
 /**
  * Parses a custom date format (DD.MM.YYYY) into a Date object.
  * @param {string} dateString - The date string to parse.

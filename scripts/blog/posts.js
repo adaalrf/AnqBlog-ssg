@@ -1,17 +1,20 @@
-import fs from 'fs';
 import path from 'path';
 import { JSDOM } from 'jsdom';
 import { createPostItem } from '../utils/pagination-utils.js';
 import {
+  generateFrontMatter,
+  getFirstNthCharacters,
+} from '../utils/content-utils.js';
+import {
   ensureDirectoryExists,
+  writeFileContent,
   readFileContent,
-} from '../utils/parsing-utils.js';
+} from '../utils/path-and-file-utils.js';
 import config from '../config.js';
 
 /**
  * Generates intermediate post HTML files.
  * @param {Array} posts - The array of posts.
- * @param {number} characters - The number of characters to display in the preview.
  * @param {string} postTemplatePath - The path to the post template.
  * @param {string} tempPostsOutputDirectory - The directory to save the generated files.
  */
@@ -36,7 +39,17 @@ export const generateIntermediatePostHtmlFiles = (
     const filesWithDash = post.htmlFileName.split(' ').join('-');
     const htmlContent = postItem.outerHTML;
     const outputPath = path.join(tempPostsOutputDirectory, filesWithDash);
-    fs.writeFileSync(outputPath, htmlContent);
+
+    const modifiedPathBar = `/ <a href=/blog>Blog</a> / <em>${getFirstNthCharacters(
+      post.title,
+      20,
+    )}</em>`;
+    // Add dynamic front matter to the content
+    const finalHtml = `${generateFrontMatter(post, {
+      page: modifiedPathBar,
+    })}\n${htmlContent}`;
+
+    writeFileContent(outputPath, finalHtml);
     console.log(`(Posts.js): Generated post -> ${outputPath}`);
   });
 };

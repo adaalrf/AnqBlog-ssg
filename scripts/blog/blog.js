@@ -6,7 +6,8 @@ import {
 import {
   readFileContent,
   ensureDirectoryExists,
-} from '../utils/parsing-utils.js';
+} from '../utils/path-and-file-utils.js';
+import { generateFrontMatter } from '../utils/content-utils.js';
 import path from 'path';
 import fs from 'fs';
 import { JSDOM } from 'jsdom';
@@ -53,8 +54,6 @@ export const generatePaginatedBlogHtmlFiles = (
   // For each page
   postIndex.forEach((post, pageIndex) => {
     updatePaginationLinks(document, pageIndex, blogContent);
-    const blogPageTitle = document.getElementById('blogPageTitle');
-    blogPageTitle.textContent = `Blog`;
     // Save the tag page
     const content = document.querySelector('#blog').outerHTML;
     //const filesWithDash = tag.split(' ').join('-');
@@ -62,7 +61,15 @@ export const generatePaginatedBlogHtmlFiles = (
       post === 0
         ? path.join(tempBlogOutputPath, `index.html`)
         : path.join(tempBlogOutputPath, `-page-${post + 1}.html`);
-    fs.writeFileSync(outputFilePath, content);
+
+    const modifiedPathBar = `/ <em>Blog</em>`;
+    // Add dynamic front matter to the content
+    const finalHtml = `${generateFrontMatter(post, {
+      page: modifiedPathBar,
+      title: 'Blog',
+    })}\n${content}`;
+
+    fs.writeFileSync(outputFilePath, finalHtml);
     console.log(`(Blog.js): Generated blog page -> ${outputFilePath}`);
   });
 };

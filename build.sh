@@ -13,7 +13,7 @@ rm -rf public
 rm -rf src/temp
 
 # Generate dynamic imports
-node scripts/utils/generate-imports.js
+node scripts/generate-imports.js
 
 # Bundle website code using Webpack
 npx webpack --config webpack.config.js
@@ -25,7 +25,7 @@ cp -r src/assets public/
 node scripts/generate.js
 
 # Process Tailwind CSS using PostCSS
-node scripts/utils/build-css.js
+node scripts/build-css.js
 
 # End timer
 end_time=$(date +%s%3N)

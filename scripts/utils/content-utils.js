@@ -1,25 +1,12 @@
-import fs from 'fs';
-import path from 'path';
+// content-utils.js
+
 import { JSDOM } from 'jsdom';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import truncate from 'html-truncate';
-
-/**
- * Reads and parses configuration from a file.
- * @param {string} configPath - The path to the configuration file.
- */
-export const readConfig = (configPath) => {
-  const markedConfig = JSON.parse(fs.readFileSync(configPath, 'utf8'));
-  marked.setOptions(markedConfig);
-};
-
-/**
- * Reads the content of a file.
- * @param {string} filePath - The path to the file.
- * @returns {string} - The content of the file.
- */
-export const readFileContent = (filePath) => fs.readFileSync(filePath, 'utf8');
+import fs from 'fs';
+import path from 'path';
+import { readFileContent } from './path-and-file-utils.js';
 
 /**
  * Gets the first N characters of HTML content while preserving structure.
@@ -53,7 +40,7 @@ export const injectContentIntoTemplate = (
 
   // Replace placeholders
   Object.keys(data).forEach((key) => {
-    const placeholder = new RegExp(`{{${key}}}`, 'g');
+    const placeholder = new RegExp(`{{{${key}}}}`, 'g');
     const value = data[key];
     document.body.innerHTML = document.body.innerHTML.replace(
       placeholder,
@@ -115,29 +102,13 @@ export const processMarkdownFiles = (directory, options = {}) => {
     const fileContent = readFileContent(filePath);
     const { data, htmlContent } = parseMarkdown(fileContent);
 
-    if (!data.title) {
-      throw new Error(`Title is missing in front matter of file: ${file}`);
-    }
-
     return {
-      title: data.title,
-      date: data.date,
-      tags: data.tags || [],
+      ...data, // Include all front matter data
       htmlFileName: file.replace('.md', '.html'),
       content: htmlContent,
       previewContent: getFirstNthCharacters(htmlContent, previewLength),
     };
   });
-};
-
-/**
- * Ensures a directory exists, creating it if necessary.
- * @param {string} directory - The directory to ensure exists.
- */
-export const ensureDirectoryExists = (directory) => {
-  if (!fs.existsSync(directory)) {
-    fs.mkdirSync(directory, { recursive: true });
-  }
 };
 
 /**
@@ -150,4 +121,17 @@ export const replacePlaceholders = (template, values) => {
   return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
     return key in values ? values[key] : placeholder;
   });
+};
+
+/**
+ * Generates front matter string from a data object and additional options.
+ * @param {object} data - The metadata object.
+ * @param {object} [options={}] - Additional options to include in the front matter.
+ * @returns {string} - The front matter string.
+ */
+export const generateFrontMatter = (data, options = {}) => {
+  const mergedData = { ...data, ...options };
+  return `---\n${Object.entries(mergedData)
+    .map(([key, value]) => `${key}: "${value}"`)
+    .join('\n')}\n---`;
 };

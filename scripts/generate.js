@@ -1,40 +1,96 @@
+// generate.js
+
 import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
 import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
-import {
-  processMarkdownFiles,
-  ensureDirectoryExists,
-} from './utils/parsing-utils.js';
+import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
 import { parseDate } from './utils/date-utils.js';
+import { processMarkdownFiles } from './utils/content-utils.js';
 import config from './config.js';
 
-// Main function to generate all HTML files
 const generateAllHtmlFiles = () => {
-  ensureDirectoryExists(config.tempPostsOutputDirectory);
-  ensureDirectoryExists(config.tempTagsOutputDirectory);
-  ensureDirectoryExists(config.tempBlogOutputPath);
-  ensureDirectoryExists(config.publicContentOutputDirectory);
-  ensureDirectoryExists(config.publicBlogOutputPath);
-  ensureDirectoryExists(config.publicPostsOutputDirectory);
-  ensureDirectoryExists(config.publicTagsOutputDirectory);
+  ensureDirectoriesExist([
+    config.tempPostsOutputDirectory,
+    config.tempTagsOutputDirectory,
+    config.tempBlogOutputPath,
+    config.publicContentOutputDirectory,
+    config.publicBlogOutputPath,
+    config.publicPostsOutputDirectory,
+    config.publicTagsOutputDirectory,
+  ]);
 
-  // Ensure all dates are parsed as Date objects
-  const truncatedPosts = processMarkdownFiles(config.postsContentDirectory, {
-    previewLength: 100,
-  })
-    .map((post) => ({ ...post, date: parseDate(post.date) }))
+  const truncatedPosts = processAndSortMarkdownFiles(
+    config.postsContentDirectory,
+    { previewLength: 100 },
+  );
+
+  const fullPosts = processAndSortMarkdownFiles(config.postsContentDirectory);
+
+  const tags = collectTags(fullPosts);
+
+  generateIntermediatePostHtmlFiles(
+    fullPosts,
+    config.templatePostsPath,
+    config.tempPostsOutputDirectory,
+  );
+
+  generatePaginatedBlogHtmlFiles(
+    truncatedPosts,
+    5,
+    config.templateBlogPath,
+    config.tempBlogOutputPath,
+  );
+
+  generateTagPages(
+    tags,
+    truncatedPosts,
+    5, // Assuming 5 posts per page for tags as well
+    config.templateTagsPath,
+    config.templateMainTagsPath,
+    config.tempTagsOutputDirectory,
+  );
+
+  applyLayoutToHtmlFiles(
+    [
+      {
+        inputDir: config.tempPostsOutputDirectory,
+        outputDir: config.publicPostsOutputDirectory,
+      },
+      {
+        inputDir: config.tempTagsOutputDirectory,
+        outputDir: config.publicTagsOutputDirectory,
+      },
+      {
+        inputDir: config.tempBlogOutputPath,
+        outputDir: config.publicBlogOutputPath,
+      },
+      {
+        inputDir: config.contentDirectory,
+        outputDir: config.publicContentOutputDirectory,
+      },
+    ],
+    tags,
+  );
+};
+
+const ensureDirectoriesExist = (directories) => {
+  directories.forEach(ensureDirectoryExists);
+};
+
+const processAndSortMarkdownFiles = (directory, options = {}) => {
+  return processMarkdownFiles(directory, options)
+    .map((post) => ({
+      ...post,
+      date: post.date ? parseDate(post.date) : new Date(),
+    }))
     .sort((a, b) => b.date - a.date)
     .map((post) => ({ ...post, date: new Date(post.date) }));
+};
 
-  const fullPosts = processMarkdownFiles(config.postsContentDirectory)
-    .map((post) => ({ ...post, date: parseDate(post.date) }))
-    .sort((a, b) => b.date - a.date)
-    .map((post) => ({ ...post, date: new Date(post.date) }));
-
-  // Collect all tags
+const collectTags = (posts) => {
   const tags = {};
-  fullPosts.forEach((post) => {
+  posts.forEach((post) => {
     post.tags.forEach((tag) => {
       if (!tags[tag]) {
         tags[tag] = [];
@@ -42,48 +98,7 @@ const generateAllHtmlFiles = () => {
       tags[tag].push(post);
     });
   });
-
-  generateIntermediatePostHtmlFiles(
-    fullPosts,
-    config.templatePostsPath,
-    config.tempPostsOutputDirectory,
-    '',
-  );
-  generatePaginatedBlogHtmlFiles(
-    truncatedPosts,
-    5,
-    config.templateBlogPath,
-    config.tempBlogOutputPath,
-  );
-  generateTagPages(
-    tags,
-    truncatedPosts,
-    5, // Assuming 5 posts per page for tags as well
-    config.templateTagsPath,
-    config.tempTagsOutputDirectory,
-  );
-
-  const directoryPairs = [
-    {
-      inputDir: config.tempPostsOutputDirectory,
-      outputDir: config.publicPostsOutputDirectory,
-    },
-    {
-      inputDir: config.tempTagsOutputDirectory,
-      outputDir: config.publicTagsOutputDirectory,
-    },
-    {
-      inputDir: config.tempBlogOutputPath,
-      outputDir: config.publicBlogOutputPath,
-    },
-    {
-      inputDir: config.contentDirectory,
-      outputDir: config.publicContentOutputDirectory,
-    },
-  ];
-
-  applyLayoutToHtmlFiles(directoryPairs, tags);
+  return tags;
 };
 
-// Execute the HTML file generation
 generateAllHtmlFiles();
