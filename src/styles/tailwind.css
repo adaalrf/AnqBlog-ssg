@@ -35,7 +35,7 @@
     ); /* Prevent horizontal scrollbar making the page jumnp */
   }
   a {
-    @apply transition-all duration-100 text-foreground hover:text-accent;
+    @apply transition-all duration-100 no-underline text-foreground hover:text-accent;
   }
 
   h1 {
