@@ -12,19 +12,31 @@ const rp = (path: string): string => {
   return fullPath.replace(rootPath, '');
 };
 
-const sunIcon = `<image src="${rp(
-  '../assets/icons/sun.svg',
-)}" alt="Sun icon" height="24" width="24" />`;
-const moonIcon = `<image src="${rp(
-  '../assets/icons/moon.svg',
-)}" alt="Moon icon" height="24" width="24" />`;
+const sunIconPath = rp('../assets/icons/sun.svg');
+const moonIconPath = rp('../assets/icons/moon.svg');
+const burgerLightPath = rp('../assets/icons/burger-light.svg');
+const burgerDarkPath = rp('../assets/icons/burger-dark.svg');
 
-const burgerLight = `<image src="${rp(
-  '../assets/icons/burger-light.svg',
-)}" alt="Burger menu" height="36" width="36" />`;
-const burgerDark = `<image src="${rp(
-  '../assets/icons/burger-dark.svg',
-)}" alt="Burger menu" height="36" width="36" />`;
+/**
+ * Creates an <img> element for the theme icon.
+ * @param {string} iconPath - The path to the icon.
+ * @param {string} altText - Alternative text for accessibility.
+ * @param {number} height - Height of the image.
+ * @param {number} width - Width of the image.
+ */
+function createIconElement(
+  iconPath: string,
+  altText: string,
+  height: number,
+  width: number,
+): HTMLImageElement {
+  const img = document.createElement('img');
+  img.src = iconPath;
+  img.alt = altText;
+  img.height = height;
+  img.width = width;
+  return img;
+}
 
 /**
  * Sets the theme of the website.
@@ -32,15 +44,27 @@ const burgerDark = `<image src="${rp(
  */
 function setTheme(theme: 'light' | 'dark'): void {
   if (htmlElement && toggleThemeBtn && burgerMenu) {
+    // Clear existing content
+    toggleThemeBtn.textContent = '';
+    burgerMenu.textContent = '';
+
     if (theme === 'light') {
       htmlElement.classList.replace('dark', 'light');
-      toggleThemeBtn.innerHTML = sunIcon;
-      burgerMenu.innerHTML = burgerLight;
+      toggleThemeBtn.appendChild(
+        createIconElement(sunIconPath, 'Sun icon', 24, 24),
+      );
+      burgerMenu.appendChild(
+        createIconElement(burgerLightPath, 'Burger menu', 36, 36),
+      );
       localStorage.setItem('theme', 'light');
     } else {
       htmlElement.classList.replace('light', 'dark');
-      toggleThemeBtn.innerHTML = moonIcon;
-      burgerMenu.innerHTML = burgerDark;
+      toggleThemeBtn.appendChild(
+        createIconElement(moonIconPath, 'Moon icon', 24, 24),
+      );
+      burgerMenu.appendChild(
+        createIconElement(burgerDarkPath, 'Burger menu', 36, 36),
+      );
       localStorage.setItem('theme', 'dark');
     }
     toggleThemeBtn.classList.remove('hidden');

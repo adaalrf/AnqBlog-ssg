@@ -14,7 +14,7 @@
     "src/**/*.ts",
     "src/ts/generate-index.js",
     "src/ts/fetch-posts.ts",
-    "src/ts/toggle-theme.ts"
+    "legacy/toggle-theme.ts"
   ],
   "exclude": ["node_modules", "public", "legacy"]
 }
