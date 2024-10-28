@@ -1,8 +1,6 @@
 # ✨ Adaalrf.dev - A Static Site Generator (v0.4 - Work in Progress) ✨
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Node Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
-[![Code Quality](https://img.shields.io/badge/code-quality-brightgreen)](https://github.com/adaalrf/adaalrf.dev)
 
 Welcome to Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites. This project aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility. It converts Markdown files into HTML, injects templates, supports pagination, generates tag pages, and processes CSS with Tailwind CSS and Autoprefixer.
 This project started out of a need for a simple, customizable, and efficient way to build static websites while keeping resource usage to a minimum. It aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility.
