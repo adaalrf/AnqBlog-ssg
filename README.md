@@ -86,7 +86,8 @@ This project includes example assets and templates I personally use for my websi
    The `serve.js` script uses Node.js to spin up a simple HTTP server that will serve the `public` directory. This will allow you to view the site at `http://localhost:8080`.
 
    If a specific `404.html` file is found within a directory, it will be used for not found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
-   _Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers._
+   
+   **Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.**
 
 ## 🚢 Deployment
 
