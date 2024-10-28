@@ -2,6 +2,7 @@
 node_modules/
 public/
 src/temp/
+legacy/
 
 # Ignore all files in content and templates directories
 src/content/*
