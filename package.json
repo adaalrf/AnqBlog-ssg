@@ -1,7 +1,7 @@
 {
   "name": "adaalrf_dev",
-  "version": "1.0.0",
-  "description": "",
+  "version": "0.4.0",
+  "description": "Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites.",
   "main": "index.js",
   "type": "module",
   "scripts": {

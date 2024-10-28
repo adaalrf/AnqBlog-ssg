@@ -1,5 +1,9 @@
 # ✨ Adaalrf.dev - A Static Site Generator (v0.4 - Work in Progress) ✨
 
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Node Version](https://img.shields.io/badge/node-%3E%3D14.0.0-brightgreen)](https://nodejs.org/)
+[![Code Quality](https://img.shields.io/badge/code-quality-brightgreen)](https://github.com/adaalrf/adaalrf.dev)
+
 Welcome to Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites. This project aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility. It converts Markdown files into HTML, injects templates, supports pagination, generates tag pages, and processes CSS with Tailwind CSS and Autoprefixer.
 This project started out of a need for a simple, customizable, and efficient way to build static websites while keeping resource usage to a minimum. It aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility.
 
@@ -86,7 +90,7 @@ This project includes example assets and templates I personally use for my websi
    The `serve.js` script uses Node.js to spin up a simple HTTP server that will serve the `public` directory. This will allow you to view the site at `http://localhost:8080`.
 
    If a specific `404.html` file is found within a directory, it will be used for not found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
-   
+
    **Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.**
 
 ## 🚢 Deployment
