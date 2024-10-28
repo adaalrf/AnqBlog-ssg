@@ -1,167 +1,145 @@
-# Static site generator with Markdown blog features
+# ✨ Adaalrf.dev - A Static Site Generator (v0.4 - Work in Progress) ✨
 
-Version 0.3
+Welcome to Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites. This project aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility. It converts Markdown files into HTML, injects templates, supports pagination, generates tag pages, and processes CSS with Tailwind CSS and Autoprefixer.
+This project started out of a need for a simple, customizable, and efficient way to build static websites while keeping resource usage to a minimum. It aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility.
 
-### Overview
+This project includes example assets and templates I personally use for my website [Adaalrf.dev](https://adaalrf.dev/) to get you started. The true power lies in the ability to customize and extend the generator to suit your needs. Whether you're a developer, designer, or content creator, this generator can help you build a beautiful and functional static site with ease.
 
-This project is designed to generate static HTML files for a blog and other content pages. It utilizes a modular structure to ensure maintainability, ease of use, and separation of concerns. The primary components include parsing markdown files, generating HTML content, and applying layout templates.
+## 🚀 Features
 
-### Features
+- **Dark Mode**: Dark mode support is implemented, allowing users to switch between light and dark themes by clicking a toggle button.
 
-- **Markdown to HTML Conversion**: Convert markdown files to HTML with front matter support.
-- **Template Injection**: Inject content into HTML templates with placeholder replacement.
-- **Pagination**: Generate paginated blog pages.
-- **Tag Pages**: Generate tag-specific pages for blog posts.
-- **Intermediate and Final Post Generation**: Separate steps for generating intermediate and final HTML files for blog posts.
-- **CSS Processing**: Build CSS using Tailwind CSS and Autoprefixer.
+- **Markdown to HTML Conversion**: Converts markdown content into fully formatted HTML pages.
+- **Template Injection**: Templates are used for consistent structure across pages, making updates easy.
+- **Pagination Support**: Automatic pagination for long lists of content like blog posts.
+- **Tag Pages**: Generates pages for content with shared tags, making it easier to organize related content.
+- **Modular Structure**: Built with reusability and customization in mind, modules for each feature.
+- **CSS Processing**: Uses Tailwind CSS and Autoprefixer for efficient, responsive styles.
+- **JavaScript Bundling**: Bundles JavaScript files using Webpack for optimized performance.
+- **Typescript Support**: The project uses TypeScript for user files for enhanced development experience.
 
-### Directory Structure
+## 📋 Requirements
 
-```plaintext
-project-root/
-├── public/
-│ ├── assets/
-│ │ ├── icons/
-│ │ └── styles/
-│ ├── blog/
-│ │ ├── tags/
-│ │ ├── blog-page-1.html
-│ │ ├── blog-page-2.html
-│ │ └── ...
-│ ├── posts/
-│ │ ├── post1.html
-│ │ ├── post2.html
-│ │ └── ...
-│ └── index.html
-├── scripts/
-│ ├── blog/
-│ │ ├── generate-final-posts.js
-│ │ ├── generate-intermediate-posts.js
-│ │ ├── generate-paginated-blog.js
-│ │ └── generate-tag-pages.js
-│ └── utils/
-│ ├── build-css.js
-│ ├── date-utils.js
-│ ├── generate-imports.js
-│ ├── parsing-utils.js
-│ └── resolve-path.js
-├── src/
-│ ├── assets/
-│ │ └── icons/
-│ ├── content/
-│ │ ├── posts/
-│ │ └── styles/
-│ ├── templates/
-│ │ ├── about-template.html
-│ │ ├── blog-template.html
-│ │ ├── layout-template.html
-│ │ └── post-template.html
-│ └── ts/
-│ ├── fetch-posts.ts
-│ ├── main.ts
-│ └── toggle-theme.ts
-├── .gitignore
-├── build.sh
-├── marked.json
-├── package.json
-├── README.md
-└── ...
-```
+- **Node.js**: [Install Node.js](https://nodejs.org/).
+- The rest will be installed with `npm install`. You can check the `package.json` file for more details.
 
-### Installation
+## 🔧 Installation and Workflow
 
-1. **Clone the Repository**:
-   ```sh
-   git clone https://github.com/your-repo/project-name.git
-   cd project-name
-   ```
-2. **Install Dependencies**:
-   ```sh
+1. **Initial Setup**:
+
+   - Clone the repository and install dependencies.
+
+   ```bash
+   git clone https://github.com/adaalrf/adaalrf.dev.git
+   cd adaalrf.dev
    npm install
    ```
-3. **Configure Project**:
-   Ensure marked.json is properly configured with your markdown parsing options.
 
-### Usage
+2. **Create Content**:
 
-**Build**
-To build the project, run the following command:
+   - Write blog posts or pages in Markdown.
+   - Place the Markdown files in `src/content/blog/posts/`.
 
-```sh
-./build.sh
-```
+   ```markdown
+   ---
+   title: 'My First Blog Post'
+   date: '2024-01-01'
+   tags: ['personal', 'introduction']
+   ---
 
-This script performs the following actions:
+   Write your awesome content here.
+   ```
 
-- Generates dynamic imports.
-- Bundles website code using Webpack.
-- Copies necessary assets to the public directory.
-- Runs the generation scripts to generate the output files.
-- Processes Tailwind CSS using PostCSS.
-- Displays the build time.
+3. **Customize Your Site**:
 
-**The build.sh script**:
+   - Update `config.js` to personalize settings like your site name, number of posts per page, etc.
 
-```sh
-#!/bin/bash
+   ```javascript
+   const config = {
+     siteName: 'My Amazing Blog',
+     postsPerPage: 5,
+     contentDirectory: 'src/content/blog/posts',
+     outputDirectory: 'public',
+   };
+   export default config;
+   ```
 
-# Ensure script is being run from the project root
-cd "$(dirname "$0")"
+   - Edit or add templates in the `src/templates/` directory to change the HTML structure or styling.
+   - I suggest adding standalone pages to the src/content/pages directory if needed. This is also where you find the index.html file. These files also suports front-matter for metadata, title and the like.
 
-# Start timer
-start_time=$(date +%s%3N)
+4. **Build the Site**:
 
-# Generate dynamic imports
-node scripts/utils/generate-imports.js
+   - Run the build command to generate HTML files from the Markdown content. After building, you may use a simple [HTTP server](https://www.npmjs.com/package/http-server) (`http-server`) to serve the new content if needed. Note that `http-server` needs to be installed globally (`npm install -g http-server`) or added manually. You can also use alternatives like `live-server`. Refer to the comments in the `build.sh` script for customization or to remove it altogether.
 
-# Bundle website code using Webpack
-npx webpack --config webpack.config.js
+   ```bash
+   npm run build
+   ```
 
-# Copy necessary assets to the public directory
-cp -r src/assets public/
+   The generated HTML files will be in the `public/` directory, ready to be deployed.
 
-# Run the generation scripts to generate the output files
-node scripts/generate.js
+## 🚢 Deployment
 
-# Process Tailwind CSS using PostCSS
-node scripts/utils/build-css.js
+To deploy the generated files to your server, you can use a deployment script like the following example for Linux and Mac:
 
-# End timer
-end_time=$(date +%s%3N)
+### Deployment Script Example
 
-# Calculate duration in milliseconds
-build_time_ms=$((end_time - start_time))
-
-# Convert milliseconds to seconds and milliseconds
-build_time_sec=$((build_time_ms / 1000))
-build_time_ms=$((build_time_ms % 1000))
-
-echo "Build complete. Generated files are in the 'public' directory."
-echo "Build time: ${build_time_sec}s ${build_time_ms}ms."
-
-# Change to whatever local server you want to use (e.g. http-server, live-server, etc.)
-http-server public
-```
-
-### Deploy
-
-To deploy the project to your VPS, run the following command:
-
-```sh
-./deploy.sh
-```
-
-The deploy.sh script:
-
-```
+```bash
 #!/bin/bash
 
 # Transfer files to VPS
 scp -r public/* root@<yourHostIp>:/var/www/myWebsite/
 ```
 
-Replace <yourHostIp> with the IP address of your VPS.
+For Windows users, you can use tools like **WinSCP** or **PuTTY** to automate the deployment process. Refer to their respective documentation for detailed instructions.
 
-### Configuration
+The script will copy the files from the `public/` directory to your server. It is recommended to test the deployment on a local or non-production server first to ensure everything works as intended. Replace `<yourHostIp>` with your server's IP address (e.g., `192.168.1.1`) and `/var/www/myWebsite/` with the appropriate directory path on your server (e.g., `/var/www/html/`).
 
-marked.json: Configuration file for the markdown parser.
+## 📁 File Structure
+
+- `src/`
+  - `assets/`: Static assets like images and icons.
+  - `content/`: Markdown files for each page/post.
+  - `styles/`: Source CSS files to be processed by Tailwind CSS and Autoprefixer.
+  - `templates/`: HTML templates used to wrap around the converted markdown.
+  - `ts/`: TypeScript files used for interactivity and utility functions, including:
+    - `burger-dropdown.ts`: Controls the behavior of the burger menu dropdown.
+    - `main.ts`: Main entry point, imports other TypeScript modules. (Should be left alone, as it will be rewritten during the build process.)
+    - `tags-dropdown.ts`: Controls the tags dropdown behavior.
+    - `toggle-theme.ts`: Manages theme switching between light and dark mode.
+- `public/`: The output folder for the generated static site.
+- `scripts/`: Contains various build and utility scripts, including CSS processing, generating imports, and applying templates.
+- `temp/`: Temporary files generated during the site build process.
+- `build.sh`: Shell script for the complete build process.
+
+## 🎨 CSS Styling
+
+The generator uses **Tailwind CSS** for utility-first styling, which helps keep the CSS lightweight and maintainable. **Autoprefixer** is used to ensure cross-browser compatibility. For more information on customizing Tailwind CSS, refer to the [Tailwind CSS Documentation](https://tailwindcss.com/docs).
+
+To customize the appearance of your site, you can:
+
+- **Templates**: Modify the base HTML structure by editing files in the `src/templates/` folder.
+- **Pagination**: Adjust the number of posts per page by editing the `config.js` file.
+- **Tags**: Tags are automatically pulled from the Markdown front matter and used to generate tag pages.
+- **JavaScript/TypeScript**: Add or modify JavaScript behavior by editing the files in the `src/ts/` directory.
+
+## 🤝 Contributing
+
+Contributions are welcome! Feel free to submit a pull request or open an issue for feedback or feature requests. [GitHub Repository](https://github.com/adaalrf/adaalrf.dev)
+
+## 📜 License
+
+This project is licensed under the MIT License. See the `LICENSE` file for more information.
+
+## 🔮 Future Improvements
+
+- **Refactoring and Optimizations**: Improve code readability, maintainability, and performance by continuously refactoring the codebase.
+- **Asset Optimization**: Add image optimization for even faster page loads.
+- **RSS Feed Generation**: Automatically generate RSS feeds for blog posts.
+- **Plugin System**: Develop a plugin system to allow additional features, such as SEO enhancements or analytics, to be easily added.
+- **Search Functionality**: Add a client-side search feature to make it easier for users to find specific posts or content.
+- **Local Storage Caching**: Implement caching using local storage or service workers to improve site speed and user experience for returning visitors.
+- **Automatic Sitemap Generation**: Generate an XML sitemap automatically to improve SEO and make it easier for search engines to crawl the site.
+
+## 💬 Questions or Feedback?
+
+If you have any questions or feedback, please feel free to reach out by [opening an issue](https://github.com/adaalrf/adaalrf.dev/issues) or contacting me directly.
