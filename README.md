@@ -89,7 +89,7 @@ This project includes example assets and templates I personally use for my websi
 
    If a specific `404.html` file is found within a directory, it will be used for not found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
 
-   **Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.**
+   **Note: The serve.js script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.**
 
 ## 🚢 Deployment
 
