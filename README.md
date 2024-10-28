@@ -65,17 +65,28 @@ This project includes example assets and templates I personally use for my websi
    ```
 
    - Edit or add templates in the `src/templates/` directory to change the HTML structure or styling.
-   - I suggest adding standalone pages to the src/content/pages directory if needed. This is also where you find the index.html file. These files also suports front-matter for metadata, title and the like.
+   - I suggest adding standalone pages to the src/content/pages directory if needed. This is also where you find the index.html file. These files also support front-matter for metadata, title, and the like.
 
 4. **Build the Site**:
 
-   - Run the build command to generate HTML files from the Markdown content. After building, you may use a simple [HTTP server](https://www.npmjs.com/package/http-server) (`http-server`) to serve the new content if needed. Note that `http-server` needs to be installed globally (`npm install -g http-server`) or added manually. You can also use alternatives like `live-server`. Refer to the comments in the `build.sh` script for customization or to remove it altogether.
+   - Run the build command to generate HTML files from the Markdown content:
 
    ```bash
    npm run build
    ```
 
-   The generated HTML files will be in the `public/` directory, ready to be deployed.
+   The generated HTML files will be in the `public/` directory and ready to be deployed.
+
+   You can also serve the generated site locally using:
+
+   ```bash
+   npm run serve
+   ```
+
+   The `serve.js` script uses Node.js to spin up a simple HTTP server that will serve the `public` directory. This will allow you to view the site at `http://localhost:8080`.
+
+   If a specific `404.html` file is found within a directory, it will be used for not found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
+   _Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers._
 
 ## 🚢 Deployment
 
@@ -94,6 +105,8 @@ For Windows users, you can use tools like **WinSCP** or **PuTTY** to automate th
 
 The script will copy the files from the `public/` directory to your server. It is recommended to test the deployment on a local or non-production server first to ensure everything works as intended. Replace `<yourHostIp>` with your server's IP address (e.g., `192.168.1.1`) and `/var/www/myWebsite/` with the appropriate directory path on your server (e.g., `/var/www/html/`).
 
+Or simply move the contents manually.
+
 ## 📁 File Structure
 
 - `src/`
@@ -109,7 +122,9 @@ The script will copy the files from the `public/` directory to your server. It i
 - `public/`: The output folder for the generated static site.
 - `scripts/`: Contains various build and utility scripts, including CSS processing, generating imports, and applying templates.
 - `temp/`: Temporary files generated during the site build process.
-- `build.sh`: Shell script for the complete build process.
+- `build.js`: JavaScript script for the complete build process, ensuring cross-platform compatibility.
+- `serve.js`: JavaScript script to serve the `public` directory locally, handling directory-specific and default 404 pages.
+- `legacy/`: Old or decrepit code that is no longer maintained or supported. They are here for historical purposes only.
 
 ## 🎨 CSS Styling
 

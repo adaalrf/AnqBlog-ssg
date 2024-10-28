@@ -85,7 +85,7 @@ export const generateTagPages = (
       if (pageIndex === 0) {
         tagLinks.push({
           tag: filesWithoutDash,
-          link: `${filesWithDash}.html`,
+          link: `/blog/tags/${filesWithDash}.html`,
         });
       }
     });
