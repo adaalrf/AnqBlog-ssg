@@ -142,7 +142,7 @@ To customize the appearance of your site, you can:
 
 ## 🤝 Contributing
 
-Contributions are welcome! Feel free to submit a pull request or open an issue for feedback or feature requests. [GitHub Repository](https://github.com/adaalrf/adaalrf.dev)
+Contributions are welcome! Feel free to submit a pull request or open an issue for feedback or feature requests. [adaalrf.dev](https://github.com/adaalrf/adaalrf.dev)
 
 ## 📜 License
 
