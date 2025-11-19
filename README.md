@@ -3,22 +3,22 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
 Welcome to Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites. This project aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility. It converts Markdown files into HTML, injects templates, supports pagination, generates tag pages, and processes CSS with Tailwind CSS and Autoprefixer.
-This project started out of a need for a simple, customizable, and efficient way to build static websites while keeping resource usage to a minimum. It aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility.
+This project started from a need for a simple, customizable, and efficient way to build static websites while keeping resource usage to a minimum. It aims to provide a solid foundation for creating blogs, portfolios, documentation, and more, with a focus on ease of use and flexibility.
 
-This project includes example assets and templates I personally use for my website [Adaalrf.dev](https://adaalrf.dev/) to get you started. The true power lies in the ability to customize and extend the generator to suit your needs. Whether you're a developer, designer, or content creator, this generator can help you build a beautiful and functional static site with ease.
+To get you started. The true power lies in the ability to customize and extend the generator to suit your needs. Whether you're a developer, designer, or content creator, this generator can help you build a beautiful and functional static site with ease.
 
 ## 🚀 Features
 
 - **Dark Mode**: Dark mode support is implemented, allowing users to switch between light and dark themes by clicking a toggle button.
 
 - **Markdown to HTML Conversion**: Converts markdown content into fully formatted HTML pages.
-- **Template Injection**: Templates are used for consistent structure across pages, making updates easy.
+- **Template Injection**: Templates are used for a consistent structure across pages, making updates easy.
 - **Pagination Support**: Automatic pagination for long lists of content like blog posts.
 - **Tag Pages**: Generates pages for content with shared tags, making it easier to organize related content.
 - **Modular Structure**: Built with reusability and customization in mind, modules for each feature.
 - **CSS Processing**: Uses Tailwind CSS and Autoprefixer for efficient, responsive styles.
 - **JavaScript Bundling**: Bundles JavaScript files using Webpack for optimized performance.
-- **Typescript Support**: The project uses TypeScript for user files for enhanced development experience.
+- **Typescript Support**: The project uses TypeScript for user files for an enhanced development experience.
 
 ## 📋 Requirements
 
@@ -77,7 +77,7 @@ This project includes example assets and templates I personally use for my websi
    npm run build
    ```
 
-   The generated HTML files will be in the `public/` directory and ready to be deployed.
+   The generated HTML files will be in the `public/` directory and ready for deployment.
 
    You can also serve the generated site locally using:
 
@@ -87,7 +87,7 @@ This project includes example assets and templates I personally use for my websi
 
    The `serve.js` script uses Node.js to spin up a simple HTTP server that will serve the `public` directory. This will allow you to view the site at `http://localhost:8080`.
 
-   If a specific `404.html` file is found within a directory, it will be used for not found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
+   If a specific `404.html` file is found within a directory, it will be used for not-found pages in that directory. Otherwise, the root-level `404.html` will be served as a fallback.
 
    **Note: The serve.js script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.**
 
@@ -104,11 +104,11 @@ To deploy the generated files to your server, you can use a deployment script li
 scp -r public/* root@<yourHostIp>:/var/www/myWebsite/
 ```
 
-For Windows users, you can use tools like **WinSCP** or **PuTTY** to automate the deployment process. Refer to their respective documentation for detailed instructions.
+Windows users can use tools such as **WinSCP** or **PuTTY** to automate deployment. Refer to their respective documentation for detailed instructions.
 
 The script will copy the files from the `public/` directory to your server. It is recommended to test the deployment on a local or non-production server first to ensure everything works as intended. Replace `<yourHostIp>` with your server's IP address (e.g., `192.168.1.1`) and `/var/www/myWebsite/` with the appropriate directory path on your server (e.g., `/var/www/html/`).
 
-Or simply move the contents manually.
+Or move the contents manually.
 
 ## 📁 File Structure
 
@@ -131,7 +131,7 @@ Or simply move the contents manually.
 
 ## 🎨 CSS Styling
 
-The generator uses **Tailwind CSS** for utility-first styling, which helps keep the CSS lightweight and maintainable. **Autoprefixer** is used to ensure cross-browser compatibility. For more information on customizing Tailwind CSS, refer to the [Tailwind CSS Documentation](https://tailwindcss.com/docs).
+The generator uses **Tailwind CSS** for utility-first styling, which helps keep the CSS lightweight and maintainable. **Autoprefixer** is used to ensure cross-browser compatibility. If you would like more information on customizing Tailwind CSS, please refer to the [Tailwind CSS Documentation](https://tailwindcss.com/docs).
 
 To customize the appearance of your site, you can:
 
