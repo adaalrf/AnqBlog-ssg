@@ -4,6 +4,8 @@ import path from 'path';
 import {
   parseHtmlFrontMatter,
   getFirstNthCharacters,
+  normalizeTagForFile,
+  denormalizeTagFromFile,
 } from './content-utils.js';
 import { readFileContent } from './path-and-file-utils.js';
 import { formatDate } from './date-utils.js';
@@ -23,37 +25,6 @@ export const paginatePosts = (posts, postsPerPage) => {
 };
 
 /**
- * Reads intermediate posts from a directory.
- * @param {string} tempPostsOutputDirectory - The directory to read the posts from.
- * @returns {Array} - The array of intermediate posts.
- */
-export const readIntermediatePosts = (tempPostsOutputDirectory) => {
-  if (typeof tempPostsOutputDirectory !== 'string') {
-    throw new TypeError('tempPostsOutputDirectory should be a string');
-  }
-
-  const files = fs.readdirSync(tempPostsOutputDirectory);
-  return files
-    .filter((file) => file.endsWith('.html'))
-    .map((file) => {
-      const filePath = path.join(tempPostsOutputDirectory, file);
-      const fileContent = readFileContent(filePath);
-      const { content } = parseHtmlFrontMatter(fileContent);
-      const dom = new JSDOM(content);
-      const document = dom.window.document;
-
-      const title = document.querySelector('.post-title')?.textContent;
-      const date = new Date(document.querySelector('.post-date')?.textContent);
-      const tags = Array.from(document.querySelectorAll('.tags a')).map(
-        (tag) => tag.textContent,
-      );
-      const previewContent = document.querySelector('.content')?.innerHTML;
-
-      return { title, date, tags, htmlFileName: file, previewContent };
-    });
-};
-
-/**
  * Creates a post item element.
  * @param {Object} post - The post data.
  * @param {HTMLElement} postItemTemplate - The post item template.
@@ -68,12 +39,26 @@ export const createPostItem = (
   tagsPath = '',
 ) => {
   const { title, date, tags, htmlFileName, previewContent } = post;
-  const postsPathSansPublic = postsPath.replace('public/', '');
-  const tagsPathSansPublic = tagsPath.replace('public/', '');
+  
+  // Convert to absolute web paths from site root
+  // Remove any relative path components and 'public/' prefix
+  let postsWebPath = postsPath.replace(/^\.\.\//g, '').replace(/public\//g, '');
+  let tagsWebPath = tagsPath.replace(/^\.\.\//g, '').replace(/public\//g, '');
+  
+  // Ensure paths start with /
+  if (postsWebPath && !postsWebPath.startsWith('/')) {
+    postsWebPath = '/' + postsWebPath;
+  }
+  if (tagsWebPath && !tagsWebPath.startsWith('/')) {
+    tagsWebPath = '/' + tagsWebPath;
+  }
+  
+  // Default to absolute paths if empty
+  if (!postsWebPath) postsWebPath = '/blog/posts';
+  if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
-  const titleLink = `<a href="${postsPathSansPublic}/${htmlFileName
-    .split(' ')
-    .join('-')}">${getFirstNthCharacters(title, 25)}</a>`;
+  const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
+  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${getFirstNthCharacters(title, 25)}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.querySelector('.post-title').innerHTML = titleLink;
@@ -89,9 +74,7 @@ export const createPostItem = (
       const tagsList = tags
         .map(
           (tag) =>
-            `<a href="${tagsPathSansPublic}/${tag
-              .split(' ')
-              .join('-')}.html">${tag.split('-').join(' ')}</a>`,
+            `<a href="${tagsWebPath}/${normalizeTagForFile(tag)}.html">${denormalizeTagFromFile(tag)}</a>`,
         )
         .join(' ');
 
@@ -121,19 +104,30 @@ export const updatePaginationLinks = (
   tag = '',
 ) => {
   const paginationDiv = document.querySelector('.pagination');
+  if (!paginationDiv) {
+    throw new Error('Pagination template must contain an element with class "pagination"');
+  }
   const previousLink = paginationDiv.querySelector('.previous-page');
   const nextLink = paginationDiv.querySelector('.next-page');
-  const tagWithDash = tag.split(' ').join('-');
+  
+  if (!previousLink || !nextLink) {
+    throw new Error('Pagination template must contain elements with classes "previous-page" and "next-page"');
+  }
+  const tagWithDash = normalizeTagForFile(tag);
 
   // Get the classes for normal and current page links
-  const classesNormalPageLink = document
-    .getElementById('page-link-1')
-    .className.split(' ')
-    .filter(Boolean);
-  const classesCurrentPageLink = document
-    .getElementById('page-link-3')
-    .className.split(' ')
-    .filter(Boolean);
+  const pageLink1 = document.getElementById('page-link-1');
+  const pageLink3 = document.getElementById('page-link-3');
+  
+  if (!pageLink1 || !pageLink3) {
+    throw new Error('Pagination template must contain elements with ids "page-link-1" and "page-link-3"');
+  }
+  
+  const classesNormalPageLink = pageLink1.className.split(' ').filter(Boolean);
+  const classesCurrentPageLink = pageLink3.className.split(' ').filter(Boolean);
+
+  // Determine the range of pages to display
+  const totalPages = paginatedPosts.length;
 
   // Helper function to update pagination links
   const updatePaginationLink = (pageLink, index, isCurrentPage) => {
@@ -147,14 +141,11 @@ export const updatePaginationLinks = (
         ? `${tag ? tagWithDash : 'index'}.html`
         : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
-    // Show the page link if there are more than one page
-    if (index.length > 0) {
+    // Show page link only if there are multiple pages
+    if (totalPages > 1) {
       pageLink.classList.remove('hidden');
     }
   };
-
-  // Determine the range of pages to display
-  const totalPages = paginatedPosts.length;
   const startPage = Math.max(0, Math.min(totalPages - 5, pageIndex - 2));
   const endPage = Math.min(totalPages, startPage + 5);
 
@@ -163,6 +154,9 @@ export const updatePaginationLinks = (
     const pageLink = paginationDiv.querySelector(
       `#page-link-${i - startPage + 1}`,
     );
+    if (!pageLink) {
+      throw new Error(`Pagination template must contain element with id "page-link-${i - startPage + 1}"`);
+    }
     const isActivePage = i === pageIndex; // Determine if the current page is the active page
     updatePaginationLink(pageLink, i, isActivePage); // Update the pagination link with the appropriate details
   }

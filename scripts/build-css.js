@@ -1,4 +1,4 @@
-import fs from 'fs';
+import fs from 'fs/promises';
 import postcss from 'postcss';
 import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
@@ -6,40 +6,48 @@ import config from './config.js';
 import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
 
 /**
- * Processes the input CSS file with PostCSS, Tailwind CSS, and Autoprefixer, and writes the output CSS file.
+ * Processes the input CSS file with PostCSS, Tailwind CSS, and Autoprefixer.
+ * Reads the source CSS, processes it through Tailwind and Autoprefixer, then writes the output.
+ * Also generates a source map if available.
+ * @throws {Error} - If file reading, processing, or writing fails.
  */
-const processCSS = () => {
-  const inputFilePath = config.inputCSS;
-  const outputFilePath = config.outputCSS;
+const processCSS = async () => {
+  try {
+    const inputFilePath = config.inputCSS;
+    const outputFilePath = config.outputCSS;
 
-  // Ensure the output directory exists
-  ensureDirectoryExists(outputFilePath);
+    // Ensure the output directory exists
+    ensureDirectoryExists(outputFilePath);
 
-  // Read the input CSS file
-  fs.readFile(inputFilePath, 'utf8', (err, css) => {
-    if (err) throw err;
+    // Read the input CSS file
+    const css = await fs.readFile(inputFilePath, 'utf8');
 
     // Process the CSS with PostCSS, Tailwind CSS, and Autoprefixer
-    postcss([tailwindcss, autoprefixer])
-      .process(css, { from: inputFilePath, to: outputFilePath })
-      .then((result) => {
-        // Write the processed CSS to the output file
-        fs.writeFile(outputFilePath, result.css, () =>
-          console.log(`(CSS.js): Generated css file -> ${outputFilePath}`),
-        );
-        if (result.map) {
-          fs.writeFile(
-            outputFilePath + '.map',
-            result.map.toString(),
-            () => true,
-          );
-        }
-      })
-      .catch((error) =>
-        console.error('(CSS.js): Failed to process CSS file ->', error),
-      );
-  });
+    const result = await postcss([tailwindcss, autoprefixer]).process(css, {
+      from: inputFilePath,
+      to: outputFilePath,
+    });
+
+    // Write the processed CSS to the output file
+    await fs.writeFile(outputFilePath, result.css);
+    console.log(`(CSS.js): Generated css file -> ${outputFilePath}`);
+
+    // Write source map if available
+    if (result.map) {
+      await fs.writeFile(outputFilePath + '.map', result.map.toString());
+    }
+  } catch (error) {
+    console.error('(CSS.js): Failed to process CSS file ->', error);
+    throw error;
+  }
 };
 
-// Execute the CSS processing
-processCSS();
+// Execute CSS processing
+(async () => {
+  try {
+    await processCSS();
+  } catch (error) {
+    console.error('(CSS.js): Failed to process CSS:', error);
+    process.exit(1);
+  }
+})();

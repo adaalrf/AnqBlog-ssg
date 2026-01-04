@@ -36,9 +36,10 @@ module.exports = {
             '--tw-prose-captions': theme('colors.foreground'),
             '--tw-prose-kbd': theme('colors.foreground'),
             '--tw-prose-kbd-shadows': theme('colors.foreground'),
-            '--tw-prose-code': theme('colors.background'),
-            '--tw-prose-pre-code': theme('colors.background'),
-            '--tw-prose-pre-bg': theme('colors.muted-foreground'),
+            '--tw-prose-code': theme('colors.code-foreground'),
+            '--tw-prose-pre-code': theme('colors.code-foreground'),
+            '--tw-prose-pre-bg': theme('colors.code'),
+            '--tw-prose-code-bg': theme('colors.code'),
             '--tw-prose-th-borders': theme('colors.foreground'),
             '--tw-prose-td-borders': theme('colors.foreground'),
             /* the rest seems to not be needed, since we are using our own dark-mode solution */

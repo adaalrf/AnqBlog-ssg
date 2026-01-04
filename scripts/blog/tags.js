@@ -3,7 +3,11 @@ import {
   createPostItem,
   updatePaginationLinks,
 } from '../utils/pagination-utils.js';
-import { generateFrontMatter } from '../utils/content-utils.js';
+import {
+  generateFrontMatter,
+  normalizeTagForFile,
+  denormalizeTagFromFile,
+} from '../utils/content-utils.js';
 import {
   readFileContent,
   ensureDirectoryExists,
@@ -11,12 +15,11 @@ import {
 } from '../utils/path-and-file-utils.js';
 import path from 'path';
 import { JSDOM } from 'jsdom';
-import config from '../config.js';
 
 /**
  * Generates tag pages for the blog.
- * @param {object} tags - The tags with associated posts.
- * @param {array} posts - The array of posts.
+ * @param {Object} tags - The tags with associated posts.
+ * @param {Array} posts - The array of posts.
  * @param {number} postsPerPage - The number of posts per page.
  * @param {string} templateTagsPath - The path to the tags template.
  * @param {string} templateMainTagsPath - The path to the main tags index template.
@@ -32,27 +35,37 @@ export const generateTagPages = (
 ) => {
   ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the directory exists
 
+  // Cache the template content to avoid reading it multiple times
+  const templateTagsContent = readFileContent(templateTagsPath);
+
   // Create an array to store tag link information for the index page
   const tagLinks = [];
 
   Object.keys(tags).forEach((tag) => {
-    const tagPosts = posts.filter((post) => post.tags.includes(tag));
+    const tagPosts = posts.filter((post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag));
     const tagContent = paginatePosts(tagPosts, postsPerPage);
 
     tagContent.forEach((pagePosts, pageIndex) => {
-      const templateTagsContent = readFileContent(templateTagsPath);
+      // Create a new JSDOM instance from cached template for each page
       const dom = new JSDOM(templateTagsContent);
       const document = dom.window.document;
       const postItemTemplate = document.querySelector('.post-item');
       const postLinksDiv = document.getElementById('post-links-div');
+      
+      if (!postItemTemplate) {
+        throw new Error('Tags template must contain an element with class "post-item"');
+      }
+      if (!postLinksDiv) {
+        throw new Error('Tags template must contain an element with id "post-links-div"');
+      }
 
       // Add each post to the post links container
       pagePosts.forEach((post) => {
         const postItem = createPostItem(
           post,
           postItemTemplate,
-          `../../${config.publicPostsOutputDirectory}`,
-          `../../${config.publicTagsOutputDirectory}`,
+          '/blog/posts',
+          '/blog/tags',
         );
         postLinksDiv.appendChild(postItem);
       });
@@ -61,19 +74,28 @@ export const generateTagPages = (
       updatePaginationLinks(document, pageIndex, tagContent, tag);
 
       // Save the tag page
-      const content = document.querySelector('#tag').outerHTML;
-      const filesWithDash = tag.split(' ').join('-');
+      const tagElement = document.querySelector('#tag');
+      if (!tagElement) {
+        throw new Error('Tags template must contain an element with id "tag"');
+      }
+      const content = tagElement.outerHTML;
+      // Sanitize tag for filename
+      const filesWithDash = normalizeTagForFile(tag)
+        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '-') // Remove invalid filesystem characters
+        .replace(/-+/g, '-') // Collapse multiple dashes
+        .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+      
       const outputFilePath =
         pageIndex === 0
           ? path.join(tempTagsOutputDirectory, `${filesWithDash}.html`)
           : path.join(
               tempTagsOutputDirectory,
-              `${filesWithDash}-${pageIndex + 1}.html`,
+              `${filesWithDash}-page-${pageIndex + 1}.html`,
             );
-      const filesWithoutDash = tag.split('-').join(' ');
-      const modifiedPathBar = `/ <a href=/blog/tags>Tags</a> / <em>${filesWithoutDash}</em>`;
+      const filesWithoutDash = denormalizeTagFromFile(tag);
+      const modifiedPathBar = `/ <a href=/blog/tags>Tags</a> / <em>${filesWithoutDash}</em>`.replace(/\s+/g, ' ').trim();
       // Add dynamic front matter to the content
-      const finalHtml = `${generateFrontMatter(posts, {
+      const finalHtml = `${generateFrontMatter({
         page: modifiedPathBar,
         title: filesWithoutDash,
       })}\n${content}`;
@@ -125,7 +147,7 @@ export const generateTagPages = (
 
   tagLinks.forEach((tagLink) => {
     if (!tagLink.link || !tagLink.tag) {
-      console.error('Invalid tagLink:', tagLink);
+      console.error('(Tags.js): Invalid tagLink:', tagLink);
       return;
     }
     const linkElement = document.createElement('a');
@@ -144,7 +166,7 @@ export const generateTagPages = (
 
   const content = document.querySelector('#tags').outerHTML;
   const mainTagsPath = path.join(tempTagsOutputDirectory, 'index.html');
-  const modifiedPathBar = `/ <em>Tags</em>`;
+  const modifiedPathBar = `/ <em>Tags</em>`.replace(/\s+/g, ' ').trim();
   // Add dynamic front matter to the content
   const finalIndexHtml = `${generateFrontMatter({
     page: modifiedPathBar,

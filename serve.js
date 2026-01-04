@@ -1,3 +1,4 @@
+#!/usr/bin/env node
 // serve.js
 // This script creates a simple HTTP server that serves static files from the public directory. It reads the requested file from the public directory, determines the content type based on the file extension,
 // and sends the file content as the response. If the requested file is not found, it looks for a 404.html file in the requested directory or falls back to the root 404.html file.
@@ -14,9 +15,26 @@ import fs from 'fs/promises';
 const port = process.env.PORT || 8080;
 const publicDir = path.resolve('./public');
 
+/**
+ * HTTP server request handler.
+ * Serves static files from the public directory with path traversal protection.
+ * Handles 404 errors by checking for directory-specific 404.html files.
+ * @param {http.IncomingMessage} req - The HTTP request object.
+ * @param {http.ServerResponse} res - The HTTP response object.
+ */
 const server = http.createServer(async (req, res) => {
   try {
-    let filePath = path.join(publicDir, req.url);
+    // Normalize the requested path and remove leading slashes for relative resolution
+    const url = req.url || '/';
+    const requestedPath = path.normalize(url.split('?')[0]).replace(/^(\.\.[\/\\])+/, '');
+    let filePath = path.resolve(publicDir, requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath);
+
+    // Ensure the resolved path is within the public directory by checking it starts with publicDir
+    if (!filePath.startsWith(publicDir + path.sep) && filePath !== publicDir) {
+      res.writeHead(403, { 'Content-Type': 'text/plain' });
+      res.end('403 Forbidden: Path traversal detected', 'utf-8');
+      return;
+    }
 
     // If the request points to a directory, serve the index.html file
     let stats = await fs.stat(filePath);
@@ -51,7 +69,17 @@ const server = http.createServer(async (req, res) => {
   } catch (error) {
     if (error.code === 'ENOENT') {
       // If file not found, try finding a 404.html in the requested directory first
-      const directoryPath = path.join(publicDir, req.url);
+      const url = req.url || '/';
+      const requestedPath = path.normalize(url.split('?')[0]).replace(/^(\.\.[\/\\])+/, '');
+      const directoryPath = path.resolve(publicDir, requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath);
+
+      // Ensure directory path is still within public directory
+      if (!directoryPath.startsWith(publicDir + path.sep) && directoryPath !== publicDir) {
+        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.end('404 Not Found', 'utf-8');
+        return;
+      }
+
       const notFoundPath = path.join(directoryPath, '404.html');
 
       try {

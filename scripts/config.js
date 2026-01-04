@@ -6,6 +6,7 @@ import { fpr } from './utils/path-and-file-utils.js';
  */
 const siteConfig = {
   siteName: '. adaalrf.dev',
+  postsPerPage: 5,
 };
 
 /**
@@ -15,7 +16,6 @@ const siteConfig = {
 const pathConfig = {
   inputCSS: fpr('src/styles/tailwind.css'),
   outputCSS: fpr('public/styles/styles.css'),
-  markedConfigPath: fpr('marked.json'),
   contentDirectory: fpr('src/content'),
   postsContentDirectory: fpr('src/content/blog/posts'),
   templatePostsPath: fpr('src/templates/post-template.html'),

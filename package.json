@@ -1,14 +1,22 @@
 {
   "name": "adaalrf_dev",
   "version": "0.4.0",
-  "description": "Adaalrf.dev, a modular static site generator designed to help you build fast, reliable, and beautifully styled static websites.",
+  "description": "A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.",
   "main": "index.js",
   "type": "module",
   "scripts": {
     "build": "node build.js",
     "serve": "node serve.js"
   },
-  "keywords": [],
+  "keywords": [
+    "static-site-generator",
+    "ssg",
+    "blog",
+    "markdown",
+    "tailwindcss",
+    "static-site",
+    "generator"
+  ],
   "author": "Adaalrf",
   "license": "MIT",
   "dependencies": {

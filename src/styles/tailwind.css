@@ -12,8 +12,8 @@
     --accent-foreground: var(--background);
     --destructive: hsl(0, 80%, 60%); /* Destructive Red (#ff6e6e) */
     --destructive-foreground: var(--foreground);
-    --code: var(--foreground);
-    --code-foreground: hsl(30, 20%, 95%); /* Same as background */
+    --code: hsl(30, 20%, 90%); /* Slightly darker than background for code bg */
+    --code-foreground: hsl(220, 13%, 20%); /* Foreground color for code text */
   }
 
   .dark {
@@ -25,8 +25,8 @@
     --accent-foreground: var(--background);
     --destructive: hsl(0, 76%, 70%); /* Destructive Red (#ed7878) */
     --destructive-foreground: var(--foreground);
-    --code: var(--foreground);
-    --code-foreground: hsl(240, 15%, 15%); /* Same as background */
+    --code: hsl(240, 15%, 20%); /* Slightly lighter than background for code bg */
+    --code-foreground: hsl(230, 33%, 90%); /* Foreground color for code text */
   }
 
   html {

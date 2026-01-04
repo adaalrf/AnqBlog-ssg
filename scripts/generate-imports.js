@@ -1,5 +1,3 @@
-// generate-imports.js
-
 import fs from 'fs';
 import { fpr } from './utils/path-and-file-utils.js';
 
@@ -20,14 +18,13 @@ const generateImports = () => {
     .map((file) => `import './${file.replace('.ts', '')}';`)
     .join('\n');
 
-  // Add initialization logic to the main.ts content
+  // Generate main.ts content with imports and initialization
   const mainContent = `
 ${imports}
 
 // Initialization logic
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Website loaded');
-    // Additional website logic here
 });
 `;
 

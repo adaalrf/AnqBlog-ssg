@@ -2,9 +2,10 @@ import {
   replacePlaceholders,
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
+  normalizeTagForFile,
+  denormalizeTagFromFile,
 } from './utils/content-utils.js';
 import {
-  rp,
   fpr,
   readFileContent,
   ensureDirectoryExists,
@@ -16,26 +17,22 @@ import config from './config.js';
 
 /**
  * Generates the tags dropdown HTML.
- * @param {object} tags - The tags object.
+ * @param {Object} tags - The tags object.
  * @param {string} currentFilePath - The current file path.
  * @returns {string} - The generated tags dropdown HTML.
  */
 const generateTagsDropdown = (tags, currentFilePath) => {
   if (!currentFilePath) {
-    console.error('Error: currentFilePath is undefined.');
+    console.error('(Apply-Layout.js): Error: currentFilePath is undefined');
     return '';
   }
 
+  // Use absolute paths from site root for consistency
   return Object.keys(tags)
     .map((tag) => {
-      const relativePath = rp(
-        path.dirname(currentFilePath),
-        `${tag}.html`,
-        fpr('public/blog/tags'),
-      );
-      const filesWithDash = tag.split(' ').join('-');
-      const filesWithoutDash = tag.split('-').join(' ');
-      return `<li><a href="${relativePath}${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
+      const filesWithDash = normalizeTagForFile(tag);
+      const filesWithoutDash = denormalizeTagFromFile(tag);
+      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
     })
     .join('\n');
 };
@@ -43,28 +40,40 @@ const generateTagsDropdown = (tags, currentFilePath) => {
 /**
  * Applies the main layout to all HTML files in multiple directories.
  * @param {Array} directoryPairs - Array of directory pairs (input and output).
- * @param {object} tags - Tags object.
+ * @param {Object} tags - Tags object.
  */
 export const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
   const processedDirs = new Set();
+  // Cache templates to avoid reading them multiple times
+  const templateCache = {
+    mainLayout: null,
+    specificTemplates: {},
+  };
 
   directoryPairs.forEach(({ inputDir, outputDir }) => {
-    processDirectory(inputDir, outputDir, tags, processedDirs);
+    processDirectory(inputDir, outputDir, tags, processedDirs, templateCache);
   });
 };
 
 /**
- * Processes a single directory to apply the main layout.
- * @param {string} inputDir - The input directory.
- * @param {string} outputDir - The output directory.
- * @param {object} tags - Tags object.
- * @param {Set} processedDirs - Set of processed directories.
+ * Processes a single directory to apply the main layout to HTML files.
+ * Recursively processes subdirectories and applies templates to HTML files.
+ * @param {string} inputDir - The input directory to process.
+ * @param {string} outputDir - The output directory for processed files.
+ * @param {Object} tags - Tags object for generating dropdowns.
+ * @param {Set<string>} processedDirs - Set of already processed directories to avoid duplicates.
+ * @param {Object} templateCache - Cache object for storing template content.
  */
-const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
+const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCache) => {
   if (processedDirs.has(inputDir)) {
     return;
   }
   processedDirs.add(inputDir);
+
+  // Skip if directory doesn't exist
+  if (!fs.existsSync(inputDir)) {
+    return;
+  }
 
   const files = fs.readdirSync(inputDir);
 
@@ -78,7 +87,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
 
     if (fs.statSync(inputFilePath).isDirectory()) {
       ensureDirectoryExists(outputFilePath);
-      processDirectory(inputFilePath, outputFilePath, tags, processedDirs);
+      processDirectory(inputFilePath, outputFilePath, tags, processedDirs, templateCache);
     } else if (file.endsWith('.html')) {
       const fileContent = readFileContent(inputFilePath);
       const { data, content } = parseHtmlFrontMatter(fileContent);
@@ -93,7 +102,11 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
       // If a specific template exists, inject the content into it
       let mainContent;
       if (specificTemplateExists) {
-        const templateContent = readFileContent(templateFilePath);
+        // Cache specific templates
+        if (!templateCache.specificTemplates[templateFilePath]) {
+          templateCache.specificTemplates[templateFilePath] = readFileContent(templateFilePath);
+        }
+        const templateContent = templateCache.specificTemplates[templateFilePath];
         const dom = injectContentIntoTemplate(templateContent, {
           ...data,
           content,
@@ -104,25 +117,27 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs) => {
         mainContent = content;
       }
 
-      const relativeOutputPath = rp(
-        path.dirname(outputFilePath),
-        file,
-        fpr('public'),
-      );
+      // All assets are at the site root, use absolute paths from root
       const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
-      let mainLayoutContent = readFileContent(config.mainLayoutPath);
+      // Cache main layout template
+      if (!templateCache.mainLayout) {
+        templateCache.mainLayout = readFileContent(config.mainLayoutPath);
+      }
+      const mainLayoutContent = templateCache.mainLayout;
 
-      const finalTitle = `${config.siteName} | ${data.title}`;
-      // Replace placeholders in the main layout
+      const finalTitle = `${config.siteName} | ${data.title || ''}`;
+      // Replace placeholders in the main layout - all assets are at root
+      // Provide defaults for missing fields
       const finalHtml = replacePlaceholders(mainLayoutContent, {
         ...data,
         title: finalTitle,
+        page: data.page || '', // Default to empty if not provided
         children: mainContent,
         tagsDropdown: tagsDropdownContent,
-        stylesPath: path.join(relativeOutputPath, 'styles/styles.css'),
-        faviconPath: path.join(relativeOutputPath, 'assets/favicon.ico'),
-        scriptPath: path.join(relativeOutputPath, 'js/bundle.js'),
-        gitLogoPath: path.join(relativeOutputPath, 'assets/github-icon.svg'),
+        stylesPath: '/styles/styles.css',
+        faviconPath: '/assets/favicon.ico',
+        scriptPath: '/js/bundle.js',
+        gitLogoPath: '/assets/github-icon.svg',
       });
 
       writeFileContent(outputFilePath, finalHtml);

@@ -3,19 +3,12 @@ const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
 const burgerMenu = document.querySelector<HTMLElement>('#burger-dropdown');
 const savedTheme = localStorage.getItem('theme');
 
-const rp = (path: string): string => {
-  const fullPath = new URL(path, import.meta.url).pathname;
-  const rootPath = new URL(import.meta.url).pathname
-    .split('/') // Remove the filename
-    .slice(0, -2) // Remove the 'ts' and 'js' directories
-    .join('/'); // Join the path back together
-  return fullPath.replace(rootPath, '');
-};
-
-const sunIconPath = rp('../assets/icons/sun.svg');
-const moonIconPath = rp('../assets/icons/moon.svg');
-const burgerLightPath = rp('../assets/icons/burger-light.svg');
-const burgerDarkPath = rp('../assets/icons/burger-dark.svg');
+// Use absolute paths from site root for static assets
+// This works regardless of the current page's location
+const sunIconPath = '/assets/icons/sun.svg';
+const moonIconPath = '/assets/icons/moon.svg';
+const burgerLightPath = '/assets/icons/burger-light.svg';
+const burgerDarkPath = '/assets/icons/burger-dark.svg';
 
 /**
  * Creates an <img> element for the theme icon.
