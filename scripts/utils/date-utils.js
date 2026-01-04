@@ -1,5 +1,5 @@
 /**
- * Parses a custom date format (DD.MM.YYYY) into a Date object.
+ * Parses a date string in either ISO 8601 format (YYYY-MM-DD) or DD.MM.YYYY format into a Date object.
  * @param {string} dateString - The date string to parse.
  * @returns {Date} - The parsed Date object.
  * @throws {Error} - If the date string is invalid or in wrong format.
@@ -9,10 +9,30 @@ export const parseDate = (dateString) => {
     throw new Error('Date string must be a non-empty string');
   }
 
+  // Try ISO 8601 format first (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ss)
+  const isoDate = new Date(dateString);
+  if (!isNaN(isoDate.getTime())) {
+    // Check if it's a valid ISO date format (YYYY-MM-DD)
+    const isoMatch = dateString.match(/^(\d{4})-(\d{2})-(\d{2})/);
+    if (isoMatch) {
+      const [, year, month, day] = isoMatch.map(Number);
+      const date = new Date(year, month - 1, day);
+      // Validate the date is actually valid
+      if (
+        date.getFullYear() === year &&
+        date.getMonth() === month - 1 &&
+        date.getDate() === day
+      ) {
+        return date;
+      }
+    }
+  }
+
+  // Fall back to DD.MM.YYYY format
   const parts = dateString.split('.');
   if (parts.length !== 3) {
     throw new Error(
-      `Invalid date format. Expected DD.MM.YYYY, got: ${dateString}`,
+      `Invalid date format. Expected DD.MM.YYYY or YYYY-MM-DD (ISO 8601), got: ${dateString}`,
     );
   }
 

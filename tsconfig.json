@@ -11,10 +11,7 @@
     "skipLibCheck": true
   },
   "include": [
-    "src/**/*.ts",
-    "src/ts/generate-index.js",
-    "src/ts/fetch-posts.ts",
-    "legacy/toggle-theme.ts"
+    "src/**/*.ts"
   ],
   "exclude": ["node_modules", "public", "legacy"]
 }

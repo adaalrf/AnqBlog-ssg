@@ -24,7 +24,7 @@ const generateAllHtmlFiles = () => {
 
   const truncatedPosts = processAndSortMarkdownFiles(
     config.postsContentDirectory,
-    { previewLength: 200 },
+    { previewLength: config.previewLength },
   );
 
   const fullPosts = processAndSortMarkdownFiles(config.postsContentDirectory);
@@ -101,10 +101,20 @@ const processAndSortMarkdownFiles = (directory, options = {}) => {
         console.warn(`Post missing content: ${post.htmlFileName || 'unknown'}`);
       }
       
+      // Parse date with error handling
+      let postDate = new Date();
+      if (post.date) {
+        try {
+          postDate = parseDate(post.date);
+        } catch (error) {
+          console.warn(`Post has invalid date "${post.date}" (${post.htmlFileName || 'unknown'}): ${error.message}. Using current date.`);
+        }
+      }
+      
       return {
         ...post,
         title: post.title || 'Untitled',
-        date: post.date ? parseDate(post.date) : new Date(),
+        date: postDate,
         tags: Array.isArray(post.tags) ? post.tags : [],
         content: post.content || '',
       };

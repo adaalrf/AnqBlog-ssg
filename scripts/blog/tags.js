@@ -12,6 +12,7 @@ import {
   readFileContent,
   ensureDirectoryExists,
   writeFileContent,
+  sanitizeFilename,
 } from '../utils/path-and-file-utils.js';
 import path from 'path';
 import { JSDOM } from 'jsdom';
@@ -80,10 +81,7 @@ export const generateTagPages = (
       }
       const content = tagElement.outerHTML;
       // Sanitize tag for filename
-      const filesWithDash = normalizeTagForFile(tag)
-        .replace(/[<>:"/\\|?*\x00-\x1f]/g, '-') // Remove invalid filesystem characters
-        .replace(/-+/g, '-') // Collapse multiple dashes
-        .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+      const filesWithDash = sanitizeFilename(normalizeTagForFile(tag));
       
       const outputFilePath =
         pageIndex === 0

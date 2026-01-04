@@ -86,3 +86,20 @@ export const fpr = (relativePath) => {
   return path.join(projectRoot, relativePath);
 };
 
+/**
+ * Sanitizes a filename by removing/replacing invalid filesystem characters.
+ * @param {string} filename - The filename to sanitize.
+ * @returns {string} - The sanitized filename.
+ * @throws {Error} - If filename is not a string.
+ */
+export const sanitizeFilename = (filename) => {
+  if (typeof filename !== 'string') {
+    throw new Error('Filename must be a string');
+  }
+  return filename
+    .replace(/[<>:"/\\|?*\x00-\x1f]/g, '-') // Remove invalid filesystem characters
+    .replace(/\s+/g, '-') // Replace spaces with dashes
+    .replace(/-+/g, '-') // Collapse multiple dashes
+    .replace(/^-|-$/g, ''); // Remove leading/trailing dashes
+};
+

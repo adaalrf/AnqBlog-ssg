@@ -9,6 +9,7 @@ import {
 } from './content-utils.js';
 import { readFileContent } from './path-and-file-utils.js';
 import { formatDate } from './date-utils.js';
+import config from '../config.js';
 
 /**
  * Splits posts into pages.
@@ -39,12 +40,12 @@ export const createPostItem = (
   tagsPath = '',
 ) => {
   const { title, date, tags, htmlFileName, previewContent } = post;
-  
+
   // Convert to absolute web paths from site root
   // Remove any relative path components and 'public/' prefix
   let postsWebPath = postsPath.replace(/^\.\.\//g, '').replace(/public\//g, '');
   let tagsWebPath = tagsPath.replace(/^\.\.\//g, '').replace(/public\//g, '');
-  
+
   // Ensure paths start with /
   if (postsWebPath && !postsWebPath.startsWith('/')) {
     postsWebPath = '/' + postsWebPath;
@@ -52,13 +53,13 @@ export const createPostItem = (
   if (tagsWebPath && !tagsWebPath.startsWith('/')) {
     tagsWebPath = '/' + tagsWebPath;
   }
-  
+
   // Default to absolute paths if empty
   if (!postsWebPath) postsWebPath = '/blog/posts';
   if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
   const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
-  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${getFirstNthCharacters(title, 25)}</a>`;
+  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${getFirstNthCharacters(title, config.titleTruncationLength)}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.querySelector('.post-title').innerHTML = titleLink;
@@ -109,7 +110,7 @@ export const updatePaginationLinks = (
   }
   const previousLink = paginationDiv.querySelector('.previous-page');
   const nextLink = paginationDiv.querySelector('.next-page');
-  
+
   if (!previousLink || !nextLink) {
     throw new Error('Pagination template must contain elements with classes "previous-page" and "next-page"');
   }
@@ -118,11 +119,11 @@ export const updatePaginationLinks = (
   // Get the classes for normal and current page links
   const pageLink1 = document.getElementById('page-link-1');
   const pageLink3 = document.getElementById('page-link-3');
-  
+
   if (!pageLink1 || !pageLink3) {
     throw new Error('Pagination template must contain elements with ids "page-link-1" and "page-link-3"');
   }
-  
+
   const classesNormalPageLink = pageLink1.className.split(' ').filter(Boolean);
   const classesCurrentPageLink = pageLink3.className.split(' ').filter(Boolean);
 
@@ -146,8 +147,8 @@ export const updatePaginationLinks = (
       pageLink.classList.remove('hidden');
     }
   };
-  const startPage = Math.max(0, Math.min(totalPages - 5, pageIndex - 2));
-  const endPage = Math.min(totalPages, startPage + 5);
+  const startPage = Math.max(0, Math.min(totalPages - config.paginationWindowSize, pageIndex - 2));
+  const endPage = Math.min(totalPages, startPage + config.paginationWindowSize);
 
   // Update the pagination links
   for (let i = startPage; i < endPage; i++) {
@@ -164,9 +165,8 @@ export const updatePaginationLinks = (
   // Next page link
   nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
   if (!nextLink.classList.contains('hidden')) {
-    nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${
-      pageIndex + 2
-    }.html`;
+    nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex + 2
+      }.html`;
   }
 
   // Previous page link

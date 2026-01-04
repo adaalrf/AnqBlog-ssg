@@ -207,8 +207,10 @@ export const processMarkdownFiles = (directory, options = {}) => {
     throw new Error('Options must be an object');
   }
 
-  // Return empty array if directory doesn't exist
+  // Return empty array if directory doesn't exist (allows graceful handling for first-time setup)
+  // Log a warning to help users identify configuration issues
   if (!fs.existsSync(directory)) {
+    console.warn(`(Content-utils.js): Directory does not exist: ${directory}. Returning empty array.`);
     return [];
   }
 

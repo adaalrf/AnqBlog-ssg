@@ -17,7 +17,7 @@ const rootDir = process.cwd();
     await fs.rm(publicDir, { recursive: true, force: true });
 
     // Remove temp directory
-    const tempDir = path.join(rootDir, 'src', 'temp');
+    const tempDir = path.join(rootDir, '.build');
     await fs.rm(tempDir, { recursive: true, force: true });
 
     // Generate dynamic imports

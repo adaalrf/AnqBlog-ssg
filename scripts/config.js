@@ -7,6 +7,10 @@ import { fpr } from './utils/path-and-file-utils.js';
 const siteConfig = {
   siteName: '. adaalrf.dev',
   postsPerPage: 5,
+  previewLength: 200, // Character length for post previews
+  titleTruncationLength: 25, // Character length for truncated titles in post items
+  titleTruncationLengthBreadcrumb: 20, // Character length for truncated titles in breadcrumbs
+  paginationWindowSize: 5, // Number of page links to show in pagination
 };
 
 /**
@@ -23,9 +27,9 @@ const pathConfig = {
   templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
   templateTagsPath: fpr('src/templates/tags-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
-  tempPostsOutputDirectory: fpr('src/temp/blog/posts'),
-  tempTagsOutputDirectory: fpr('src/temp/blog/tags'),
-  tempBlogOutputPath: fpr('src/temp/blog'),
+  tempPostsOutputDirectory: fpr('.build/blog/posts'),
+  tempTagsOutputDirectory: fpr('.build/blog/tags'),
+  tempBlogOutputPath: fpr('.build/blog'),
   publicContentOutputDirectory: fpr('public'),
   publicBlogOutputPath: fpr('public/blog'),
   publicPostsOutputDirectory: fpr('public/blog/posts'),
