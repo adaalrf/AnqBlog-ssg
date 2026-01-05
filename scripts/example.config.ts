@@ -1,30 +1,32 @@
 import { fpr } from './utils/path-and-file-utils.js';
+import type { SiteConfig, PathConfig } from './types/config.js';
 
 /**
- * Site configuration settings for the static site generator.
- * @type {Object}
+ * Example configuration file for the static site generator.
+ * 
+ * Copy this file to `scripts/config.ts` and customize the values for your site.
+ * The `config.ts` file is gitignored and should contain your site-specific settings.
  */
-const siteConfig = {
-  siteName: '. adaalrf.dev',
-  siteDescription: 'The personal website and blog of the individual known as Adaalrf.',
-  siteUrl: 'https://ssg.adaalrf.dev', // Base URL for the site (used for canonical URLs and Open Graph)
-  githubUrl: 'https://github.com/adaalrf',
-  authorName: 'adaalrf', // Author name displayed in footer
-  copyrightYear: new Date().getFullYear(),
-  postsPerPage: 5,
+const siteConfig: SiteConfig = {
+  siteName: 'My Blog', // Site name displayed in header
+  siteDescription: 'My awesome blog', // Site description for meta tags
+  siteUrl: 'https://example.com', // Base URL (used for canonical URLs and Open Graph)
+  githubUrl: 'https://github.com/username', // GitHub profile URL
+  authorName: 'username', // Author name displayed in footer
+  copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
+  postsPerPage: 5, // Number of posts per paginated page
   previewLength: 200, // Character length for post previews
-  titleTruncationLength: 25, // Character length for truncated titles in post items
-  titleTruncationLengthBreadcrumb: 20, // Character length for truncated titles in breadcrumbs
-  paginationWindowSize: 5, // Number of page links to show in pagination
+  titleTruncationLength: 25, // Max title length in post listings
+  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
+  paginationWindowSize: 5, // Number of page links in pagination
   dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
   siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
 };
 
 /**
  * Path configuration settings for the static site generator.
- * @type {Object}
  */
-const pathConfig = {
+const pathConfig: PathConfig = {
   inputCSS: fpr('src/styles/tailwind.css'),
   outputCSS: fpr('public/styles/styles.css'),
   contentDirectory: fpr('src/content'),
@@ -45,7 +47,6 @@ const pathConfig = {
 
 /**
  * Exports the combined configuration settings.
- * @type {Object}
  */
 const config = {
   ...siteConfig,
@@ -53,3 +54,4 @@ const config = {
 };
 
 export default config;
+

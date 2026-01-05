@@ -16,7 +16,7 @@ The build process requires Node.js, but the generated static site can be served 
 - **Dark Mode** - Built-in light/dark theme toggle with persistent user preference
 - **Performance Optimized** - Parallel processing, HTML minification, and efficient builds
 - **Tailwind CSS** - Modern utility-first CSS framework with custom theme support
-- **TypeScript** - Type-safe client-side interactivity
+- **TypeScript** - Fully type-safe codebase (build scripts and client-side code)
 - **Build Progress** - Real-time progress indicators during build process
 
 ## Requirements
@@ -37,7 +37,7 @@ npm install
 Copy the example configuration file:
 
 ```bash
-cp scripts/example.config.js scripts/config.js
+cp scripts/example.config.ts scripts/config.ts
 ```
 
 ## Usage
@@ -66,9 +66,9 @@ Copy the example configuration file if you haven't already:
 cp scripts/example.config.js scripts/config.js
 ```
 
-Then edit `scripts/config.js` to customize your site:
+Then edit `scripts/config.ts` to customize your site:
 
-```javascript
+```typescript
 const siteConfig = {
   siteName: 'My Blog',                      // Site name displayed in header
   siteDescription: 'My awesome blog',       // Site description for meta tags
@@ -111,7 +111,7 @@ The site will be available at `http://localhost:8080` by default.
 PORT=3000 npm run serve
 ```
 
-> **Important:** `serve.js` requires Node.js and is for **local development only**. The built site in `public/` contains only static files (HTML, CSS, JavaScript) and can be served by **any web server without Node.js**.
+> **Important:** `serve.ts` requires Node.js and is for **local development only**. The built site in `public/` contains only static files (HTML, CSS, JavaScript) and can be served by **any web server without Node.js**.
 
 ## Deployment
 
@@ -141,13 +141,17 @@ anq-blog-ssg/
 │   ├── styles/          # Tailwind CSS source
 │   ├── templates/       # HTML templates
 │   └── ts/              # TypeScript source files
-├── scripts/             # Build scripts and utilities
+├── scripts/             # Build scripts and utilities (TypeScript source)
 │   ├── blog/            # Blog-specific generators
-│   └── utils/           # Utility functions
+│   ├── utils/           # Utility functions
+│   └── types/           # TypeScript type definitions
+│       ├── index.ts     # Core types (Post, ProcessMarkdownOptions, etc.)
+│       └── config.ts    # Configuration types
+├── dist/                # Compiled JavaScript (generated, gitignored)
 ├── .build/              # Temporary build artifacts (generated, not committed)
 ├── public/              # Generated static site (output)
-├── build.js             # Main build orchestrator
-├── serve.js             # Local development server
+├── build.ts             # Main build orchestrator (TypeScript)
+├── serve.ts             # Local development server (TypeScript)
 └── package.json         # Dependencies and scripts
 ```
 
@@ -202,12 +206,12 @@ Customize styles in `src/styles/tailwind.css` and configure Tailwind in `tailwin
 Copy the example configuration file if you haven't already:
 
 ```bash
-cp scripts/example.config.js scripts/config.js
+cp scripts/example.config.ts scripts/config.ts
 ```
 
-Edit `scripts/config.js` to customize your site settings. The configuration is split into `siteConfig` (user-facing settings) and `pathConfig` (internal paths). You typically only need to modify `siteConfig`:
+Edit `scripts/config.ts` to customize your site settings. The configuration is split into `siteConfig` (user-facing settings) and `pathConfig` (internal paths). You typically only need to modify `siteConfig`:
 
-```javascript
+```typescript
 const siteConfig = {
   siteName: 'My Blog',                    // Site name displayed in header
   siteDescription: 'My awesome blog',     // Site description for meta tags
@@ -283,14 +287,18 @@ Check that template files are present and verify file permissions.
 
 The build process includes several optimization steps executed in order:
 
-1. **Import Generation** - Automatically generates TypeScript imports from `src/ts/` directory
-2. **Code Bundling** - Bundles TypeScript with Webpack into a single JavaScript file
-3. **Asset Copying** - Copies static assets (images, icons, favicon) to output directory
-4. **Content Generation** - Processes Markdown files and generates HTML pages with pagination
-5. **CSS Processing** - Compiles Tailwind CSS with PostCSS and Autoprefixer
-6. **HTML Minification** - Optimizes HTML output (preserves code blocks and whitespace in `<pre>` tags)
+1. **TypeScript Compilation** - Compiles all TypeScript source files to JavaScript in `dist/` directory
+2. **Configuration Validation** - Validates site configuration and paths before building
+3. **Import Generation** - Automatically generates TypeScript imports from `src/ts/` directory
+4. **Code Bundling** - Bundles TypeScript with Webpack into a single JavaScript file
+5. **Asset Copying** - Copies static assets (images, icons, favicon) to output directory
+6. **Content Generation** - Processes Markdown files and generates HTML pages with pagination
+7. **CSS Processing** - Compiles Tailwind CSS with PostCSS and Autoprefixer
+8. **HTML Minification** - Optimizes HTML output (preserves code blocks and whitespace in `<pre>` tags)
 
 Build progress is displayed in real-time, showing the number of posts, pages, and tags being processed. The entire build process is optimized for speed with parallel processing where possible.
+
+**Note:** The `dist/` directory contains compiled JavaScript files and is automatically generated during the build process. It is gitignored and should not be committed to version control.
 
 ## Performance
 
@@ -298,18 +306,6 @@ Build progress is displayed in real-time, showing the number of posts, pages, an
 - **HTML Minification** - Reduces file sizes by 10-20% while preserving code blocks
 - **Template Caching** - Templates are cached to minimize I/O operations
 - **Optimized Output** - Clean, minified HTML, CSS, and JavaScript
-
-## Contributing
-
-Contributions are welcome! If you'd like to contribute:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add some amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
-
-For bug reports or feature requests, please open an issue on GitHub.
 
 ## License
 

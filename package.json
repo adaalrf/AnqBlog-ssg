@@ -4,8 +4,9 @@
   "description": "A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.",
   "type": "module",
   "scripts": {
-    "build": "node build.js",
-    "serve": "node serve.js"
+    "build": "tsc && node dist/build.js",
+    "serve": "tsc && node dist/serve.js",
+    "compile": "tsc"
   },
   "keywords": [
     "static-site-generator",

@@ -1,25 +1,23 @@
-import { JSDOM } from 'jsdom';
-import fs from 'fs';
 import path from 'path';
 import {
-  parseHtmlFrontMatter,
   getFirstNthCharacters,
   normalizeTagForFile,
   denormalizeTagFromFile,
   escapeHtml,
 } from './content-utils.js';
-import { readFileContent } from './path-and-file-utils.js';
+import { filePathToWebPath } from './path-and-file-utils.js';
 import { formatDate, formatDateISO } from './date-utils.js';
 import config from '../config.js';
+import type { Post } from '../types/index.js';
 
 /**
  * Splits posts into pages.
- * @param {Array} posts - The array of posts.
- * @param {number} postsPerPage - The number of posts per page.
- * @returns {Array} - The paginated posts.
+ * @param posts - The array of posts.
+ * @param postsPerPage - The number of posts per page.
+ * @returns The paginated posts.
  */
-export const paginatePosts = (posts, postsPerPage) => {
-  const paginatedPosts = [];
+export const paginatePosts = (posts: Post[], postsPerPage: number): Post[][] => {
+  const paginatedPosts: Post[][] = [];
   for (let i = 0; i < posts.length; i += postsPerPage) {
     paginatedPosts.push(posts.slice(i, i + postsPerPage));
   }
@@ -28,18 +26,18 @@ export const paginatePosts = (posts, postsPerPage) => {
 
 /**
  * Creates a post item element.
- * @param {Object} post - The post data.
- * @param {HTMLElement} postItemTemplate - The post item template.
- * @param {string} [postsPath=''] - The base path for the posts links.
- * @param {string} [tagsPath=''] - The base path for the tags links.
- * @returns {HTMLElement} - The post item element.
+ * @param post - The post data.
+ * @param postItemTemplate - The post item template.
+ * @param postsPath - The base path for the posts links.
+ * @param tagsPath - The base path for the tags links.
+ * @returns The post item element.
  */
 export const createPostItem = (
-  post,
-  postItemTemplate,
-  postsPath = '',
-  tagsPath = '',
-) => {
+  post: Post,
+  postItemTemplate: Element,
+  postsPath: string = '',
+  tagsPath: string = '',
+): Element => {
   const { title, date, tags, htmlFileName, previewContent } = post;
 
   // Convert to absolute web paths from site root
@@ -61,18 +59,26 @@ export const createPostItem = (
 
   const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
   // Escape title to prevent XSS attacks
-  const escapedTitle = escapeHtml(getFirstNthCharacters(title, config.titleTruncationLength));
+  const escapedTitle = escapeHtml(getFirstNthCharacters(title, (config as { titleTruncationLength: number }).titleTruncationLength));
   const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${escapedTitle}</a>`;
 
-  const postItem = postItemTemplate.cloneNode(true);
-  postItem.querySelector('.post-title').innerHTML = titleLink;
+  const postItem = postItemTemplate.cloneNode(true) as Element;
+  const titleElement = postItem.querySelector('.post-title');
+  if (titleElement) {
+    titleElement.innerHTML = titleLink;
+  }
+  
   // Update time element with ISO date and formatted display
   const dateElement = postItem.querySelector('.post-date');
   if (dateElement) {
     dateElement.setAttribute('datetime', formatDateISO(date));
     dateElement.textContent = formatDate(date);
   }
-  postItem.querySelector('.content').innerHTML = previewContent;
+  
+  const contentElement = postItem.querySelector('.content');
+  if (contentElement) {
+    contentElement.innerHTML = previewContent;
+  }
 
   const tagsContainer = postItem.querySelector('.tags');
   const tagsContainerMobile = postItem.querySelector('.tags-mobile');
@@ -102,28 +108,46 @@ export const createPostItem = (
 
 /**
  * Updates pagination links.
- * @param {Document} document - The DOM document.
- * @param {number} pageIndex - The current page index.
- * @param {Array} paginatedPosts - The array of paginated posts.
- * @param {string} [tag=''] - The tag (if any).
+ * @param document - The DOM document.
+ * @param pageIndex - The current page index.
+ * @param paginatedPosts - The array of paginated posts.
+ * @param tag - The tag (if any).
+ * @param outputDir - The output directory path (e.g., config.publicBlogOutputPath).
+ * @param publicDir - The public directory path (e.g., config.publicContentOutputDirectory).
  */
 export const updatePaginationLinks = (
-  document,
-  pageIndex,
-  paginatedPosts,
-  tag = '',
-) => {
+  document: Document,
+  pageIndex: number,
+  paginatedPosts: Post[][],
+  tag: string = '',
+  outputDir: string | null = null,
+  publicDir: string | null = null,
+): void => {
   const paginationDiv = document.querySelector('.pagination');
   if (!paginationDiv) {
     throw new Error('Pagination template must contain an element with class "pagination"');
   }
-  const previousLink = paginationDiv.querySelector('.previous-page');
-  const nextLink = paginationDiv.querySelector('.next-page');
+  const previousLink = paginationDiv.querySelector('.previous-page') as HTMLAnchorElement;
+  const nextLink = paginationDiv.querySelector('.next-page') as HTMLAnchorElement;
 
   if (!previousLink || !nextLink) {
     throw new Error('Pagination template must contain elements with classes "previous-page" and "next-page"');
   }
   const tagWithDash = normalizeTagForFile(tag);
+
+  /**
+   * Helper function to get web path from file path, with fallback.
+   * @param fileName - The filename (e.g., 'index.html', 'blog-page-2.html').
+   * @param fallbackPath - Fallback path if outputDir/publicDir not provided.
+   * @returns The web path.
+   */
+  const getWebPath = (fileName: string, fallbackPath: string): string => {
+    if (outputDir && publicDir) {
+      const filePath = path.join(outputDir, fileName);
+      return filePathToWebPath(filePath, publicDir);
+    }
+    return fallbackPath;
+  };
 
   // Get the classes for normal and current page links
   const pageLink1 = document.getElementById('page-link-1');
@@ -140,17 +164,32 @@ export const updatePaginationLinks = (
   const totalPages = paginatedPosts.length;
 
   // Helper function to update pagination links
-  const updatePaginationLink = (pageLink, index, isCurrentPage) => {
+  const updatePaginationLink = (pageLink: Element, index: number, isCurrentPage: boolean): void => {
     pageLink.className = '';
     const classNames = isCurrentPage
       ? classesCurrentPageLink
       : classesNormalPageLink;
     pageLink.classList.add(...classNames);
-    pageLink.href =
-      index === 0
-        ? `${tag ? tagWithDash : 'index'}.html`
-        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
-    pageLink.textContent = index + 1;
+
+    // Build the href based on whether it's a tag page or blog page
+    let href: string;
+    if (tag) {
+      // Tag pages: /blog/tags/tag-name.html or /blog/tags/tag-name-page-2.html
+      if (index === 0) {
+        href = getWebPath(`${tagWithDash}.html`, `/blog/tags/${tagWithDash}.html`);
+      } else {
+        href = getWebPath(`${tagWithDash}-page-${index + 1}.html`, `/blog/tags/${tagWithDash}-page-${index + 1}.html`);
+      }
+    } else {
+      // Blog pages: /blog/ or /blog/index.html or /blog/blog-page-2.html
+      if (index === 0) {
+        href = getWebPath('index.html', '/blog/index.html');
+      } else {
+        href = getWebPath(`blog-page-${index + 1}.html`, `/blog/blog-page-${index + 1}.html`);
+      }
+    }
+    (pageLink as HTMLAnchorElement).href = href;
+    pageLink.textContent = String(index + 1);
     // Set accessibility attributes
     pageLink.setAttribute('aria-label', `Go to page ${index + 1}`);
     // Set data attribute for easier styling/selection
@@ -165,8 +204,8 @@ export const updatePaginationLinks = (
       pageLink.classList.remove('hidden');
     }
   };
-  const startPage = Math.max(0, Math.min(totalPages - config.paginationWindowSize, pageIndex - 2));
-  const endPage = Math.min(totalPages, startPage + config.paginationWindowSize);
+  const startPage = Math.max(0, Math.min(totalPages - (config as { paginationWindowSize: number }).paginationWindowSize, pageIndex - 2));
+  const endPage = Math.min(totalPages, startPage + (config as { paginationWindowSize: number }).paginationWindowSize);
 
   // Update the pagination links
   for (let i = startPage; i < endPage; i++) {
@@ -183,18 +222,40 @@ export const updatePaginationLinks = (
   // Next page link
   nextLink.classList.toggle('hidden', pageIndex >= paginatedPosts.length - 1);
   if (!nextLink.classList.contains('hidden')) {
-    nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex + 2
-      }.html`;
+    const nextFileName = tag
+      ? `${tagWithDash}-page-${pageIndex + 2}.html`
+      : `blog-page-${pageIndex + 2}.html`;
+    const nextFallback = tag
+      ? `/blog/tags/${tagWithDash}-page-${pageIndex + 2}.html`
+      : `/blog/blog-page-${pageIndex + 2}.html`;
+    nextLink.href = getWebPath(nextFileName, nextFallback);
     nextLink.setAttribute('aria-label', 'Next page');
   }
 
   // Previous page link
   previousLink.classList.toggle('hidden', pageIndex <= 0);
   if (!previousLink.classList.contains('hidden')) {
-    previousLink.href =
-      pageIndex === 1
-        ? `${tag ? tag : 'index'}.html`
-        : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex}.html`;
+    let prevFileName: string;
+    let prevFallback: string;
+    if (tag) {
+      if (pageIndex === 1) {
+        prevFileName = `${tagWithDash}.html`;
+        prevFallback = `/blog/tags/${tagWithDash}.html`;
+      } else {
+        prevFileName = `${tagWithDash}-page-${pageIndex}.html`;
+        prevFallback = `/blog/tags/${tagWithDash}-page-${pageIndex}.html`;
+      }
+    } else {
+      if (pageIndex === 1) {
+        prevFileName = 'index.html';
+        prevFallback = '/blog/index.html';
+      } else {
+        prevFileName = `blog-page-${pageIndex}.html`;
+        prevFallback = `/blog/blog-page-${pageIndex}.html`;
+      }
+    }
+    previousLink.href = getWebPath(prevFileName, prevFallback);
     previousLink.setAttribute('aria-label', 'Previous page');
   }
 };
+

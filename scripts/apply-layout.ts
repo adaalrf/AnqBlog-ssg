@@ -15,16 +15,38 @@ import { minifyHtml } from './utils/html-minify.js';
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';
+import type { Post } from './types/index.js';
+
+/**
+ * Tags object mapping tag names to arrays of posts.
+ */
+type Tags = Record<string, Post[]>;
+
+/**
+ * Directory pair for input and output.
+ */
+interface DirectoryPair {
+  inputDir: string;
+  outputDir: string;
+}
+
+/**
+ * Template cache for storing loaded templates.
+ */
+interface TemplateCache {
+  mainLayout: string | null;
+  specificTemplates: Record<string, string>;
+}
 
 /**
  * Generates the tags dropdown HTML.
- * @param {Object} tags - The tags object.
- * @param {string} currentFilePath - The current file path.
- * @returns {string} - The generated tags dropdown HTML.
+ * @param tags - The tags object.
+ * @param currentFilePath - The current file path.
+ * @returns The generated tags dropdown HTML.
  */
-const generateTagsDropdown = (tags, currentFilePath) => {
+const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
   if (!currentFilePath) {
-    console.error('(Apply-Layout.js): Error: currentFilePath is undefined');
+    console.error('(Apply-Layout.ts): Error: currentFilePath is undefined');
     return '';
   }
 
@@ -40,13 +62,13 @@ const generateTagsDropdown = (tags, currentFilePath) => {
 
 /**
  * Applies the main layout to all HTML files in multiple directories.
- * @param {Array} directoryPairs - Array of directory pairs (input and output).
- * @param {Object} tags - Tags object.
+ * @param directoryPairs - Array of directory pairs (input and output).
+ * @param tags - Tags object.
  */
-export const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
-  const processedDirs = new Set();
+export const applyLayoutToHtmlFiles = (directoryPairs: DirectoryPair[], tags: Tags): void => {
+  const processedDirs = new Set<string>();
   // Cache templates to avoid reading them multiple times
-  const templateCache = {
+  const templateCache: TemplateCache = {
     mainLayout: null,
     specificTemplates: {},
   };
@@ -59,13 +81,19 @@ export const applyLayoutToHtmlFiles = (directoryPairs, tags) => {
 /**
  * Processes a single directory to apply the main layout to HTML files.
  * Recursively processes subdirectories and applies templates to HTML files.
- * @param {string} inputDir - The input directory to process.
- * @param {string} outputDir - The output directory for processed files.
- * @param {Object} tags - Tags object for generating dropdowns.
- * @param {Set<string>} processedDirs - Set of already processed directories to avoid duplicates.
- * @param {Object} templateCache - Cache object for storing template content.
+ * @param inputDir - The input directory to process.
+ * @param outputDir - The output directory for processed files.
+ * @param tags - Tags object for generating dropdowns.
+ * @param processedDirs - Set of already processed directories to avoid duplicates.
+ * @param templateCache - Cache object for storing template content.
  */
-const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCache) => {
+const processDirectory = (
+  inputDir: string,
+  outputDir: string,
+  tags: Tags,
+  processedDirs: Set<string>,
+  templateCache: TemplateCache,
+): void => {
   if (processedDirs.has(inputDir)) {
     return;
   }
@@ -101,7 +129,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
       const specificTemplateExists = fs.existsSync(templateFilePath);
 
       // If a specific template exists, inject the content into it
-      let mainContent;
+      let mainContent: string;
       if (specificTemplateExists) {
         // Cache specific templates
         if (!templateCache.specificTemplates[templateFilePath]) {
@@ -112,7 +140,11 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
           ...data,
           content,
         });
-        mainContent = dom.window.document.querySelector('body').innerHTML;
+        const bodyElement = dom.window.document.querySelector('body');
+        if (!bodyElement) {
+          throw new Error(`Template missing body element: ${templateFilePath}`);
+        }
+        mainContent = bodyElement.innerHTML;
         // Else, apply the main layout to the content
       } else {
         mainContent = content;
@@ -126,7 +158,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
       }
       const mainLayoutContent = templateCache.mainLayout;
 
-      const finalTitle = `${config.siteName} | ${data.title || ''}`;
+      const finalTitle = `${config.siteName} | ${(data.title as string) || ''}`;
 
       // Generate canonical URL and Open Graph URL from file path
       // Convert file path relative to public directory to URL path
@@ -156,7 +188,7 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
       let finalHtml = replacePlaceholders(mainLayoutContent, {
         ...data,
         title: finalTitle,
-        page: data.page || '', // Default to empty if not provided
+        page: (data.page as string) || '', // Default to empty if not provided
         children: mainContent,
         tagsDropdown: tagsDropdownContent,
         siteName: config.siteName || '',
@@ -178,7 +210,8 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
       finalHtml = minifyHtml(finalHtml);
 
       writeFileContent(outputFilePath, finalHtml);
-      console.log(`(Apply-Layout.js): Processed page -> ${outputFilePath}`);
+      console.log(`(Apply-Layout.ts): Processed page -> ${outputFilePath}`);
     }
   });
 };
+

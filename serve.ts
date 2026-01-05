@@ -1,28 +1,63 @@
 #!/usr/bin/env node
-// serve.js
-// This script creates a simple HTTP server that serves static files from the public directory. It reads the requested file from the public directory, determines the content type based on the file extension,
-// and sends the file content as the response. If the requested file is not found, it looks for a 404.html file in the requested directory or falls back to the root 404.html file.
-// If no 404.html file is found, it sends a plain text response with "404 Not Found". If there is a server error, it sends a 500 status code with an error message.
-// The server listens on the specified port (default 8080) and logs the server URL when it starts.
-// To run the server, execute the script with Node.js: "npm run serve"
-// The server will start and serve files from the public directory. You can access the server at http://localhost:8080.
-// Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.
+/**
+ * Local development server for the static site generator.
+ * 
+ * This script creates a simple HTTP server that serves static files from the
+ * public directory. It handles:
+ * - Static file serving with proper MIME types
+ * - Directory index.html resolution
+ * - 404 error handling with custom error pages
+ * - Path traversal protection
+ * 
+ * Usage:
+ *   npm run serve
+ *   PORT=3000 npm run serve  # Custom port
+ * 
+ * The server listens on port 8080 by default (or PORT environment variable).
+ * Access the site at http://localhost:8080
+ * 
+ * **Important:** This server is for LOCAL DEVELOPMENT ONLY.
+ * It is NOT suitable for production use. The generated static site in `public/`
+ * can be served by any web server (Apache, Nginx, Caddy, etc.) without Node.js.
+ */
 
 import http from 'http';
 import path from 'path';
 import fs from 'fs/promises';
 
-const port = process.env.PORT || 8080;
+const port = Number(process.env.PORT) || 8080;
 const publicDir = path.resolve('./public');
+
+/**
+ * MIME types mapping for file extensions.
+ */
+const mimeTypes: Record<string, string> = {
+  '.html': 'text/html',
+  '.js': 'application/javascript',
+  '.css': 'text/css',
+  '.json': 'application/json',
+  '.png': 'image/png',
+  '.jpg': 'image/jpg',
+  '.gif': 'image/gif',
+  '.svg': 'image/svg+xml',
+  '.wav': 'audio/wav',
+  '.mp4': 'video/mp4',
+  '.woff': 'font/woff',
+  '.woff2': 'font/woff2',
+  '.ttf': 'font/ttf',
+  '.eot': 'application/vnd.ms-fontobject',
+  '.otf': 'font/otf',
+  '.wasm': 'application/wasm',
+};
 
 /**
  * HTTP server request handler.
  * Serves static files from the public directory with path traversal protection.
  * Handles 404 errors by checking for directory-specific 404.html files.
- * @param {http.IncomingMessage} req - The HTTP request object.
- * @param {http.ServerResponse} res - The HTTP response object.
+ * @param req - The HTTP request object.
+ * @param res - The HTTP response object.
  */
-const server = http.createServer(async (req, res) => {
+const server = http.createServer(async (req: http.IncomingMessage, res: http.ServerResponse): Promise<void> => {
   try {
     // Normalize the requested path and remove leading slashes for relative resolution
     const url = req.url || '/';
@@ -43,32 +78,14 @@ const server = http.createServer(async (req, res) => {
     }
 
     const extname = String(path.extname(filePath)).toLowerCase();
-    const mimeTypes = {
-      '.html': 'text/html',
-      '.js': 'application/javascript',
-      '.css': 'text/css',
-      '.json': 'application/json',
-      '.png': 'image/png',
-      '.jpg': 'image/jpg',
-      '.gif': 'image/gif',
-      '.svg': 'image/svg+xml',
-      '.wav': 'audio/wav',
-      '.mp4': 'video/mp4',
-      '.woff': 'font/woff',
-      '.woff2': 'font/woff2',
-      '.ttf': 'font/ttf',
-      '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'font/otf',
-      '.wasm': 'application/wasm',
-    };
-
     const contentType = mimeTypes[extname] || 'application/octet-stream';
 
     const content = await fs.readFile(filePath);
     res.writeHead(200, { 'Content-Type': contentType });
     res.end(content, 'utf-8');
   } catch (error) {
-    if (error.code === 'ENOENT') {
+    const err = error as NodeJS.ErrnoException;
+    if (err.code === 'ENOENT') {
       // If file not found, try finding a 404.html in the requested directory first
       const url = req.url || '/';
       const requestedPath = path.normalize(url.split('?')[0]).replace(/^(\.\.[\/\\])+/, '');
@@ -103,7 +120,7 @@ const server = http.createServer(async (req, res) => {
       }
     } else {
       res.writeHead(500);
-      res.end(`Server error: ${error.code}`, 'utf-8');
+      res.end(`Server error: ${err.code}`, 'utf-8');
     }
   }
 });
@@ -111,3 +128,4 @@ const server = http.createServer(async (req, res) => {
 server.listen(port, () => {
   console.log(`Server is running at http://localhost:${port}`);
 });
+

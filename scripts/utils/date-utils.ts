@@ -1,12 +1,13 @@
 import config from '../config.js';
+import type { Config } from '../types/config.js';
 
 /**
  * Parses a date string in either ISO 8601 format (YYYY-MM-DD) or DD.MM.YYYY format into a Date object.
- * @param {string} dateString - The date string to parse.
- * @returns {Date} - The parsed Date object.
- * @throws {Error} - If the date string is invalid or in wrong format.
+ * @param dateString - The date string to parse.
+ * @returns The parsed Date object.
+ * @throws {Error} If the date string is invalid or in wrong format.
  */
-export const parseDate = (dateString) => {
+export const parseDate = (dateString: string): Date => {
   if (!dateString || typeof dateString !== 'string') {
     throw new Error('Date string must be a non-empty string');
   }
@@ -72,29 +73,29 @@ export const parseDate = (dateString) => {
 /**
  * Formats a Date object into a human-readable string.
  * Uses the locale from config if available, otherwise defaults to 'en-US'.
- * @param {Date} date - The date object to format.
- * @returns {string} - The formatted date string.
- * @throws {Error} - If the date object is invalid.
+ * @param date - The date object to format.
+ * @returns The formatted date string.
+ * @throws {Error} If the date object is invalid.
  */
-export const formatDate = (date) => {
+export const formatDate = (date: Date): string => {
   if (!(date instanceof Date)) {
     throw new Error('Invalid date object');
   }
 
   // Get locale from config, defaulting to 'en-US' if not available
-  const locale = config.dateLocale || 'en-US';
+  const locale = (config as Config).dateLocale || 'en-US';
 
-  const options = { year: 'numeric', month: 'short', day: 'numeric' };
+  const options: Intl.DateTimeFormatOptions = { year: 'numeric', month: 'short', day: 'numeric' };
   return date.toLocaleDateString(locale, options);
 };
 
 /**
  * Formats a Date object into an ISO 8601 date string (YYYY-MM-DD).
- * @param {Date} date - The date object to format.
- * @returns {string} - The ISO 8601 formatted date string.
- * @throws {Error} - If the date object is invalid.
+ * @param date - The date object to format.
+ * @returns The ISO 8601 formatted date string.
+ * @throws {Error} If the date object is invalid.
  */
-export const formatDateISO = (date) => {
+export const formatDateISO = (date: Date): string => {
   if (!(date instanceof Date)) {
     throw new Error('Invalid date object');
   }
@@ -104,3 +105,4 @@ export const formatDateISO = (date) => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
+

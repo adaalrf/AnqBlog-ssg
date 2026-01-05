@@ -15,37 +15,54 @@ import {
   writeFileContent,
   sanitizeFilename,
 } from '../utils/path-and-file-utils.js';
+import { getListingTemplatePath } from '../utils/template-utils.js';
+import config from '../config.js';
 import path from 'path';
 import { JSDOM } from 'jsdom';
+import type { Post } from '../types/index.js';
+
+/**
+ * Tag link information for the tags index page.
+ */
+interface TagLink {
+  tag: string;
+  link: string;
+  count: number;
+}
+
+/**
+ * Tags object mapping tag names to arrays of posts.
+ */
+type Tags = Record<string, Post[]>;
 
 /**
  * Generates tag pages for the blog.
- * @param {Object} tags - The tags with associated posts.
- * @param {Array} posts - The array of posts.
- * @param {number} postsPerPage - The number of posts per page.
- * @param {string} templateTagsPath - The path to the tags template.
- * @param {string} templateMainTagsPath - The path to the main tags index template.
- * @param {string} tempTagsOutputDirectory - The directory to save the paginated tag pages.
+ * @param tags - The tags with associated posts.
+ * @param posts - The array of posts.
+ * @param postsPerPage - The number of posts per page.
+ * @param templateTagsPath - The path to the tags template.
+ * @param templateMainTagsPath - The path to the main tags index template.
+ * @param tempTagsOutputDirectory - The directory to save the paginated tag pages.
  */
 export const generateTagPages = (
-  tags,
-  posts,
-  postsPerPage,
-  templateTagsPath,
-  templateMainTagsPath,
-  tempTagsOutputDirectory,
-) => {
+  tags: Tags,
+  posts: Post[],
+  postsPerPage: number,
+  templateTagsPath: string,
+  templateMainTagsPath: string,
+  tempTagsOutputDirectory: string,
+): void => {
   ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the directory exists
 
   // Read the shared listing template
-  const listingTemplatePath = templateTagsPath.replace('tags-template.html', 'listing-template.html');
+  const listingTemplatePath = getListingTemplatePath();
   // Cache the template content to avoid reading it multiple times
   let templateTagsContent = readFileContent(listingTemplatePath);
   // Replace containerId placeholder with 'tag'
   templateTagsContent = templateTagsContent.replace(/\{\{containerId\}\}/g, 'tag');
 
   // Create an array to store tag link information for the index page
-  const tagLinks = [];
+  const tagLinks: TagLink[] = [];
   const tagKeys = Object.keys(tags);
   const totalTags = tagKeys.length;
   let totalTagPages = 0;
@@ -57,10 +74,10 @@ export const generateTagPages = (
     totalTagPages += tagContent.length;
   });
 
-  console.log(`(Tags.js): Processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})...`);
+  console.log(`(Tags.ts): Processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})...`);
 
   let currentPage = 0;
-  Object.keys(tags).forEach((tag, tagIndex) => {
+  Object.keys(tags).forEach((tag) => {
     const tagPosts = posts.filter((post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag));
     const tagContent = paginatePosts(tagPosts, postsPerPage);
 
@@ -72,10 +89,24 @@ export const generateTagPages = (
       const postLinksDiv = document.getElementById('post-links-div');
 
       if (!postItemTemplate) {
-        throw new Error(`Tags template must contain an element with class "post-item" (template: ${templateTagsPath}, tag: ${tag})`);
+        throw new Error(
+          `Tags template missing required element:\n` +
+          `  Element: .post-item\n` +
+          `  Template: ${templateTagsPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Tag: ${tag}\n` +
+          `  Page: ${pageIndex + 1}`
+        );
       }
       if (!postLinksDiv) {
-        throw new Error(`Tags template must contain an element with id "post-links-div" (template: ${templateTagsPath}, tag: ${tag})`);
+        throw new Error(
+          `Tags template missing required element:\n` +
+          `  Element: #post-links-div\n` +
+          `  Template: ${templateTagsPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Tag: ${tag}\n` +
+          `  Page: ${pageIndex + 1}`
+        );
       }
 
       // Add each post to the post links container
@@ -90,12 +121,19 @@ export const generateTagPages = (
       });
 
       postItemTemplate.remove();
-      updatePaginationLinks(document, pageIndex, tagContent, tag);
+      updatePaginationLinks(document, pageIndex, tagContent, tag, config.publicTagsOutputDirectory, config.publicContentOutputDirectory);
 
       // Save the tag page
       const tagElement = document.querySelector('#tag');
       if (!tagElement) {
-        throw new Error(`Tags template must contain an element with id "tag" (template: ${templateTagsPath}, tag: ${tag}, page: ${pageIndex + 1})`);
+        throw new Error(
+          `Tags template missing required element:\n` +
+          `  Element: #tag\n` +
+          `  Template: ${templateTagsPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Tag: ${tag}\n` +
+          `  Page: ${pageIndex + 1}`
+        );
       }
       const content = tagElement.outerHTML;
       // Sanitize tag for filename
@@ -116,11 +154,11 @@ export const generateTagPages = (
       const finalHtml = `${generateFrontMatter({
         page: modifiedPathBar,
         title: filesWithoutDash,
-      })}\n${content}`;
+      }, {})}\n${content}`;
 
       writeFileContent(outputFilePath, finalHtml);
       currentPage++;
-      console.log(`(Tags.js): [${currentPage}/${totalTagPages}] Generated tag page -> ${outputFilePath}`);
+      console.log(`(Tags.ts): [${currentPage}/${totalTagPages}] Generated tag page -> ${outputFilePath}`);
 
       // Add the link to the tagLinks array for the index page
       if (pageIndex === 0) {
@@ -141,15 +179,17 @@ export const generateTagPages = (
 
   if (!tagLinksContainer) {
     throw new Error(
-      `The index template must contain an element with the ID 'tag-links-container' (template: ${templateMainTagsPath}).`,
+      `Tags index template missing required element:\n` +
+      `  Element: #tag-links-container\n` +
+      `  Template: ${templateMainTagsPath}`
     );
   }
 
   const tagLinkLiTemplate = document.getElementById('tag-link-li');
   const tagLinkAnchorTemplate = document.getElementById('tag-link');
 
-  let linkElementLiClasses = [];
-  let linkElementAnchorClasses = [];
+  let linkElementLiClasses: string[] = [];
+  let linkElementAnchorClasses: string[] = [];
 
   // Read anchor classes first (before removing the li template)
   if (tagLinkAnchorTemplate) {
@@ -176,7 +216,7 @@ export const generateTagPages = (
 
   tagLinks.forEach((tagLink) => {
     if (!tagLink.link || !tagLink.tag) {
-      console.error('(Tags.js): Invalid tagLink:', tagLink);
+      console.error('(Tags.ts): Invalid tagLink:', tagLink);
       return;
     }
     const linkElement = document.createElement('a');
@@ -201,16 +241,21 @@ export const generateTagPages = (
     tagLinksContainer.appendChild(listItem);
   });
 
-  const content = document.querySelector('#tags').outerHTML;
+  const tagsElement = document.querySelector('#tags');
+  if (!tagsElement) {
+    throw new Error(`Tags index template missing required element: #tags`);
+  }
+  const content = tagsElement.outerHTML;
   const mainTagsPath = path.join(tempTagsOutputDirectory, 'index.html');
   const modifiedPathBar = `/ <em>Tags</em>`.replace(/\s+/g, ' ').trim();
   // Add dynamic front matter to the content
   const finalIndexHtml = `${generateFrontMatter({
     page: modifiedPathBar,
     title: 'Tags',
-  })}\n${content}`;
+  }, {})}\n${content}`;
 
   writeFileContent(mainTagsPath, finalIndexHtml);
-  console.log(`(Tags.js): Generated main tags page -> ${mainTagsPath}`);
-  console.log(`(Tags.js): ✓ Completed processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})`);
+  console.log(`(Tags.ts): Generated main tags page -> ${mainTagsPath}`);
+  console.log(`(Tags.ts): ✓ Completed processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})`);
 };
+

@@ -7,7 +7,7 @@ const outputPath = fpr('src/ts/main.ts');
 /**
  * Generates the main.ts file by reading all .ts files in the src/ts directory except main.ts.
  */
-const generateImports = () => {
+const generateImports = (): void => {
   // Read all .ts files in the directory except main.ts
   const files = fs
     .readdirSync(dirPath)
@@ -36,8 +36,9 @@ document.addEventListener('DOMContentLoaded', () => {
   // Write the main.ts file
   fs.writeFileSync(outputPath, mainContent);
 
-  console.log(`(Imports.js): Generated imports file -> ${outputPath}`);
+  console.log(`(Imports.ts): Generated imports file -> ${outputPath}`);
 };
 
 // Execute the imports generation
 generateImports();
+

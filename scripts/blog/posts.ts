@@ -3,7 +3,6 @@ import { JSDOM } from 'jsdom';
 import {
   generateFrontMatter,
   truncateText,
-  injectContentIntoTemplate,
   normalizeTagForFile,
   denormalizeTagFromFile,
   escapeHtml,
@@ -16,29 +15,29 @@ import {
 } from '../utils/path-and-file-utils.js';
 import { formatDate, formatDateISO } from '../utils/date-utils.js';
 import config from '../config.js';
+import type { Post } from '../types/index.js';
 
 /**
  * Generates intermediate post HTML files.
- * @param {Array} posts - The array of posts.
- * @param {string} postTemplatePath - The path to the post template.
- * @param {string} tempPostsOutputDirectory - The directory to save the generated files.
+ * @param posts - The array of posts.
+ * @param postTemplatePath - The path to the post template.
+ * @param tempPostsOutputDirectory - The directory to save the generated files.
  */
 export const generateIntermediatePostHtmlFiles = async (
-  posts,
-  postTemplatePath,
-  tempPostsOutputDirectory,
-) => {
+  posts: Post[],
+  postTemplatePath: string,
+  tempPostsOutputDirectory: string,
+): Promise<void> => {
   ensureDirectoryExists(tempPostsOutputDirectory);
 
   const totalPosts = posts.length;
-  console.log(`(Posts.js): Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
+  console.log(`(Posts.ts): Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
 
   // Read template once to avoid redundant file reads
   const templateContent = readFileContent(postTemplatePath);
 
   // Process posts in parallel for better performance
   await Promise.all(posts.map(async (post, index) => {
-
     // Format tags for display (escape to prevent XSS)
     const tagsHtml = post.tags && post.tags.length > 0
       ? post.tags
@@ -60,7 +59,7 @@ export const generateIntermediatePostHtmlFiles = async (
       .replace(/\{\{content\}\}/g, post.content);
 
     document.body.innerHTML = bodyHtml;
-    
+
     // Update time element with ISO date attribute
     const dateElement = document.querySelector('.post-date');
     if (dateElement && dateElement.tagName.toLowerCase() === 'time') {
@@ -75,7 +74,13 @@ export const generateIntermediatePostHtmlFiles = async (
 
     const postContentElement = document.querySelector('#post-content');
     if (!postContentElement) {
-      throw new Error(`Post template must contain an element with id "post-content" (template: ${postTemplatePath}, post: ${post.htmlFileName || 'unknown'})`);
+      throw new Error(
+        `Post template missing required element:\n` +
+        `  Element: #post-content\n` +
+        `  Template: ${postTemplatePath}\n` +
+        `  Post: ${post.htmlFileName || 'unknown'}\n` +
+        `  Title: ${post.title || 'Untitled'}`
+      );
     }
     const htmlContent = postContentElement.outerHTML;
 
@@ -88,14 +93,15 @@ export const generateIntermediatePostHtmlFiles = async (
     const escapedTruncatedTitle = escapeHtml(truncatedTitle);
     const modifiedPathBar = `/ <a href="/blog">Blog</a> / <em>${escapedTruncatedTitle}</em>`.replace(/\s+/g, ' ').trim();
     // Add dynamic front matter to the content
-    const finalHtml = `${generateFrontMatter(post, {
+    const finalHtml = `${generateFrontMatter(post as Record<string, unknown>, {
       page: modifiedPathBar,
     })}\n${htmlContent}`;
 
     writeFileContent(outputPath, finalHtml);
     const current = index + 1;
-    console.log(`(Posts.js): [${current}/${totalPosts}] Generated post -> ${outputPath}`);
+    console.log(`(Posts.ts): [${current}/${totalPosts}] Generated post -> ${outputPath}`);
   }));
 
-  console.log(`(Posts.js): ✓ Completed processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}`);
+  console.log(`(Posts.ts): ✓ Completed processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}`);
 };
+

@@ -1,5 +1,20 @@
 #!/usr/bin/env node
-// build.js
+/**
+ * Main build orchestrator for the static site generator.
+ * 
+ * This script:
+ * 1. Compiles TypeScript source files to JavaScript in dist/
+ * 2. Validates configuration
+ * 3. Generates dynamic imports
+ * 4. Bundles client-side code with Webpack
+ * 5. Copies assets
+ * 6. Generates HTML content from Markdown
+ * 7. Processes CSS with Tailwind and PostCSS
+ * 8. Minifies HTML output
+ * 
+ * The compiled JavaScript files are placed in the dist/ directory,
+ * which is gitignored and regenerated on each build.
+ */
 import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
@@ -8,7 +23,7 @@ import { promisify } from 'util';
 const execAsync = promisify(exec);
 const rootDir = process.cwd();
 
-(async () => {
+(async (): Promise<void> => {
   try {
     const startTime = Date.now();
 
@@ -20,12 +35,27 @@ const rootDir = process.cwd();
     const tempDir = path.join(rootDir, '.build');
     await fs.rm(tempDir, { recursive: true, force: true });
 
+    // Compile TypeScript first
+    console.log('Compiling TypeScript...');
+    try {
+      await execAsync('npx tsc');
+    } catch (error) {
+      const err = error as Error;
+      throw new Error(`TypeScript compilation failed: ${err.message}`);
+    }
+
+    // Validate configuration after compilation (runs from dist/)
+    const validateConfigPath = path.join(rootDir, 'dist', 'scripts', 'validate-config.js');
+    const { validateConfig } = await import(validateConfigPath);
+    validateConfig();
+
     // Generate dynamic imports
     console.log('Generating dynamic imports...');
     try {
-      await execAsync('node scripts/generate-imports.js');
+      await execAsync('node dist/scripts/generate-imports.js');
     } catch (error) {
-      throw new Error(`generate-imports.js failed: ${error.message}`);
+      const err = error as Error;
+      throw new Error(`generate-imports.js failed: ${err.message}`);
     }
 
     // Bundle website code using Webpack
@@ -33,7 +63,8 @@ const rootDir = process.cwd();
     try {
       await execAsync('npx webpack --config webpack.config.js');
     } catch (error) {
-      throw new Error(`Webpack failed: ${error.message}`);
+      const err = error as Error;
+      throw new Error(`Webpack failed: ${err.message}`);
     }
 
     // Copy necessary assets to the public directory
@@ -43,7 +74,8 @@ const rootDir = process.cwd();
       await fs.access(assetsSrc);
       await copyDirectory(assetsSrc, assetsDest);
     } catch (error) {
-      if (error.code === 'ENOENT') {
+      const err = error as NodeJS.ErrnoException;
+      if (err.code === 'ENOENT') {
         console.warn('Assets directory not found, skipping asset copy.');
       } else {
         throw error;
@@ -53,17 +85,19 @@ const rootDir = process.cwd();
     // Run the generation scripts to generate the output files
     console.log('Running the generation scripts...');
     try {
-      await execAsync('node scripts/generate.js');
+      await execAsync('node dist/scripts/generate.js');
     } catch (error) {
-      throw new Error(`generate.js failed: ${error.message}`);
+      const err = error as Error;
+      throw new Error(`generate.js failed: ${err.message}`);
     }
 
     // Process Tailwind CSS using PostCSS
     console.log('Processing Tailwind CSS...');
     try {
-      await execAsync('node scripts/build-css.js');
+      await execAsync('node dist/scripts/build-css.js');
     } catch (error) {
-      throw new Error(`build-css.js failed: ${error.message}`);
+      const err = error as Error;
+      throw new Error(`build-css.js failed: ${err.message}`);
     }
 
     // Copy root index.html and fix paths
@@ -85,7 +119,7 @@ const rootDir = process.cwd();
       path.join(publicDir, 'js', 'bundle.js'),
     ];
 
-    const missingFiles = [];
+    const missingFiles: string[] = [];
     for (const file of criticalFiles) {
       try {
         await fs.access(file);
@@ -113,13 +147,14 @@ const rootDir = process.cwd();
     process.exit(1);
   }
 })();
+
 /**
  * Recursively copies a directory and its contents.
- * @param {string} src - The source directory path.
- * @param {string} dest - The destination directory path.
- * @throws {Error} - If copying fails.
+ * @param src - The source directory path.
+ * @param dest - The destination directory path.
+ * @throws {Error} If copying fails.
  */
-async function copyDirectory(src, dest) {
+async function copyDirectory(src: string, dest: string): Promise<void> {
   try {
     await fs.mkdir(dest, { recursive: true });
     const entries = await fs.readdir(src, { withFileTypes: true });
@@ -139,3 +174,4 @@ async function copyDirectory(src, dest) {
     throw error; // Re-throw to fail the build if asset copy fails
   }
 }
+

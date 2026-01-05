@@ -1,69 +1,25 @@
+import { createDropdown } from './utils/dropdown';
+
 document.addEventListener('DOMContentLoaded', () => {
   const dropdownToggle = document.getElementById('tags-dropdown') as HTMLAnchorElement;
   const dropdownMenu = document.getElementById('tags-dropdown-menu');
 
   if (dropdownMenu && dropdownToggle) {
-    const showDropdown = () => {
-      dropdownMenu.classList.remove('opacity-0', 'invisible', '-translate-y-2');
-      dropdownMenu.classList.add('opacity-100', 'visible', 'translate-y-0');
-      dropdownToggle.setAttribute('aria-expanded', 'true');
-    };
+    // Create the dropdown with shared logic
+    createDropdown('tags-dropdown', 'tags-dropdown-menu');
 
-    const hideDropdown = () => {
-      dropdownMenu.classList.remove('opacity-100', 'visible', 'translate-y-0');
-      dropdownMenu.classList.add('opacity-0', 'invisible', '-translate-y-2');
-      dropdownToggle.setAttribute('aria-expanded', 'false');
-    };
+    // Tags dropdown has special behavior: it's a link that should navigate
+    // The dropdown is just a preview/quick access, clicking should navigate
+    dropdownToggle.addEventListener('click', () => {
+      // Don't prevent default - always allow navigation to /blog/tags
+      // The dropdown will close automatically via the shared logic
+    });
 
-    const isDropdownOpen = () => {
-      return dropdownToggle.getAttribute('aria-expanded') === 'true';
-    };
-
-    dropdownToggle.addEventListener('mouseenter', showDropdown);
-    dropdownMenu.addEventListener('mouseenter', showDropdown);
-
-    dropdownToggle.addEventListener('mouseleave', hideDropdown);
-    dropdownMenu.addEventListener('mouseleave', hideDropdown);
-
-    // Keyboard support: Enter and Space keys
+    // Keyboard support: Enter and Space keys (additional to shared Escape key)
     dropdownToggle.addEventListener('keydown', (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
-        e.preventDefault();
-        if (isDropdownOpen()) {
-          hideDropdown();
-        } else {
-          showDropdown();
-        }
-      }
-    });
-
-    // Click support: always allow navigation to tags page
-    // The dropdown is just a preview/quick access, clicking the link should navigate
-    dropdownToggle.addEventListener('click', (e) => {
-      // Don't prevent default - always allow navigation to /blog/tags
-      // Hide dropdown if it's open, but still navigate
-      if (isDropdownOpen()) {
-        hideDropdown();
-      }
-      // Let the click proceed to navigate to /blog/tags
-    });
-
-    // Close on Escape key
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && isDropdownOpen()) {
-        hideDropdown();
-      }
-    });
-
-    // Close when clicking outside
-    document.addEventListener('click', (e) => {
-      const target = e.target as Node;
-      if (
-        isDropdownOpen() &&
-        !dropdownMenu.contains(target) &&
-        !dropdownToggle.contains(target)
-      ) {
-        hideDropdown();
+        // Allow default behavior (navigation) for Enter/Space
+        // The dropdown state is managed by the shared logic
       }
     });
   }

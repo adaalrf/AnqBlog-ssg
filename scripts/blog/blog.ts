@@ -7,24 +7,27 @@ import {
   readFileContent,
   ensureDirectoryExists,
 } from '../utils/path-and-file-utils.js';
+import { getListingTemplatePath } from '../utils/template-utils.js';
 import { generateFrontMatter } from '../utils/content-utils.js';
+import config from '../config.js';
 import path from 'path';
 import fs from 'fs';
 import { JSDOM } from 'jsdom';
+import type { Post } from '../types/index.js';
 
 /**
  * Generates paginated blog HTML files.
- * @param {Array} posts - The array of posts to paginate.
- * @param {number} postsPerPage - The number of posts per page.
- * @param {string} templateBlogPath - The path to the blog template.
- * @param {string} tempBlogOutputPath - The directory to save the paginated blog pages.
+ * @param posts - The array of posts to paginate.
+ * @param postsPerPage - The number of posts per page.
+ * @param templateBlogPath - The path to the blog template.
+ * @param tempBlogOutputPath - The directory to save the paginated blog pages.
  */
 export const generatePaginatedBlogHtmlFiles = (
-  posts,
-  postsPerPage,
-  templateBlogPath,
-  tempBlogOutputPath,
-) => {
+  posts: Post[],
+  postsPerPage: number,
+  templateBlogPath: string,
+  tempBlogOutputPath: string,
+): void => {
   ensureDirectoryExists(tempBlogOutputPath);
 
   const blogContent = paginatePosts(posts, postsPerPage);
@@ -35,10 +38,10 @@ export const generatePaginatedBlogHtmlFiles = (
   }
 
   const totalPages = blogContent.length;
-  console.log(`(Blog.js): Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
+  console.log(`(Blog.ts): Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
 
   // Read the shared listing template
-  const listingTemplatePath = templateBlogPath.replace('blog-template.html', 'listing-template.html');
+  const listingTemplatePath = getListingTemplatePath();
   let blogTemplateContent = readFileContent(listingTemplatePath);
   // Replace containerId placeholder with 'blog'
   blogTemplateContent = blogTemplateContent.replace(/\{\{containerId\}\}/g, 'blog');
@@ -52,10 +55,22 @@ export const generatePaginatedBlogHtmlFiles = (
     const postLinksDiv = document.getElementById('post-links-div');
 
     if (!postItemTemplate) {
-      throw new Error(`Blog template must contain an element with class "post-item" (template: ${templateBlogPath})`);
+      throw new Error(
+        `Blog template missing required element:\n` +
+        `  Element: .post-item\n` +
+        `  Template: ${templateBlogPath}\n` +
+        `  Listing template: ${listingTemplatePath}\n` +
+        `  Page: ${pageIndex + 1}`
+      );
     }
     if (!postLinksDiv) {
-      throw new Error(`Blog template must contain an element with id "post-links-div" (template: ${templateBlogPath})`);
+      throw new Error(
+        `Blog template missing required element:\n` +
+        `  Element: #post-links-div\n` +
+        `  Template: ${templateBlogPath}\n` +
+        `  Listing template: ${listingTemplatePath}\n` +
+        `  Page: ${pageIndex + 1}`
+      );
     }
 
     // Add only posts for the current page
@@ -71,10 +86,16 @@ export const generatePaginatedBlogHtmlFiles = (
 
     postItemTemplate.remove();
 
-    updatePaginationLinks(document, pageIndex, blogContent);
+    updatePaginationLinks(document, pageIndex, blogContent, '', config.publicBlogOutputPath, config.publicContentOutputDirectory);
     const blogElement = document.querySelector('#blog');
     if (!blogElement) {
-      throw new Error(`Blog template must contain an element with id "blog" (template: ${templateBlogPath}, page: ${pageIndex + 1})`);
+      throw new Error(
+        `Blog template missing required element:\n` +
+        `  Element: #blog\n` +
+        `  Template: ${templateBlogPath}\n` +
+        `  Listing template: ${listingTemplatePath}\n` +
+        `  Page: ${pageIndex + 1}`
+      );
     }
     const content = blogElement.outerHTML;
     const outputFilePath =
@@ -87,12 +108,13 @@ export const generatePaginatedBlogHtmlFiles = (
     const finalHtml = `${generateFrontMatter({
       page: modifiedPathBar,
       title: 'Blog',
-    })}\n${content}`;
+    }, {})}\n${content}`;
 
     fs.writeFileSync(outputFilePath, finalHtml);
     const current = pageIndex + 1;
-    console.log(`(Blog.js): [${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
+    console.log(`(Blog.ts): [${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
   });
 
-  console.log(`(Blog.js): ✓ Completed generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}`);
+  console.log(`(Blog.ts): ✓ Completed generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}`);
 };
+

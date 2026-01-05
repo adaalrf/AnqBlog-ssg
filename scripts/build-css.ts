@@ -9,9 +9,9 @@ import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
  * Processes the input CSS file with PostCSS, Tailwind CSS, and Autoprefixer.
  * Reads the source CSS, processes it through Tailwind and Autoprefixer, then writes the output.
  * Also generates a source map if available.
- * @throws {Error} - If file reading, processing, or writing fails.
+ * @throws {Error} If file reading, processing, or writing fails.
  */
-const processCSS = async () => {
+const processCSS = async (): Promise<void> => {
   try {
     const inputFilePath = config.inputCSS;
     const outputFilePath = config.outputCSS;
@@ -30,14 +30,14 @@ const processCSS = async () => {
 
     // Write the processed CSS to the output file
     await fs.writeFile(outputFilePath, result.css);
-    console.log(`(CSS.js): Generated css file -> ${outputFilePath}`);
+    console.log(`(CSS.ts): Generated css file -> ${outputFilePath}`);
 
     // Write source map if available
     if (result.map) {
       await fs.writeFile(outputFilePath + '.map', result.map.toString());
     }
   } catch (error) {
-    console.error('(CSS.js): Failed to process CSS file ->', error);
+    console.error('(CSS.ts): Failed to process CSS file ->', error);
     throw error;
   }
 };
@@ -47,7 +47,8 @@ const processCSS = async () => {
   try {
     await processCSS();
   } catch (error) {
-    console.error('(CSS.js): Failed to process CSS:', error);
+    console.error('(CSS.ts): Failed to process CSS:', error);
     process.exit(1);
   }
 })();
+
