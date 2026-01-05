@@ -7,6 +7,7 @@ import {
   generateFrontMatter,
   normalizeTagForFile,
   denormalizeTagFromFile,
+  escapeHtml,
 } from '../utils/content-utils.js';
 import {
   readFileContent,
@@ -36,13 +37,30 @@ export const generateTagPages = (
 ) => {
   ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the directory exists
 
+  // Read the shared listing template
+  const listingTemplatePath = templateTagsPath.replace('tags-template.html', 'listing-template.html');
   // Cache the template content to avoid reading it multiple times
-  const templateTagsContent = readFileContent(templateTagsPath);
+  let templateTagsContent = readFileContent(listingTemplatePath);
+  // Replace containerId placeholder with 'tag'
+  templateTagsContent = templateTagsContent.replace(/\{\{containerId\}\}/g, 'tag');
 
   // Create an array to store tag link information for the index page
   const tagLinks = [];
+  const tagKeys = Object.keys(tags);
+  const totalTags = tagKeys.length;
+  let totalTagPages = 0;
 
-  Object.keys(tags).forEach((tag) => {
+  // Count total pages for progress tracking
+  tagKeys.forEach((tag) => {
+    const tagPosts = posts.filter((post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag));
+    const tagContent = paginatePosts(tagPosts, postsPerPage);
+    totalTagPages += tagContent.length;
+  });
+
+  console.log(`(Tags.js): Processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})...`);
+
+  let currentPage = 0;
+  Object.keys(tags).forEach((tag, tagIndex) => {
     const tagPosts = posts.filter((post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag));
     const tagContent = paginatePosts(tagPosts, postsPerPage);
 
@@ -54,10 +72,10 @@ export const generateTagPages = (
       const postLinksDiv = document.getElementById('post-links-div');
       
       if (!postItemTemplate) {
-        throw new Error('Tags template must contain an element with class "post-item"');
+        throw new Error(`Tags template must contain an element with class "post-item" (template: ${templateTagsPath}, tag: ${tag})`);
       }
       if (!postLinksDiv) {
-        throw new Error('Tags template must contain an element with id "post-links-div"');
+        throw new Error(`Tags template must contain an element with id "post-links-div" (template: ${templateTagsPath}, tag: ${tag})`);
       }
 
       // Add each post to the post links container
@@ -77,7 +95,7 @@ export const generateTagPages = (
       // Save the tag page
       const tagElement = document.querySelector('#tag');
       if (!tagElement) {
-        throw new Error('Tags template must contain an element with id "tag"');
+        throw new Error(`Tags template must contain an element with id "tag" (template: ${templateTagsPath}, tag: ${tag}, page: ${pageIndex + 1})`);
       }
       const content = tagElement.outerHTML;
       // Sanitize tag for filename
@@ -91,7 +109,9 @@ export const generateTagPages = (
               `${filesWithDash}-page-${pageIndex + 1}.html`,
             );
       const filesWithoutDash = denormalizeTagFromFile(tag);
-      const modifiedPathBar = `/ <a href=/blog/tags>Tags</a> / <em>${filesWithoutDash}</em>`.replace(/\s+/g, ' ').trim();
+      // Escape tag name in breadcrumb to prevent XSS
+      const escapedTagName = escapeHtml(filesWithoutDash);
+      const modifiedPathBar = `/ <a href="/blog/tags">Tags</a> / <em>${escapedTagName}</em>`.replace(/\s+/g, ' ').trim();
       // Add dynamic front matter to the content
       const finalHtml = `${generateFrontMatter({
         page: modifiedPathBar,
@@ -99,7 +119,8 @@ export const generateTagPages = (
       })}\n${content}`;
 
       writeFileContent(outputFilePath, finalHtml);
-      console.log(`(Tags.js): Generated tag page -> ${outputFilePath}`);
+      currentPage++;
+      console.log(`(Tags.js): [${currentPage}/${totalTagPages}] Generated tag page -> ${outputFilePath}`);
 
       // Add the link to the tagLinks array for the index page
       if (pageIndex === 0) {
@@ -119,7 +140,7 @@ export const generateTagPages = (
 
   if (!tagLinksContainer) {
     throw new Error(
-      "The index template must contain an element with the ID 'tag-links-container'.",
+      `The index template must contain an element with the ID 'tag-links-container' (template: ${templateMainTagsPath}).`,
     );
   }
 
@@ -173,4 +194,5 @@ export const generateTagPages = (
 
   writeFileContent(mainTagsPath, finalIndexHtml);
   console.log(`(Tags.js): Generated main tags page -> ${mainTagsPath}`);
+  console.log(`(Tags.js): ✓ Completed processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})`);
 };

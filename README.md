@@ -1,25 +1,28 @@
-# AnqBlog-ssg
+# AnqBlog SSG
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.
+A fast, lightweight static site generator that converts Markdown to HTML. Built with Node.js, featuring pagination, tag organization, SEO optimization, and modern tooling.
 
 The build process requires Node.js, but the generated static site can be served on any web server without Node.js.
 
 ## Features
 
-- Markdown to HTML conversion with front matter support
-- Template-based page structure
-- Pagination for blog listings
-- Tag-based content organization
-- Dark mode support
-- Tailwind CSS processing
-- TypeScript bundling
+- **Markdown to HTML** - Convert Markdown files with YAML front matter to static HTML
+- **Template-based Architecture** - Flexible HTML templates for complete design control
+- **Pagination** - Automatic pagination for blog listings with configurable posts per page
+- **Tag System** - Organize content with tags and generate dedicated tag pages
+- **SEO Optimization** - Automatic canonical URLs, Open Graph meta tags, and Twitter card support
+- **Dark Mode** - Built-in light/dark theme toggle with persistent user preference
+- **Performance Optimized** - Parallel processing, HTML minification, and efficient builds
+- **Tailwind CSS** - Modern utility-first CSS framework with custom theme support
+- **TypeScript** - Type-safe client-side interactivity
+- **Build Progress** - Real-time progress indicators during build process
 
 ## Requirements
 
-- Node.js v14 or higher
-- npm or yarn
+- **Node.js** v18 or higher
+- **npm** or **yarn** package manager
 
 ## Installation
 
@@ -31,6 +34,12 @@ cd anq-blog-ssg
 npm install
 ```
 
+Copy the example configuration file:
+
+```bash
+cp scripts/example.config.js scripts/config.js
+```
+
 ## Usage
 
 ### Create Content
@@ -40,7 +49,7 @@ Write blog posts in Markdown and place them in `src/content/blog/posts/`:
 ```markdown
 ---
 title: 'My First Blog Post'
-date: '03.01.2025'
+date: '03.01.2026'  # or use ISO 8601: '2026-01-03'
 tags: ['personal', 'introduction']
 ---
 
@@ -51,13 +60,29 @@ Standalone pages can be added to `src/content/pages/`. These support front matte
 
 ### Configure
 
-Edit `scripts/config.js` to customize your site:
+Copy the example configuration file if you haven't already:
+
+```bash
+cp scripts/example.config.js scripts/config.js
+```
+
+Then edit `scripts/config.js` to customize your site:
 
 ```javascript
-const config = {
-  siteName: 'My Blog',
-  postsPerPage: 5,
-  // ...
+const siteConfig = {
+  siteName: 'My Blog',                      // Site name displayed in header
+  siteDescription: 'My awesome blog',       // Site description for meta tags
+  siteUrl: 'https://example.com',           // Base URL (used for canonical URLs and Open Graph)
+  githubUrl: 'https://github.com/username', // GitHub profile URL
+  authorName: 'username',                   // Author name displayed in footer
+  copyrightYear: new Date().getFullYear(),  // Copyright year (auto-updates)
+  postsPerPage: 5,                          // Number of posts per paginated page
+  previewLength: 200,                       // Character length for post previews
+  titleTruncationLength: 25,                // Max title length in post listings
+  titleTruncationLengthBreadcrumb: 20,      // Max title length in breadcrumbs
+  paginationWindowSize: 5,                  // Number of page links in pagination
+  dateLocale: 'en-US',                      // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
+  siteLanguage: 'en',                       // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
 };
 ```
 
@@ -71,26 +96,37 @@ npm run build
 
 Output files are generated in the `public/` directory.
 
-### Serve Locally
+### Serve Locally (Development)
 
-Preview the site locally:
+Preview the site locally using the built-in Node.js server:
 
 ```bash
 npm run serve
 ```
 
-The site will be available at `http://localhost:8080`.
+The site will be available at `http://localhost:8080` by default.
 
-Note: The local server is for development only. Use a production web server for deployment.
+**Custom Port:** Set the `PORT` environment variable to use a different port:
+```bash
+PORT=3000 npm run serve
+```
+
+> **Important:** `serve.js` requires Node.js and is for **local development only**. The built site in `public/` contains only static files (HTML, CSS, JavaScript) and can be served by **any web server without Node.js**.
 
 ## Deployment
 
-Deploy the contents of the `public/` directory to any static hosting service.
+Deploy the contents of the `public/` directory to any static hosting service. **The generated site requires NO Node.js runtime** - it's pure HTML, CSS, and JavaScript that can be served by any web server (Apache, Nginx, Caddy, etc.) or static hosting service.
 
-Example deployment:
+### Example: Manual Deployment via SSH
 
 ```bash
 scp -r public/* user@your-server:/var/www/html/
+```
+
+### Example: GitHub Pages
+
+```bash
+git subtree push --prefix public origin gh-pages
 ```
 
 ## Project Structure
@@ -106,55 +142,181 @@ anq-blog-ssg/
 │   ├── templates/       # HTML templates
 │   └── ts/              # TypeScript source files
 ├── scripts/             # Build scripts and utilities
+│   ├── blog/            # Blog-specific generators
+│   └── utils/           # Utility functions
+├── .build/              # Temporary build artifacts (generated, not committed)
 ├── public/              # Generated static site (output)
-├── build.js             # Main build script
-└── serve.js             # Local development server
+├── build.js             # Main build orchestrator
+├── serve.js             # Local development server
+└── package.json         # Dependencies and scripts
 ```
 
 ## Customization
 
 ### Templates
 
-Edit files in `src/templates/` to modify the HTML structure and layout.
+Edit files in `src/templates/` to modify the HTML structure and layout:
+
+- `layout-template.html` - Main page wrapper (header, footer, navigation)
+- `post-template.html` - Individual blog post layout
+- `blog-template.html` - Blog listing page layout
+- `tags-template.html` - Tag page layout
+- `main-tags-template.html` - Tags index page layout
+
+#### Template Placeholders
+
+The `layout-template.html` supports the following placeholders that are automatically replaced during build:
+
+- `{{siteName}}` - Site name from config
+- `{{siteDescription}}` - Site description for meta tags
+- `{{siteLanguage}}` - HTML lang attribute (e.g., 'en', 'es', 'fr')
+- `{{title}}` - Page title (format: `{{siteName}} | {{pageTitle}}`)
+- `{{page}}` - Breadcrumb navigation path (HTML formatted)
+- `{{children}}` - Main content area (injected from other templates)
+- `{{tagsDropdown}}` - Generated HTML for tags dropdown menu
+- `{{githubUrl}}` - GitHub profile URL from config
+- `{{authorName}}` - Author name from config
+- `{{copyrightYear}}` - Copyright year (auto-updated)
+- `{{canonicalUrl}}` - Canonical URL for SEO
+- `{{ogUrl}}` - Open Graph URL
+- `{{stylesPath}}` - Path to CSS file (`/styles/styles.css`)
+- `{{faviconPath}}` - Path to favicon (`/assets/favicon.ico`)
+- `{{scriptPath}}` - Path to JavaScript bundle (`/js/bundle.js`)
+- `{{gitLogoPath}}` - Path to GitHub icon (`/assets/github-icon.svg`)
+
+Content templates (`post-template.html`, `blog-template.html`, etc.) support:
+
+- `{{content}}` - Full post content (HTML)
+- `{{previewContent}}` - Truncated preview content
+- `{{title}}` - Post title
+- `{{titleLink}}` - Post title as clickable link
+- `{{date}}` - Formatted publication date
+- `{{tags}}` - Post tags as HTML links
 
 ### Styling
 
-Customize styles in `src/styles/tailwind.css` and configure Tailwind in `tailwind.config.js`. See the [Tailwind CSS documentation](https://tailwindcss.com/docs) for details.
+Customize styles in `src/styles/tailwind.css` and configure Tailwind in `tailwind.config.js`. The project uses Tailwind's typography plugin for content styling. See the [Tailwind CSS documentation](https://tailwindcss.com/docs) for details.
 
 ### Configuration
 
-Edit `scripts/config.js` to adjust site name, posts per page, and directory paths.
+Copy the example configuration file if you haven't already:
+
+```bash
+cp scripts/example.config.js scripts/config.js
+```
+
+Edit `scripts/config.js` to customize your site settings. The configuration is split into `siteConfig` (user-facing settings) and `pathConfig` (internal paths). You typically only need to modify `siteConfig`:
+
+```javascript
+const siteConfig = {
+  siteName: 'My Blog',                    // Site name displayed in header
+  siteDescription: 'My awesome blog',     // Site description for meta tags
+  siteUrl: 'https://example.com',          // Base URL (used for canonical URLs and Open Graph)
+  githubUrl: 'https://github.com/username', // GitHub profile URL
+  authorName: 'username',                  // Author name displayed in footer
+  copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
+  postsPerPage: 5,                         // Number of posts per paginated page
+  previewLength: 200,                      // Character length for post previews
+  titleTruncationLength: 25,               // Max title length in post listings
+  titleTruncationLengthBreadcrumb: 20,      // Max title length in breadcrumbs
+  paginationWindowSize: 5,                  // Number of page links in pagination
+  dateLocale: 'en-US',                      // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
+  siteLanguage: 'en',                       // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
+};
+```
 
 ### TypeScript
 
-Add or modify interactive features by editing files in `src/ts/`.
+Add or modify interactive features by editing files in `src/ts/`:
+
+- `toggle-theme.ts` - Theme switcher (light/dark mode)
+- `burger-dropdown.ts` - Mobile navigation menu
+- `tags-dropdown.ts` - Tags dropdown menu
+- `main.ts` - Entry point (auto-generated imports)
 
 ## Troubleshooting
 
 ### Build fails with "ENOENT" errors
 
-Ensure required directories exist: `src/content/blog/posts/`, `src/templates/`, `src/styles/`. Check that template files are present and verify file permissions.
+**Solution:** Ensure required directories exist:
+- `src/content/blog/posts/` - For blog posts
+- `src/templates/` - For HTML templates
+- `src/styles/` - For CSS source files
+
+Check that template files are present and verify file permissions.
 
 ### CSS not loading
 
-Run `npm run build` to regenerate CSS. Verify that `public/styles/styles.css` exists after build and that template paths use absolute paths from root (`/styles/styles.css`).
+**Solution:** 
+1. Run `npm run build` to regenerate CSS
+2. Verify that `public/styles/styles.css` exists after build
+3. Ensure template paths use absolute paths from root (`/styles/styles.css`)
 
 ### Posts not appearing
 
-Ensure markdown files are in `src/content/blog/posts/`. Check front matter format (YAML with `---` delimiters) and verify date format is `DD.MM.YYYY` (e.g., `03.01.2025`).
-
-### Server returns 403 Forbidden
-
-This indicates a path traversal attempt was blocked. Verify you're accessing valid paths within the `public/` directory.
+**Solution:** 
+1. Ensure markdown files are in `src/content/blog/posts/`
+2. Check front matter format (YAML with `---` delimiters)
+3. Verify date format is either:
+   - `DD.MM.YYYY` (e.g., `03.01.2026`)
+   - ISO 8601: `YYYY-MM-DD` (e.g., `2026-01-03`)
+4. Check build output for warnings about missing titles or invalid dates
 
 ### Template elements not found
 
-Ensure templates contain required elements (e.g., `#post-content`, `.post-item`). Check template file names match expected patterns and review error messages for specific missing elements.
+**Solution:** 
+1. Ensure templates contain required elements:
+   - `#post-content` - For post pages
+   - `.post-item` - For blog/tag listings
+   - `#post-links-div` - For paginated content
+2. Check template file names match expected patterns
+3. Review error messages for specific missing elements and file paths
+
+### Theme toggle not visible
+
+**Solution:** 
+- On desktop: The theme toggle is in the top navigation bar. If it's hidden, check that the path bar isn't too long (it should truncate automatically)
+- On mobile: The theme toggle is in the burger menu dropdown
+- Ensure JavaScript is enabled in your browser
+
+## Build Process
+
+The build process includes several optimization steps executed in order:
+
+1. **Import Generation** - Automatically generates TypeScript imports from `src/ts/` directory
+2. **Code Bundling** - Bundles TypeScript with Webpack into a single JavaScript file
+3. **Asset Copying** - Copies static assets (images, icons, favicon) to output directory
+4. **Content Generation** - Processes Markdown files and generates HTML pages with pagination
+5. **CSS Processing** - Compiles Tailwind CSS with PostCSS and Autoprefixer
+6. **HTML Minification** - Optimizes HTML output (preserves code blocks and whitespace in `<pre>` tags)
+
+Build progress is displayed in real-time, showing the number of posts, pages, and tags being processed. The entire build process is optimized for speed with parallel processing where possible.
+
+## Performance
+
+- **Parallel Processing** - Posts are processed concurrently for faster builds
+- **HTML Minification** - Reduces file sizes by 10-20% while preserving code blocks
+- **Template Caching** - Templates are cached to minimize I/O operations
+- **Optimized Output** - Clean, minified HTML, CSS, and JavaScript
 
 ## Contributing
 
-Contributions are welcome. Please open an issue or submit a pull request.
+Contributions are welcome! If you'd like to contribute:
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add some amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
+
+For bug reports or feature requests, please open an issue on GitHub.
 
 ## License
 
 MIT License. See `LICENSE` for details.
+
+---
+
+**Author:** [Adaalrf](https://github.com/adaalrf)
+
+For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/adaalrf/anq-blog-ssg).

@@ -4,7 +4,7 @@
 // and sends the file content as the response. If the requested file is not found, it looks for a 404.html file in the requested directory or falls back to the root 404.html file.
 // If no 404.html file is found, it sends a plain text response with "404 Not Found". If there is a server error, it sends a 500 status code with an error message.
 // The server listens on the specified port (default 8080) and logs the server URL when it starts.
-// To run the server, execute the script with Node.js: "node run serve"
+// To run the server, execute the script with Node.js: "npm run serve"
 // The server will start and serve files from the public directory. You can access the server at http://localhost:8080.
 // Note: This script is NOT suitable for production use. It does not handle concurrent requests, caching, security, or other advanced features typically found in production servers.
 
@@ -54,10 +54,11 @@ const server = http.createServer(async (req, res) => {
       '.svg': 'image/svg+xml',
       '.wav': 'audio/wav',
       '.mp4': 'video/mp4',
-      '.woff': 'application/font-woff',
-      '.ttf': 'application/font-ttf',
+      '.woff': 'font/woff',
+      '.woff2': 'font/woff2',
+      '.ttf': 'font/ttf',
       '.eot': 'application/vnd.ms-fontobject',
-      '.otf': 'application/font-otf',
+      '.otf': 'font/otf',
       '.wasm': 'application/wasm',
     };
 

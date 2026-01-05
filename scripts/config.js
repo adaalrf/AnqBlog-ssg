@@ -6,11 +6,18 @@ import { fpr } from './utils/path-and-file-utils.js';
  */
 const siteConfig = {
   siteName: '. adaalrf.dev',
+  siteDescription: 'The personal website and blog of the individual known as Adaalrf.',
+  siteUrl: 'https://ssg.adaalrf.dev', // Base URL for the site (used for canonical URLs and Open Graph)
+  githubUrl: 'https://github.com/adaalrf',
+  authorName: 'adaalrf', // Author name displayed in footer
+  copyrightYear: new Date().getFullYear(),
   postsPerPage: 5,
   previewLength: 200, // Character length for post previews
   titleTruncationLength: 25, // Character length for truncated titles in post items
   titleTruncationLengthBreadcrumb: 20, // Character length for truncated titles in breadcrumbs
   paginationWindowSize: 5, // Number of page links to show in pagination
+  dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
+  siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
 };
 
 /**

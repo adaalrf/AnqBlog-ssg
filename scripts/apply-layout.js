@@ -11,6 +11,7 @@ import {
   ensureDirectoryExists,
   writeFileContent,
 } from './utils/path-and-file-utils.js';
+import { minifyHtml } from './utils/html-minify.js';
 import fs from 'fs';
 import path from 'path';
 import config from './config.js';
@@ -126,19 +127,55 @@ const processDirectory = (inputDir, outputDir, tags, processedDirs, templateCach
       const mainLayoutContent = templateCache.mainLayout;
 
       const finalTitle = `${config.siteName} | ${data.title || ''}`;
+
+      // Generate canonical URL and Open Graph URL from file path
+      // Convert file path relative to public directory to URL path
+      const publicDir = config.publicContentOutputDirectory;
+      let relativePath = path.relative(publicDir, outputFilePath);
+      // Normalize path separators
+      relativePath = relativePath.replace(/\\/g, '/');
+      // Remove index.html and .html extension, but keep directory structure
+      if (relativePath.endsWith('/index.html')) {
+        relativePath = relativePath.replace(/\/index\.html$/, '');
+      } else if (relativePath.endsWith('.html')) {
+        relativePath = relativePath.replace(/\.html$/, '');
+      }
+      // Ensure it starts with /
+      const urlPath = relativePath.startsWith('/') ? relativePath : '/' + relativePath;
+      // If empty or just '/', use base URL, otherwise append path
+      const canonicalUrl = urlPath === '/' ? config.siteUrl : config.siteUrl + urlPath;
+      const ogUrl = canonicalUrl;
+
+      // Determine og:type based on page type (article for posts, website for others)
+      // Check if this is a post page by looking at the path
+      const isPostPage = relativePath.includes('/blog/posts/') && !relativePath.endsWith('/blog/posts');
+      const ogType = isPostPage ? 'article' : 'website';
+      
       // Replace placeholders in the main layout - all assets are at root
       // Provide defaults for missing fields
-      const finalHtml = replacePlaceholders(mainLayoutContent, {
+      let finalHtml = replacePlaceholders(mainLayoutContent, {
         ...data,
         title: finalTitle,
         page: data.page || '', // Default to empty if not provided
         children: mainContent,
         tagsDropdown: tagsDropdownContent,
+        siteName: config.siteName || '',
+        siteDescription: config.siteDescription || '',
+        githubUrl: config.githubUrl || '',
+        authorName: config.authorName || '',
+        copyrightYear: config.copyrightYear || new Date().getFullYear(),
+        siteLanguage: config.siteLanguage || 'en',
+        canonicalUrl: canonicalUrl,
+        ogUrl: ogUrl,
+        ogType: ogType,
         stylesPath: '/styles/styles.css',
         faviconPath: '/assets/favicon.ico',
         scriptPath: '/js/bundle.js',
         gitLogoPath: '/assets/github-icon.svg',
       });
+
+      // Minify HTML for smaller file sizes
+      finalHtml = minifyHtml(finalHtml);
 
       writeFileContent(outputFilePath, finalHtml);
       console.log(`(Apply-Layout.js): Processed page -> ${outputFilePath}`);

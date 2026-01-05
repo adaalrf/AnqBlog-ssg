@@ -1,5 +1,6 @@
 const htmlElement = document.querySelector<HTMLElement>('html');
 const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
+const toggleThemeBtnMobile = document.querySelector<HTMLElement>('#toggle-theme-btn-mobile');
 const burgerMenu = document.querySelector<HTMLElement>('#burger-dropdown');
 const savedTheme = localStorage.getItem('theme');
 
@@ -36,31 +37,53 @@ function createIconElement(
  * @param {'light' | 'dark'} theme - The theme to set.
  */
 function setTheme(theme: 'light' | 'dark'): void {
-  if (htmlElement && toggleThemeBtn && burgerMenu) {
+  if (htmlElement && burgerMenu) {
     // Clear existing content
-    toggleThemeBtn.textContent = '';
+    if (toggleThemeBtn) {
+      toggleThemeBtn.textContent = '';
+    }
+    if (toggleThemeBtnMobile) {
+      toggleThemeBtnMobile.textContent = '';
+    }
     burgerMenu.textContent = '';
 
     if (theme === 'light') {
       htmlElement.classList.replace('dark', 'light');
-      toggleThemeBtn.appendChild(
-        createIconElement(sunIconPath, 'Sun icon', 24, 24),
-      );
+      if (toggleThemeBtn) {
+        toggleThemeBtn.appendChild(
+          createIconElement(sunIconPath, 'Sun icon', 24, 24),
+        );
+        toggleThemeBtn.classList.remove('hidden');
+      }
+      if (toggleThemeBtnMobile) {
+        toggleThemeBtnMobile.appendChild(
+          createIconElement(sunIconPath, 'Sun icon', 24, 24),
+        );
+        toggleThemeBtnMobile.classList.remove('hidden');
+      }
       burgerMenu.appendChild(
         createIconElement(burgerLightPath, 'Burger menu', 36, 36),
       );
       localStorage.setItem('theme', 'light');
     } else {
       htmlElement.classList.replace('light', 'dark');
-      toggleThemeBtn.appendChild(
-        createIconElement(moonIconPath, 'Moon icon', 24, 24),
-      );
+      if (toggleThemeBtn) {
+        toggleThemeBtn.appendChild(
+          createIconElement(moonIconPath, 'Moon icon', 24, 24),
+        );
+        toggleThemeBtn.classList.remove('hidden');
+      }
+      if (toggleThemeBtnMobile) {
+        toggleThemeBtnMobile.appendChild(
+          createIconElement(moonIconPath, 'Moon icon', 24, 24),
+        );
+        toggleThemeBtnMobile.classList.remove('hidden');
+      }
       burgerMenu.appendChild(
         createIconElement(burgerDarkPath, 'Burger menu', 36, 36),
       );
       localStorage.setItem('theme', 'dark');
     }
-    toggleThemeBtn.classList.remove('hidden');
   }
 }
 
@@ -77,6 +100,10 @@ function toggleTheme(): void {
 
 if (toggleThemeBtn) {
   toggleThemeBtn.addEventListener('click', toggleTheme);
+}
+
+if (toggleThemeBtnMobile) {
+  toggleThemeBtnMobile.addEventListener('click', toggleTheme);
 }
 
 window.addEventListener('DOMContentLoaded', () => {

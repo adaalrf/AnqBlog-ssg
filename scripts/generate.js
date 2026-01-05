@@ -11,7 +11,7 @@ import config from './config.js';
  * Generates all HTML files for the static site.
  * Orchestrates the entire generation process including posts, blog pages, tag pages, and layout application.
  */
-const generateAllHtmlFiles = () => {
+const generateAllHtmlFiles = async () => {
   ensureDirectoriesExist([
     config.tempPostsOutputDirectory,
     config.tempTagsOutputDirectory,
@@ -22,16 +22,22 @@ const generateAllHtmlFiles = () => {
     config.publicTagsOutputDirectory,
   ]);
 
+  console.log('(Generate.js): Processing markdown files...');
   const truncatedPosts = processAndSortMarkdownFiles(
     config.postsContentDirectory,
     { previewLength: config.previewLength },
   );
 
   const fullPosts = processAndSortMarkdownFiles(config.postsContentDirectory);
+  console.log(`(Generate.js): Found ${fullPosts.length} post${fullPosts.length !== 1 ? 's' : ''}`);
 
   const tags = collectTags(fullPosts);
+  const tagCount = Object.keys(tags).length;
+  if (tagCount > 0) {
+    console.log(`(Generate.js): Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
+  }
 
-  generateIntermediatePostHtmlFiles(
+  await generateIntermediatePostHtmlFiles(
     fullPosts,
     config.templatePostsPath,
     config.tempPostsOutputDirectory,
@@ -100,7 +106,7 @@ const processAndSortMarkdownFiles = (directory, options = {}) => {
       if (!post.content) {
         console.warn(`Post missing content: ${post.htmlFileName || 'unknown'}`);
       }
-      
+
       // Parse date with error handling
       let postDate = new Date();
       if (post.date) {
@@ -110,7 +116,7 @@ const processAndSortMarkdownFiles = (directory, options = {}) => {
           console.warn(`Post has invalid date "${post.date}" (${post.htmlFileName || 'unknown'}): ${error.message}. Using current date.`);
         }
       }
-      
+
       return {
         ...post,
         title: post.title || 'Untitled',
@@ -119,8 +125,7 @@ const processAndSortMarkdownFiles = (directory, options = {}) => {
         content: post.content || '',
       };
     })
-    .sort((a, b) => b.date - a.date)
-    .map((post) => ({ ...post, date: new Date(post.date) }));
+    .sort((a, b) => b.date - a.date);
 };
 
 /**
@@ -144,4 +149,7 @@ const collectTags = (posts) => {
   return tags;
 };
 
-generateAllHtmlFiles();
+generateAllHtmlFiles().catch((error) => {
+  console.error('Error generating HTML files:', error);
+  process.exit(1);
+});

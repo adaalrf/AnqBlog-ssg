@@ -1,3 +1,5 @@
+import config from '../config.js';
+
 /**
  * Parses a date string in either ISO 8601 format (YYYY-MM-DD) or DD.MM.YYYY format into a Date object.
  * @param {string} dateString - The date string to parse.
@@ -55,7 +57,7 @@ export const parseDate = (dateString) => {
 
   const date = new Date(year, month - 1, day);
 
-  // Validate the date is actually valid (catches cases like 32.13.2024)
+  // Validate the date is actually valid (catches cases like 32.13.2026)
   if (
     date.getFullYear() !== year ||
     date.getMonth() !== month - 1 ||
@@ -69,6 +71,7 @@ export const parseDate = (dateString) => {
 
 /**
  * Formats a Date object into a human-readable string.
+ * Uses the locale from config if available, otherwise defaults to 'en-US'.
  * @param {Date} date - The date object to format.
  * @returns {string} - The formatted date string.
  * @throws {Error} - If the date object is invalid.
@@ -77,6 +80,27 @@ export const formatDate = (date) => {
   if (!(date instanceof Date)) {
     throw new Error('Invalid date object');
   }
+
+  // Get locale from config, defaulting to 'en-US' if not available
+  const locale = config.dateLocale || 'en-US';
+
   const options = { year: 'numeric', month: 'short', day: 'numeric' };
-  return date.toLocaleDateString('en-US', options);
+  return date.toLocaleDateString(locale, options);
+};
+
+/**
+ * Formats a Date object into an ISO 8601 date string (YYYY-MM-DD).
+ * @param {Date} date - The date object to format.
+ * @returns {string} - The ISO 8601 formatted date string.
+ * @throws {Error} - If the date object is invalid.
+ */
+export const formatDateISO = (date) => {
+  if (!(date instanceof Date)) {
+    throw new Error('Invalid date object');
+  }
+
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const day = String(date.getDate()).padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };

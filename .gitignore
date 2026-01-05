@@ -1,7 +1,7 @@
 # Directories
 node_modules/
 public/
-src/temp/
+.build/
 legacy/
 
 # Ignore all files in content and templates directories
@@ -10,8 +10,47 @@ src/content/*
 # Files
 deploy.sh
 
-# Development and review files
-REVIEW.md
-REVIEW-FIXED.md
-IMPROVEMENTS.md
-FINAL-REVIEW.md
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Auto-generated files
+src/ts/main.ts
+
+# Site-specific configuration (copy example.config.js to config.js)
+scripts/config.js

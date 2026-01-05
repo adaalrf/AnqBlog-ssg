@@ -1,8 +1,7 @@
 {
-  "name": "adaalrf_dev",
-  "version": "0.4.0",
+  "name": "anq-blog-ssg",
+  "version": "0.5.0",
   "description": "A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.",
-  "main": "index.js",
   "type": "module",
   "scripts": {
     "build": "node build.js",
@@ -19,6 +18,9 @@
   ],
   "author": "Adaalrf",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "dependencies": {
     "@types/node": "^20.14.8",
     "autoprefixer": "^10.4.19",

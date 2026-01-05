@@ -1,108 +1,122 @@
 <!DOCTYPE html>
 <!-- here you set the default theme -->
-<html class="dark" lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <meta
-      name="description"
-      content="The personal website and blog of the individual known as Adaalrf." />
-    <title>{{title}}</title>
-    <link href="{{stylesPath}}" rel="stylesheet" />
-    <link rel="icon" href="{{faviconPath}}" type="image/x-icon" />
-  </head>
-  <body class="bg-background flex flex-col min-h-screen">
-    <header
-      class="sticky top-0 z-10 bg-background text-foreground shadow-md p-1 mb-6">
-      <div
-        id="mobile-menu"
-        class="sm:hidden flex items-center mx-7 justify-between">
-        <ul>
-          <li class="relative">
-            <a href="#" id="burger-dropdown"></a>
-            <ul
-              id="burger-dropdown-menu"
-              class="flex flex-col gap-4 absolute mt-4 p-4 transform min-w-36 w-fit bg-background border-t-2 border-t-accent rounded-sm shadow-lg z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
-              <li class="dropdownItem"><a href="/">Home</a></li>
-              <li class="dropdownItem"><a href="/blog">Blog</a></li>
-              <li class="dropdownItem"><a href="/blog/tags">Tags</a></li>
-              <li class="dropdownItem">
-                <a
-                  href="https://github.com/adaalrf"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  >gitHub</a
-                >
-              </li>
-            </ul>
-          </li>
-        </ul>
-        <a href="/">
-          <h1 class="text-xl font-bold m-0">.&nbsp;adaalrf.dev&nbsp;</h1>
-        </a>
-      </div>
-      <div
-        class="hidden sm:flex flex-col md:flex-row items-center justify-between sm:max-w-lg md:min-max-w mx-auto">
-        <div class="flex">
-          <a href="/">
-            <h1 class="text-xl font-bold m-0">.&nbsp;adaalrf.dev&nbsp;</h1>
-          </a>
-          <div id="path-bar-div" class="text-xl font-bold m-0 overflow-hidden whitespace-nowrap">
-            {{page}}
-          </div>
-        </div>
-        <nav>
-          <ul class="flex space-x-9">
-            <li>
-              <a href="/">Home</a>
+<html class="dark" lang="{{siteLanguage}}">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="{{siteDescription}}" />
+  <meta name="robots" content="index, follow" />
+  <title>{{title}}</title>
+  <!-- Open Graph / Facebook -->
+  <meta property="og:type" content="{{ogType}}" />
+  <meta property="og:title" content="{{title}}" />
+  <meta property="og:description" content="{{siteDescription}}" />
+  <meta property="og:url" content="{{ogUrl}}" />
+  <!-- Optional: Set ogImage in config or front matter to include og:image meta tag -->
+  <!-- <meta property="og:image" content="{{ogImage}}" /> -->
+  <!-- Optional: Set articlePublishedTime in front matter for article pages -->
+  <!-- <meta property="article:published_time" content="{{articlePublishedTime}}" /> -->
+  <!-- Optional: Set articleAuthor in config or front matter for article pages -->
+  <!-- <meta property="article:author" content="{{articleAuthor}}" /> -->
+  <!-- Twitter -->
+  <meta name="twitter:card" content="summary" />
+  <meta name="twitter:title" content="{{title}}" />
+  <meta name="twitter:description" content="{{siteDescription}}" />
+  <!-- Optional: Set twitterImage in config or front matter to include twitter:image meta tag -->
+  <!-- <meta name="twitter:image" content="{{twitterImage}}" /> -->
+  <link rel="canonical" href="{{canonicalUrl}}" />
+  <link href="{{stylesPath}}" rel="stylesheet" />
+  <link rel="icon" href="{{faviconPath}}" type="image/x-icon" />
+</head>
+
+<body class="bg-background flex flex-col min-h-screen">
+  <!-- Skip to main content link for keyboard users -->
+  <a href="#main" class="sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-accent-foreground focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:w-auto focus:h-auto focus:m-0 focus:overflow-visible focus:clip-auto focus:whitespace-normal">
+    Skip to main content
+  </a>
+  <header
+    class="sticky top-0 z-10 bg-background/95 backdrop-blur-sm text-foreground border-b border-muted/50 shadow-sm mb-8">
+    <div id="mobile-menu" class="sm:hidden flex items-center justify-between px-4 py-3">
+      <ul>
+        <li class="relative">
+          <button type="button" id="burger-dropdown" aria-label="Toggle menu" aria-expanded="false"></button>
+          <ul id="burger-dropdown-menu"
+            class="flex flex-col gap-3 absolute mt-3 p-4 transform min-w-40 w-fit bg-background border border-muted rounded-lg shadow-xl z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
+            <li class="dropdownItem"><a href="/" class="block py-1">Home</a></li>
+            <li class="dropdownItem"><a href="/blog" class="block py-1">Blog</a></li>
+            <li class="dropdownItem"><a href="/blog/tags" class="block py-1">Tags</a></li>
+            <li class="dropdownItem">
+              <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer" class="block py-1">gitHub</a>
             </li>
-            <li>
-              <a href="/blog">Blog</a>
-            </li>
-            <li class="relative hidden sm:block">
-              <a href="/blog/tags" id="tags-dropdown">Tags</a>
-              <ul
-                id="tags-dropdown-menu"
-                class="flex flex-col gap-4 absolute left-1/2 mt-4 p-4 transform -translate-x-1/2 min-w-36 w-fit bg-background border-t-2 border-t-accent rounded-sm shadow-lg z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
-                {{tagsDropdown}}
-              </ul>
-            </li>
-            <li>
-              <a
-                href="https://github.com/adaalrf"
-                target="_blank"
-                rel="noopener noreferrer"
-                >gitHub</a
-              >
-            </li>
-            <li>
-              <button id="toggle-theme-btn" class="hidden">
-                <!-- Toggle Theme -->
+            <li class="dropdownItem">
+              <button id="toggle-theme-btn-mobile" class="hidden w-full text-left py-1" aria-label="Toggle theme">
+                <!-- Toggle Theme Mobile -->
               </button>
             </li>
           </ul>
+        </li>
+      </ul>
+      <a href="/" class="hover:opacity-80 transition-opacity">
+        <h1 class="text-xl font-bold m-0 tracking-tight">{{siteName}}</h1>
+      </a>
+    </div>
+    <div
+      class="hidden sm:flex flex-col md:flex-row items-center justify-between sm:max-w-lg md:min-max-w mx-auto gap-3 px-4 py-3">
+      <div class="flex items-center min-w-0 flex-1 gap-3">
+        <a href="/" class="flex-shrink-0 hover:opacity-80 transition-opacity">
+          <h1 class="text-xl font-bold m-0 tracking-tight">{{siteName}}</h1>
+        </a>
+        <nav id="path-bar-div" aria-label="Breadcrumb"
+          class="text-lg font-medium m-0 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 max-w-md text-muted-foreground">
+          {{page}}
         </nav>
       </div>
-    </header>
-    <main
-      id="main"
-      class="ring-2 ring-muted min-w-72 sm:max-w-lg md:min-max-w mx-2 sm:mx-auto p-6 rounded-md bg-background text-foreground drop-shadow-md flex-grow">
+      <nav class="flex-shrink-0" aria-label="Main navigation">
+        <ul class="flex space-x-6 items-center">
+          <li>
+            <a href="/" class="hover:text-accent transition-colors">Home</a>
+          </li>
+          <li>
+            <a href="/blog" class="hover:text-accent transition-colors">Blog</a>
+          </li>
+          <li class="relative hidden sm:block">
+            <a href="/blog/tags" id="tags-dropdown" aria-expanded="false"
+              class="hover:text-accent transition-colors">Tags</a>
+            <ul id="tags-dropdown-menu"
+              class="flex flex-col gap-2 absolute left-1/2 mt-3 p-3 transform -translate-x-1/2 min-w-40 w-fit bg-background border border-muted rounded-lg shadow-xl z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
+              {{tagsDropdown}}
+            </ul>
+          </li>
+          <li>
+            <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer"
+              class="hover:text-accent transition-colors">gitHub</a>
+          </li>
+          <li class="flex-shrink-0">
+            <button id="toggle-theme-btn" class="hidden hover:opacity-70 transition-opacity" aria-label="Toggle theme">
+              <!-- Toggle Theme -->
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </div>
+  </header>
+  <main id="main" class="min-w-72 sm:max-w-lg md:min-max-w mx-2 sm:mx-auto mb-8 flex-grow" aria-label="Main content">
+    <div class="bg-background border border-muted/50 rounded-xl shadow-sm p-6 sm:p-8">
       {{children}}
-    </main>
-    <footer class="bg-background text-foreground shadow-inner mt-6 p-4">
-      <div class="min-w-72 sm:max-w-lg md:min-max-w mx-auto text-center">
-        <p class="text-foreground">
-          © 2024 . adaalrf.dev |
-          <a href="https://github.com/adaalrf"
-            >adaalrf &nbsp;
-            <img
-              src="{{gitLogoPath}}"
-              alt="gitLogo"
-              class="inline-block w-6 h-6" />
-          </a>
-        </p>
-      </div>
-    </footer>
-    <script type="module" src="{{scriptPath}}"></script>
-  </body>
+    </div>
+  </main>
+  <footer class="bg-background/50 border-t border-muted/50 mt-auto py-6">
+    <div class="min-w-72 sm:max-w-lg md:min-max-w mx-auto text-center px-4">
+      <p class="text-muted-foreground text-sm">
+        © {{copyrightYear}} . <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer"
+          class="hover:text-accent transition-colors inline-flex items-center gap-1">{{authorName}}
+          <img src="{{gitLogoPath}}" alt="" class="inline-block w-4 h-4 opacity-70" aria-hidden="true" />
+        </a>
+      </p>
+    </div>
+  </footer>
+  <script type="module" src="{{scriptPath}}"></script>
+</body>
+
 </html>

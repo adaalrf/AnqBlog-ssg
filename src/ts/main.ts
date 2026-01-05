@@ -5,5 +5,5 @@ import './toggle-theme';
 
 // Initialization logic
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('Website loaded');
+    // Website initialized
 });

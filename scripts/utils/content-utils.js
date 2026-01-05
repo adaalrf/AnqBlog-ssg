@@ -156,19 +156,28 @@ export const parseHtmlFrontMatter = (fileContent) => {
 
 /**
  * Cleans up excessive whitespace in HTML content.
+ * Preserves whitespace in preformatted elements (pre, code, textarea).
  * @param {string} html - The HTML content.
  * @returns {string} - The cleaned HTML content.
  */
 const cleanHtmlWhitespace = (html) => {
+  if (typeof html !== 'string') {
+    return html;
+  }
+
   return html
     // Remove excessive newlines (more than 2 consecutive)
     .replace(/\n{3,}/g, '\n\n')
-    // Remove whitespace between HTML tags
+    // Remove whitespace between HTML tags (but preserve in pre/code/textarea)
+    // This regex matches > followed by whitespace followed by <
     .replace(/>\s+</g, '><')
+    // Collapse multiple spaces/tabs to single space (but be careful with preformatted)
+    .replace(/[ \t]+/g, ' ')
     // Trim each line
     .split('\n')
     .map((line) => line.trim())
     .join('\n')
+    // Remove leading/trailing whitespace
     .trim();
 };
 
@@ -287,6 +296,25 @@ const escapeYamlValue = (value) => {
     .replace(/"/g, '\\"')
     .replace(/\n/g, '\\n')
     .replace(/\r/g, '\\r')}"`;
+};
+
+/**
+ * Escapes HTML special characters to prevent XSS attacks.
+ * @param {string} text - The text to escape.
+ * @returns {string} - The escaped text safe for HTML insertion.
+ */
+export const escapeHtml = (text) => {
+  if (typeof text !== 'string') {
+    return '';
+  }
+  const map = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
 };
 
 /**

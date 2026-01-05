@@ -6,9 +6,10 @@ import {
   getFirstNthCharacters,
   normalizeTagForFile,
   denormalizeTagFromFile,
+  escapeHtml,
 } from './content-utils.js';
 import { readFileContent } from './path-and-file-utils.js';
-import { formatDate } from './date-utils.js';
+import { formatDate, formatDateISO } from './date-utils.js';
 import config from '../config.js';
 
 /**
@@ -59,11 +60,18 @@ export const createPostItem = (
   if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
   const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
-  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${getFirstNthCharacters(title, config.titleTruncationLength)}</a>`;
+  // Escape title to prevent XSS attacks
+  const escapedTitle = escapeHtml(getFirstNthCharacters(title, config.titleTruncationLength));
+  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${escapedTitle}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true);
   postItem.querySelector('.post-title').innerHTML = titleLink;
-  postItem.querySelector('.post-date').innerHTML = formatDate(date);
+  // Update time element with ISO date and formatted display
+  const dateElement = postItem.querySelector('.post-date');
+  if (dateElement) {
+    dateElement.setAttribute('datetime', formatDateISO(date));
+    dateElement.textContent = formatDate(date);
+  }
   postItem.querySelector('.content').innerHTML = previewContent;
 
   const tagsContainer = postItem.querySelector('.tags');
@@ -72,10 +80,11 @@ export const createPostItem = (
 
   if (tagsContainer && tagsContainerMobile) {
     if (tags && tags.length > 0) {
+      // Escape tag display text to prevent XSS attacks
       const tagsList = tags
         .map(
           (tag) =>
-            `<a href="${tagsWebPath}/${normalizeTagForFile(tag)}.html">${denormalizeTagFromFile(tag)}</a>`,
+            `<a href="${tagsWebPath}/${normalizeTagForFile(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
         )
         .join(' ');
 
@@ -142,6 +151,15 @@ export const updatePaginationLinks = (
         ? `${tag ? tagWithDash : 'index'}.html`
         : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${index + 1}.html`;
     pageLink.textContent = index + 1;
+    // Set accessibility attributes
+    pageLink.setAttribute('aria-label', `Go to page ${index + 1}`);
+    // Set data attribute for easier styling/selection
+    pageLink.setAttribute('data-page-number', String(index + 1));
+    if (isCurrentPage) {
+      pageLink.setAttribute('aria-current', 'page');
+    } else {
+      pageLink.removeAttribute('aria-current');
+    }
     // Show page link only if there are multiple pages
     if (totalPages > 1) {
       pageLink.classList.remove('hidden');
@@ -167,6 +185,7 @@ export const updatePaginationLinks = (
   if (!nextLink.classList.contains('hidden')) {
     nextLink.href = `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex + 2
       }.html`;
+    nextLink.setAttribute('aria-label', 'Next page');
   }
 
   // Previous page link
@@ -176,5 +195,6 @@ export const updatePaginationLinks = (
       pageIndex === 1
         ? `${tag ? tag : 'index'}.html`
         : `${tag ? tagWithDash + '-page-' : 'blog-page-'}${pageIndex}.html`;
+    previousLink.setAttribute('aria-label', 'Previous page');
   }
 };

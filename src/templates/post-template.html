@@ -1,13 +1,14 @@
-<div class="content-div">
-  <div id="post-content">
+<!-- Post content template -->
+<section class="content-div">
+  <article id="post-content">
     <div class="mb-4 flex items-center space-x-2">
-      <p class="post-date">{{date}}</p>
+      <time class="post-date">{{date}}</time>
       <span id="tag-divider" class="hidden sm:block">|</span>
       <span class="tags hidden sm:flex gap-2 italic">{{tags}}</span>
     </div>
-    <div class="content prose">{{content}}</div>
+    <div class="content prose" dir="auto">{{content}}</div>
     <div>
       <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic">{{tags}}</span>
     </div>
-  </div>
-</div>
+  </article>
+</section>

@@ -4,36 +4,52 @@
 
 @layer base {
   .light {
-    --background: hsl(30, 20%, 95%); /* Base (#eff1f5) */
-    --foreground: hsl(220, 13%, 20%); /* Text (#4c4f69) */
-    --muted: hsla(30, 20%, 95%, 0.6); /* Muted background */
-    --muted-foreground: hsla(220, 13%, 20%, 0.6); /* Muted foreground */
-    --accent: hsl(193, 100%, 70%); /* Red (#d20f39) */
+    --background: hsl(30, 20%, 95%);
+    /* Base (#eff1f5) */
+    --foreground: hsl(220, 13%, 20%);
+    /* Text (#4c4f69) */
+    --muted: hsla(30, 20%, 95%, 0.6);
+    /* Muted background */
+    --muted-foreground: hsla(220, 13%, 20%, 0.6);
+    /* Muted foreground */
+    --accent: hsl(193, 100%, 70%);
+    /* Red (#d20f39) */
     --accent-foreground: var(--background);
-    --destructive: hsl(0, 80%, 60%); /* Destructive Red (#ff6e6e) */
+    --destructive: hsl(0, 80%, 60%);
+    /* Destructive Red (#ff6e6e) */
     --destructive-foreground: var(--foreground);
-    --code: hsl(30, 20%, 90%); /* Slightly darker than background for code bg */
-    --code-foreground: hsl(220, 13%, 20%); /* Foreground color for code text */
+    --code: hsl(30, 20%, 90%);
+    /* Slightly darker than background for code bg */
+    --code-foreground: hsl(220, 13%, 20%);
+    /* Foreground color for code text */
   }
 
   .dark {
-    --background: hsl(240, 15%, 15%); /* Base (#1e1e2e) */
-    --foreground: hsl(230, 33%, 90%); /* Text (#cdd6f4) */
-    --muted: hsla(240, 15%, 15%, 0.6); /* Muted background */
-    --muted-foreground: hsla(230, 33%, 90%, 0.6); /* Muted foreground */
-    --accent: hsl(341, 39%, 52%); /* Red (#f38ba8) */
+    --background: hsl(240, 15%, 15%);
+    /* Base (#1e1e2e) */
+    --foreground: hsl(230, 33%, 90%);
+    /* Text (#cdd6f4) */
+    --muted: hsla(240, 15%, 15%, 0.6);
+    /* Muted background */
+    --muted-foreground: hsla(230, 33%, 90%, 0.6);
+    /* Muted foreground */
+    --accent: hsl(341, 39%, 52%);
+    /* Red (#f38ba8) */
     --accent-foreground: var(--background);
-    --destructive: hsl(0, 76%, 70%); /* Destructive Red (#ed7878) */
+    --destructive: hsl(0, 76%, 70%);
+    /* Destructive Red (#ed7878) */
     --destructive-foreground: var(--foreground);
-    --code: hsl(240, 15%, 20%); /* Slightly lighter than background for code bg */
-    --code-foreground: hsl(230, 33%, 90%); /* Foreground color for code text */
+    --code: hsl(240, 15%, 20%);
+    /* Slightly lighter than background for code bg */
+    --code-foreground: hsl(230, 33%, 90%);
+    /* Foreground color for code text */
   }
 
   html {
-    padding-left: calc(
-      100vw - 100%
-    ); /* Prevent horizontal scrollbar making the page jumnp */
+    padding-left: calc(100vw - 100%);
+    /* Prevent horizontal scrollbar making the page jump */
   }
+
   a {
     @apply transition-all duration-100 no-underline text-foreground hover:text-accent;
   }
@@ -45,14 +61,39 @@
   h2 {
     @apply text-2xl my-1;
   }
+
   h3 {
     @apply text-xl my-1;
   }
+
   #toggle-theme-btn {
-    @apply hover:opacity-60; /* maching the anchortag's 'text-muted-foreground' */
+    @apply hover:opacity-60;
+    /* matching the anchortag's 'text-muted-foreground' */
   }
+
+  #burger-dropdown {
+    @apply bg-transparent border-0 p-0 cursor-pointer transition-all duration-100 text-foreground hover:text-accent;
+  }
+
+  .dropdown-item {
+    @apply hover:text-accent transition-colors;
+  }
+
+  .post-item {
+    @apply pb-6 border-b last:border-0 last:pb-0;
+    border-bottom-color: var(--muted);
+  }
+
+  .post-item:not(:last-child) {
+    @apply mb-6;
+  }
+
+  .post-date {
+    @apply text-sm text-muted-foreground;
+  }
+
   pre:has(> code) {
-    @apply size-fit/*  my-2 p-2 font-mono rounded-sm bg-muted-foreground text-background */;
+    @apply size-fit;
   }
 }
 
@@ -61,6 +102,7 @@
     max-width: 724px;
     min-width: 724px;
   }
+
   .scrollbar-padding {
     --scrollbar-width: 0px;
     --scrollbar-padding: 0px;
