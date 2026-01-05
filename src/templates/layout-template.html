@@ -28,72 +28,80 @@
   <link rel="canonical" href="{{canonicalUrl}}" />
   <link href="{{stylesPath}}" rel="stylesheet" />
   <link rel="icon" href="{{faviconPath}}" type="image/x-icon" />
+  <!-- Preload critical resources for better performance -->
+  <link rel="preload" href="{{stylesPath}}" as="style" />
+  <link rel="preload" href="{{scriptPath}}" as="script" />
 </head>
 
 <body class="bg-background flex flex-col min-h-screen">
   <!-- Skip to main content link for keyboard users -->
-  <a href="#main" class="sr-only focus:fixed focus:top-4 focus:left-4 focus:z-50 focus:px-4 focus:py-2 focus:bg-accent focus:text-accent-foreground focus:rounded-md focus:shadow-lg focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 focus:ring-offset-background focus:w-auto focus:h-auto focus:m-0 focus:overflow-visible focus:clip-auto focus:whitespace-normal">
+  <a href="#main" class="skip-link">
     Skip to main content
   </a>
   <header
-    class="sticky top-0 z-10 bg-background/95 backdrop-blur-sm text-foreground border-b border-muted/50 shadow-sm mb-8">
+    class="sticky top-0 z-10 bg-background/95 backdrop-blur-sm text-foreground border-b border-border shadow-sm mb-8 transition-shadow duration-200 ease-in-out">
     <div id="mobile-menu" class="sm:hidden flex items-center justify-between px-4 py-3">
-      <ul>
+      <ul class="flex items-center m-0 p-0">
         <li class="relative">
-          <button type="button" id="burger-dropdown" aria-label="Toggle menu" aria-expanded="false"></button>
+          <button type="button" id="burger-dropdown" aria-label="Toggle menu" aria-expanded="false"
+            class="flex items-center"></button>
           <ul id="burger-dropdown-menu"
-            class="flex flex-col gap-3 absolute mt-3 p-4 transform min-w-40 w-fit bg-background border border-muted rounded-lg shadow-xl z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
-            <li class="dropdownItem"><a href="/" class="block py-1">Home</a></li>
-            <li class="dropdownItem"><a href="/blog" class="block py-1">Blog</a></li>
-            <li class="dropdownItem"><a href="/blog/tags" class="block py-1">Tags</a></li>
+            class="flex flex-col gap-3 absolute left-0 mt-3 p-4 transform min-w-40 w-fit bg-background border border-border rounded-lg shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
+            <li class="dropdownItem"><a href="/" class="block py-1.5 px-1 rounded-sm focus-ring">Home</a></li>
+            <li class="dropdownItem"><a href="/blog" class="block py-1.5 px-1 rounded-sm focus-ring">Blog</a></li>
+            <li class="dropdownItem"><a href="/blog/tags" class="block py-1.5 px-1 rounded-sm focus-ring">Tags</a></li>
             <li class="dropdownItem">
-              <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer" class="block py-1">gitHub</a>
+              <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer"
+                class="block py-1.5 px-1 rounded-sm focus-ring">gitHub</a>
             </li>
             <li class="dropdownItem">
-              <button id="toggle-theme-btn-mobile" class="hidden w-full text-left py-1" aria-label="Toggle theme">
+              <button id="toggle-theme-btn-mobile" type="button"
+                class="hidden w-full text-left py-1.5 px-1 rounded-sm focus-ring" aria-label="Toggle theme">
                 <!-- Toggle Theme Mobile -->
               </button>
             </li>
           </ul>
         </li>
       </ul>
-      <a href="/" class="hover:opacity-80 transition-opacity">
-        <h1 class="text-xl font-bold m-0 tracking-tight">{{siteName}}</h1>
+      <a href="/"
+        class="hover:opacity-80 transition-opacity duration-200 ease-in-out focus-ring rounded-sm flex items-center">
+        <h1 class="text-xl font-bold m-0 p-0 tracking-tight leading-tight">{{siteName}}</h1>
       </a>
     </div>
     <div
-      class="hidden sm:flex flex-col md:flex-row items-center justify-between sm:max-w-lg md:min-max-w mx-auto gap-3 px-4 py-3">
+      class="hidden sm:flex flex-col md:flex-row md:items-center justify-between sm:max-w-lg md:min-max-w mx-auto gap-3 px-4 py-3">
       <div class="flex items-center min-w-0 flex-1 gap-3">
-        <a href="/" class="flex-shrink-0 hover:opacity-80 transition-opacity">
-          <h1 class="text-xl font-bold m-0 tracking-tight">{{siteName}}</h1>
+        <a href="/"
+          class="flex-shrink-0 hover:opacity-80 transition-opacity duration-200 ease-in-out focus-ring rounded-sm flex items-center">
+          <h1 class="text-xl font-bold m-0 p-0 tracking-tight leading-tight">{{siteName}}</h1>
         </a>
         <nav id="path-bar-div" aria-label="Breadcrumb"
-          class="text-lg font-medium m-0 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 max-w-md text-muted-foreground">
+          class="text-base sm:text-lg font-medium m-0 overflow-hidden whitespace-nowrap text-ellipsis min-w-0 max-w-md text-muted-foreground flex items-center">
           {{page}}
         </nav>
       </div>
-      <nav class="flex-shrink-0" aria-label="Main navigation">
-        <ul class="flex space-x-6 items-center">
+      <nav class="flex-shrink-0 flex items-center" aria-label="Main navigation">
+        <ul class="flex space-x-6 items-center m-0 p-0">
           <li>
-            <a href="/" class="hover:text-accent transition-colors">Home</a>
+            <a href="/" class="nav-link">Home</a>
           </li>
           <li>
-            <a href="/blog" class="hover:text-accent transition-colors">Blog</a>
+            <a href="/blog" class="nav-link">Blog</a>
           </li>
           <li class="relative hidden sm:block">
-            <a href="/blog/tags" id="tags-dropdown" aria-expanded="false"
-              class="hover:text-accent transition-colors">Tags</a>
+            <a href="/blog/tags" id="tags-dropdown" aria-expanded="false" aria-haspopup="true" class="nav-link">Tags</a>
             <ul id="tags-dropdown-menu"
-              class="flex flex-col gap-2 absolute left-1/2 mt-3 p-3 transform -translate-x-1/2 min-w-40 w-fit bg-background border border-muted rounded-lg shadow-xl z-20 transition-all duration-300 ease-in-out opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
+              class="flex flex-col gap-2 absolute left-1/2 mt-3 p-3 transform -translate-x-1/2 min-w-40 w-fit bg-background border border-border rounded-lg shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent">
               {{tagsDropdown}}
             </ul>
           </li>
           <li>
-            <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer"
-              class="hover:text-accent transition-colors">gitHub</a>
+            <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer" class="nav-link">gitHub</a>
           </li>
           <li class="flex-shrink-0">
-            <button id="toggle-theme-btn" class="hidden hover:opacity-70 transition-opacity" aria-label="Toggle theme">
+            <button id="toggle-theme-btn" type="button"
+              class="hidden hover:opacity-70 transition-opacity duration-200 ease-in-out focus-ring rounded-sm"
+              aria-label="Toggle theme">
               <!-- Toggle Theme -->
             </button>
           </li>
@@ -102,16 +110,17 @@
     </div>
   </header>
   <main id="main" class="min-w-72 sm:max-w-lg md:min-max-w mx-2 sm:mx-auto mb-8 flex-grow" aria-label="Main content">
-    <div class="bg-background border border-muted/50 rounded-xl shadow-sm p-6 sm:p-8">
+    <div class="card p-6 sm:p-8">
       {{children}}
     </div>
   </main>
-  <footer class="bg-background/50 border-t border-muted/50 mt-auto py-6">
+  <footer class="bg-background/50 border-t border-border mt-auto py-6 transition-colors duration-200 ease-in-out">
     <div class="min-w-72 sm:max-w-lg md:min-max-w mx-auto text-center px-4">
       <p class="text-muted-foreground text-sm">
         © {{copyrightYear}} . <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer"
-          class="hover:text-accent transition-colors inline-flex items-center gap-1">{{authorName}}
-          <img src="{{gitLogoPath}}" alt="" class="inline-block w-4 h-4 opacity-70" aria-hidden="true" />
+          class="hover:text-accent transition-colors duration-200 ease-in-out inline-flex items-center gap-1 focus-ring rounded-sm">{{authorName}}
+          <img src="{{gitLogoPath}}" alt=""
+            class="inline-block w-4 h-4 opacity-70 transition-opacity duration-200 ease-in-out" aria-hidden="true" />
         </a>
       </p>
     </div>

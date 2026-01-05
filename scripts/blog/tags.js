@@ -70,7 +70,7 @@ export const generateTagPages = (
       const document = dom.window.document;
       const postItemTemplate = document.querySelector('.post-item');
       const postLinksDiv = document.getElementById('post-links-div');
-      
+
       if (!postItemTemplate) {
         throw new Error(`Tags template must contain an element with class "post-item" (template: ${templateTagsPath}, tag: ${tag})`);
       }
@@ -100,14 +100,14 @@ export const generateTagPages = (
       const content = tagElement.outerHTML;
       // Sanitize tag for filename
       const filesWithDash = sanitizeFilename(normalizeTagForFile(tag));
-      
+
       const outputFilePath =
         pageIndex === 0
           ? path.join(tempTagsOutputDirectory, `${filesWithDash}.html`)
           : path.join(
-              tempTagsOutputDirectory,
-              `${filesWithDash}-page-${pageIndex + 1}.html`,
-            );
+            tempTagsOutputDirectory,
+            `${filesWithDash}-page-${pageIndex + 1}.html`,
+          );
       const filesWithoutDash = denormalizeTagFromFile(tag);
       // Escape tag name in breadcrumb to prevent XSS
       const escapedTagName = escapeHtml(filesWithoutDash);
@@ -127,6 +127,7 @@ export const generateTagPages = (
         tagLinks.push({
           tag: filesWithoutDash,
           link: `/blog/tags/${filesWithDash}.html`,
+          count: tagPosts.length,
         });
       }
     });
@@ -150,19 +151,28 @@ export const generateTagPages = (
   let linkElementLiClasses = [];
   let linkElementAnchorClasses = [];
 
-  if (tagLinkLiTemplate) {
-    linkElementLiClasses = tagLinkLiTemplate.className
-      .split(' ')
-      .filter(Boolean);
-    tagLinkLiTemplate.remove();
-  }
-
+  // Read anchor classes first (before removing the li template)
   if (tagLinkAnchorTemplate) {
     linkElementAnchorClasses = tagLinkAnchorTemplate.className
       .split(' ')
       .filter(Boolean);
-    tagLinkAnchorTemplate.remove();
   }
+
+  if (tagLinkLiTemplate) {
+    linkElementLiClasses = tagLinkLiTemplate.className
+      .split(' ')
+      .filter(Boolean)
+      .filter((cls) => cls !== 'hidden'); // Filter out 'hidden' class
+    tagLinkLiTemplate.remove(); // This also removes the anchor inside it
+  }
+
+  // Sort tags by count (descending), then alphabetically
+  tagLinks.sort((a, b) => {
+    if (b.count !== a.count) {
+      return b.count - a.count;
+    }
+    return a.tag.localeCompare(b.tag);
+  });
 
   tagLinks.forEach((tagLink) => {
     if (!tagLink.link || !tagLink.tag) {
@@ -175,6 +185,14 @@ export const generateTagPages = (
     if (linkElementAnchorClasses.length) {
       linkElement.classList.add(...linkElementAnchorClasses);
     }
+
+    // Add post count
+    const countSpan = document.createElement('span');
+    countSpan.className = 'tag-count';
+    countSpan.textContent = ` (${tagLink.count})`;
+    countSpan.setAttribute('aria-label', `${tagLink.count} post${tagLink.count !== 1 ? 's' : ''}`);
+    linkElement.appendChild(countSpan);
+
     const listItem = document.createElement('li');
     listItem.appendChild(linkElement);
     if (linkElementLiClasses.length) {

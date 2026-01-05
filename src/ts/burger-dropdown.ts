@@ -15,16 +15,19 @@ document.addEventListener('DOMContentLoaded', () => {
       dropdownToggle.setAttribute('aria-expanded', 'false');
     };
 
+    const isDropdownOpen = () => {
+      return dropdownToggle.getAttribute('aria-expanded') === 'true';
+    };
+
     dropdownToggle.addEventListener('mouseenter', showDropdown);
     dropdownMenu.addEventListener('mouseenter', showDropdown);
 
     dropdownToggle.addEventListener('mouseleave', hideDropdown);
     dropdownMenu.addEventListener('mouseleave', hideDropdown);
 
-    // Keyboard support
+    // Keyboard and click support
     dropdownToggle.addEventListener('click', () => {
-      const isExpanded = dropdownToggle.getAttribute('aria-expanded') === 'true';
-      if (isExpanded) {
+      if (isDropdownOpen()) {
         hideDropdown();
       } else {
         showDropdown();
@@ -33,7 +36,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Close on Escape key
     document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && dropdownToggle.getAttribute('aria-expanded') === 'true') {
+      if (e.key === 'Escape' && isDropdownOpen()) {
+        hideDropdown();
+      }
+    });
+
+    // Close when clicking outside
+    document.addEventListener('click', (e) => {
+      const target = e.target as Node;
+      if (
+        isDropdownOpen() &&
+        !dropdownMenu.contains(target) &&
+        !dropdownToggle.contains(target)
+      ) {
         hideDropdown();
       }
     });

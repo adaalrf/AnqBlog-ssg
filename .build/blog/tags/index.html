@@ -3,19 +3,30 @@ page: "/ <em>Tags</em>"
 title: "Tags"
 ---
 <div id="tags">
-  <div class="flex flex-col list-none mb-6 gap-4">
-    <ul id="tag-links-container">
+  <!-- Introduction section -->
+  <div class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-4">Tags</h1>
+    <p class="text-muted-foreground leading-7">
+      Browse posts by topic. Click on any tag to see all posts with that tag.
+    </p>
+  </div>
+
+  <!-- Tag links container -->
+  <div class="mb-6">
+    <ul id="tag-links-container" class="flex flex-wrap gap-3 list-none p-0 m-0">
       
       <!-- Links to tag pages will be inserted here -->
-    <li><a href="/blog/tags/tutorial.html" class="font-black">tutorial</a></li><li><a href="/blog/tags/getting-started.html" class="font-black">getting started</a></li><li><a href="/blog/tags/customization.html" class="font-black">customization</a></li><li><a href="/blog/tags/guide.html" class="font-black">guide</a></li><li><a href="/blog/tags/performance.html" class="font-black">performance</a></li><li><a href="/blog/tags/architecture.html" class="font-black">architecture</a></li></ul>
+    <li><a href="/blog/tags/guide.html" class="tag-link-item">guide<span class="tag-count" aria-label="5 posts"> (5)</span></a></li><li><a href="/blog/tags/tutorial.html" class="tag-link-item">tutorial<span class="tag-count" aria-label="5 posts"> (5)</span></a></li><li><a href="/blog/tags/architecture.html" class="tag-link-item">architecture<span class="tag-count" aria-label="3 posts"> (3)</span></a></li><li><a href="/blog/tags/customization.html" class="tag-link-item">customization<span class="tag-count" aria-label="3 posts"> (3)</span></a></li><li><a href="/blog/tags/performance.html" class="tag-link-item">performance<span class="tag-count" aria-label="3 posts"> (3)</span></a></li><li><a href="/blog/tags/getting-started.html" class="tag-link-item">getting started<span class="tag-count" aria-label="2 posts"> (2)</span></a></li><li><a href="/blog/tags/static-sites.html" class="tag-link-item">static sites<span class="tag-count" aria-label="1 post"> (1)</span></a></li><li><a href="/blog/tags/web-dev.html" class="tag-link-item">web dev<span class="tag-count" aria-label="1 post"> (1)</span></a></li></ul>
   </div>
-  <div class="pagination flex justify-center gap-4">
-    <a href="" class="previous-page hidden">&lt;</a>
-    <a href="" class="hidden" id="page-link-1"></a>
-    <a href="" class="hidden" id="page-link-2"></a>
-    <a href="" class="hidden current-page font-bold underline" id="page-link-3"></a>
-    <a href="" class="hidden" id="page-link-4"></a>
-    <a href="" class="hidden" id="page-link-5"></a>
-    <a href="" class="next-page hidden">&gt;</a>
-  </div>
+
+  <!-- Pagination navigation (links updated dynamically by scripts) -->
+  <nav aria-label="Pagination" class="pagination flex justify-center gap-4">
+    <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
+    <a href="#" class="hidden" id="page-link-1" aria-label="Go to page 1" data-page-number="1"></a>
+    <a href="#" class="hidden" id="page-link-2" aria-label="Go to page 2" data-page-number="2"></a>
+    <a href="#" class="hidden current-page font-bold underline" id="page-link-3" aria-label="Go to page 3" aria-current="page" data-page-number="3"></a>
+    <a href="#" class="hidden" id="page-link-4" aria-label="Go to page 4" data-page-number="4"></a>
+    <a href="#" class="hidden" id="page-link-5" aria-label="Go to page 5" data-page-number="5"></a>
+    <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
+  </nav>
 </div>

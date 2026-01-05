@@ -15,10 +15,13 @@ module.exports = {
         'secondary-foreground': 'var(--secondary-foreground)',
         accent: 'var(--accent)',
         'accent-foreground': 'var(--accent-foreground)',
+        'accent-hover': 'var(--accent-hover)',
         destructive: 'var(--destructive)',
         'destructive-foreground': 'var(--destructive-foreground)',
         code: 'var(--code)',
         'code-foreground': 'var(--code-foreground)',
+        border: 'var(--border)',
+        ring: 'var(--ring)',
       },
       typography: ({ theme }) => ({
         DEFAULT: {
@@ -42,7 +45,7 @@ module.exports = {
             '--tw-prose-code-bg': theme('colors.code'),
             '--tw-prose-th-borders': theme('colors.foreground'),
             '--tw-prose-td-borders': theme('colors.foreground'),
-            /* the rest seems to not be needed, since we are using our own dark-mode solution */
+            /* the rest are not needed, with a custom dark-mode solution. But kept for other themes */
             '--tw-prose-invert-body': null,
             '--tw-prose-invert-headings': null,
             '--tw-prose-invert-lead': null,

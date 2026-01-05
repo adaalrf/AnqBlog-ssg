@@ -98,6 +98,16 @@ function toggleTheme(): void {
   }
 }
 
+// Initialize theme on page load
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', () => {
+    setTheme(savedTheme === 'light' ? 'light' : 'dark');
+  });
+} else {
+  // DOM already loaded
+  setTheme(savedTheme === 'light' ? 'light' : 'dark');
+}
+
 if (toggleThemeBtn) {
   toggleThemeBtn.addEventListener('click', toggleTheme);
 }
@@ -105,7 +115,3 @@ if (toggleThemeBtn) {
 if (toggleThemeBtnMobile) {
   toggleThemeBtnMobile.addEventListener('click', toggleTheme);
 }
-
-window.addEventListener('DOMContentLoaded', () => {
-  setTheme(savedTheme === 'light' ? 'light' : 'dark');
-});

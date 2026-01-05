@@ -7,13 +7,13 @@ content: "<h1>Getting Started with AnqBlog-ssg</h1><p>AnqBlog-ssg is a static si
 previewContent: "<h1>Getting Started with AnqBlog-ssg</h1><p>AnqBlog-ssg is a static site generator that converts Markdown to HTML. Build once, serve anywhere—no Node.js required on your web server.</p><h2>Why Static?</h2><p>Static sites are fast, secure, and cheap to host. They work on any web server, from a Raspberry Pi to a CDN. Perfect for blogs, documentation, or portfolios.</p><h2>Creating Your First Post</h2><p>Create a Markdown file in <code>src/content/blog/posts/</code> with front matter:</p><pre><code class=\"language-markdown\">---\ntitle: My First Post\ndate: 03.01.2026\ntags: [web-dev, static-sites]\n---\n\n# My First Post\n\nWrite your content in Markdown here...\n</code></pre><p>Run <code>npm run build</code> and your post is ready in the <code>public/</code> directory.</p><h2>What&#39;s Next?</h2><ul><li>Customize templates in <code>src/templates/</code></li><li>Adjust styling in <code>tailwind.config.js</code></li><li>Configure site settings in <code>scripts/config.js</code></li></ul><p>The generated site is pure HTML, CSS, and JavaScript—ready to deploy anywhere.</p>"
 page: "/ <a href=\"/blog\">Blog</a> / <em>Getting Started with...</em>"
 ---
-<div id="post-content">
+<article id="post-content">
     <div class="mb-4 flex items-center space-x-2">
-      <p class="post-date">Jan 3, 2026</p>
+      <time class="post-date" datetime="2026-01-03">Jan 3, 2026</time>
       <span id="tag-divider" class="hidden sm:block">|</span>
       <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
     </div>
-    <div class="content prose"><h1>Getting Started with AnqBlog-ssg</h1><p>AnqBlog-ssg is a static site generator that converts Markdown to HTML. Build once, serve anywhere—no Node.js required on your web server.</p><h2>Why Static?</h2><p>Static sites are fast, secure, and cheap to host. They work on any web server, from a Raspberry Pi to a CDN. Perfect for blogs, documentation, or portfolios.</p><h2>Creating Your First Post</h2><p>Create a Markdown file in <code>src/content/blog/posts/</code> with front matter:</p><pre><code class="language-markdown">---
+    <div class="content prose prose-base sm:prose-lg max-w-none" dir="auto"><h1>Getting Started with AnqBlog-ssg</h1><p>AnqBlog-ssg is a static site generator that converts Markdown to HTML. Build once, serve anywhere—no Node.js required on your web server.</p><h2>Why Static?</h2><p>Static sites are fast, secure, and cheap to host. They work on any web server, from a Raspberry Pi to a CDN. Perfect for blogs, documentation, or portfolios.</p><h2>Creating Your First Post</h2><p>Create a Markdown file in <code>src/content/blog/posts/</code> with front matter:</p><pre><code class="language-markdown">---
 title: My First Post
 date: 03.01.2026
 tags: [web-dev, static-sites]
@@ -26,4 +26,4 @@ Write your content in Markdown here...
     <div>
       <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
     </div>
-  </div>
+  </article>
