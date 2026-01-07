@@ -41,15 +41,31 @@ export function validateConfig(): void {
   }
 
   if (!Number.isInteger(cfg.titleTruncationLength) || cfg.titleTruncationLength < 1) {
-    errors.push(`titleTruncationLength must be a positive integer, got: ${cfg.titleTruncationLength}`);
+    errors.push(
+      `titleTruncationLength must be a positive integer, got: ${cfg.titleTruncationLength}`,
+    );
   }
 
-  if (!Number.isInteger(cfg.titleTruncationLengthBreadcrumb) || cfg.titleTruncationLengthBreadcrumb < 1) {
-    errors.push(`titleTruncationLengthBreadcrumb must be a positive integer, got: ${cfg.titleTruncationLengthBreadcrumb}`);
+  if (
+    !Number.isInteger(cfg.titleTruncationLengthBreadcrumb) ||
+    cfg.titleTruncationLengthBreadcrumb < 1
+  ) {
+    errors.push(
+      `titleTruncationLengthBreadcrumb must be a positive integer, got: ${cfg.titleTruncationLengthBreadcrumb}`,
+    );
   }
 
   if (!Number.isInteger(cfg.paginationWindowSize) || cfg.paginationWindowSize < 1) {
-    errors.push(`paginationWindowSize must be a positive integer, got: ${cfg.paginationWindowSize}`);
+    errors.push(
+      `paginationWindowSize must be a positive integer, got: ${cfg.paginationWindowSize}`,
+    );
+  }
+
+  // Validate maxMarkdownFileSize if provided
+  if (cfg.maxMarkdownFileSize !== undefined) {
+    if (typeof cfg.maxMarkdownFileSize !== 'number' || cfg.maxMarkdownFileSize < 1) {
+      errors.push(`maxMarkdownFileSize must be a positive number, got: ${cfg.maxMarkdownFileSize}`);
+    }
   }
 
   // Validate locale and language
@@ -59,6 +75,30 @@ export function validateConfig(): void {
 
   if (!cfg.siteLanguage || typeof cfg.siteLanguage !== 'string') {
     errors.push('siteLanguage is required');
+  }
+
+  // Validate optional URL fields
+  if (cfg.githubUrl && typeof cfg.githubUrl === 'string') {
+    try {
+      new URL(cfg.githubUrl);
+    } catch {
+      errors.push(`githubUrl must be a valid URL: ${cfg.githubUrl}`);
+    }
+  }
+
+  // Validate optional string fields
+  if (cfg.authorName && typeof cfg.authorName !== 'string') {
+    errors.push('authorName must be a string if provided');
+  }
+
+  // Validate copyright year is reasonable
+  if (typeof cfg.copyrightYear === 'number') {
+    const currentYear = new Date().getFullYear();
+    if (cfg.copyrightYear < 2000 || cfg.copyrightYear > currentYear + 1) {
+      errors.push(
+        `copyrightYear seems invalid: ${cfg.copyrightYear} (expected between 2000 and ${currentYear + 1})`,
+      );
+    }
   }
 
   // Validate required paths exist
@@ -87,7 +127,6 @@ export function validateConfig(): void {
   }
 
   if (errors.length > 0) {
-    throw new Error(`Configuration errors:\n${errors.map(e => `  - ${e}`).join('\n')}`);
+    throw new Error(`Configuration errors:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
   }
 }
-

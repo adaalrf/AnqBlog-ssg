@@ -12,15 +12,11 @@ import {
   writeFileContent,
 } from './utils/path-and-file-utils.js';
 import { minifyHtml } from './utils/html-minify.js';
-import fs from 'fs';
+import { logger } from './utils/logger.js';
+import fsPromises from 'fs/promises';
 import path from 'path';
 import config from './config.js';
-import type { Post } from './types/index.js';
-
-/**
- * Tags object mapping tag names to arrays of posts.
- */
-type Tags = Record<string, Post[]>;
+import type { Tags } from './types/index.js';
 
 /**
  * Directory pair for input and output.
@@ -46,7 +42,7 @@ interface TemplateCache {
  */
 const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
   if (!currentFilePath) {
-    console.error('(Apply-Layout.ts): Error: currentFilePath is undefined');
+    logger.error('Apply-Layout.ts', 'Error: currentFilePath is undefined');
     return '';
   }
 
@@ -65,7 +61,10 @@ const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
  * @param directoryPairs - Array of directory pairs (input and output).
  * @param tags - Tags object.
  */
-export const applyLayoutToHtmlFiles = (directoryPairs: DirectoryPair[], tags: Tags): void => {
+export const applyLayoutToHtmlFiles = async (
+  directoryPairs: DirectoryPair[],
+  tags: Tags,
+): Promise<void> => {
   const processedDirs = new Set<string>();
   // Cache templates to avoid reading them multiple times
   const templateCache: TemplateCache = {
@@ -73,9 +72,9 @@ export const applyLayoutToHtmlFiles = (directoryPairs: DirectoryPair[], tags: Ta
     specificTemplates: {},
   };
 
-  directoryPairs.forEach(({ inputDir, outputDir }) => {
-    processDirectory(inputDir, outputDir, tags, processedDirs, templateCache);
-  });
+  for (const { inputDir, outputDir } of directoryPairs) {
+    await processDirectory(inputDir, outputDir, tags, processedDirs, templateCache);
+  }
 };
 
 /**
@@ -87,38 +86,41 @@ export const applyLayoutToHtmlFiles = (directoryPairs: DirectoryPair[], tags: Ta
  * @param processedDirs - Set of already processed directories to avoid duplicates.
  * @param templateCache - Cache object for storing template content.
  */
-const processDirectory = (
+const processDirectory = async (
   inputDir: string,
   outputDir: string,
   tags: Tags,
   processedDirs: Set<string>,
   templateCache: TemplateCache,
-): void => {
+): Promise<void> => {
   if (processedDirs.has(inputDir)) {
     return;
   }
   processedDirs.add(inputDir);
 
   // Skip if directory doesn't exist
-  if (!fs.existsSync(inputDir)) {
+  try {
+    await fsPromises.access(inputDir);
+  } catch {
     return;
   }
 
-  const files = fs.readdirSync(inputDir);
+  const files = await fsPromises.readdir(inputDir);
 
-  files.forEach((file) => {
+  for (const file of files) {
     const inputFilePath = path.join(inputDir, file);
     const outputFilePath = path.join(outputDir, file);
 
     if (file === 'posts') {
-      return;
+      continue;
     }
 
-    if (fs.statSync(inputFilePath).isDirectory()) {
+    const stats = await fsPromises.stat(inputFilePath);
+    if (stats.isDirectory()) {
       ensureDirectoryExists(outputFilePath);
-      processDirectory(inputFilePath, outputFilePath, tags, processedDirs, templateCache);
+      await processDirectory(inputFilePath, outputFilePath, tags, processedDirs, templateCache);
     } else if (file.endsWith('.html')) {
-      const fileContent = readFileContent(inputFilePath);
+      const fileContent = await readFileContent(inputFilePath);
       const { data, content } = parseHtmlFrontMatter(fileContent);
 
       const templateFilePath = path.join(
@@ -126,14 +128,21 @@ const processDirectory = (
         `${path.basename(file, '.html')}-template.html`,
       );
 
-      const specificTemplateExists = fs.existsSync(templateFilePath);
+      let specificTemplateExists = false;
+      try {
+        await fsPromises.access(templateFilePath);
+        specificTemplateExists = true;
+      } catch {
+        // Template doesn't exist
+      }
 
       // If a specific template exists, inject the content into it
       let mainContent: string;
       if (specificTemplateExists) {
         // Cache specific templates
         if (!templateCache.specificTemplates[templateFilePath]) {
-          templateCache.specificTemplates[templateFilePath] = readFileContent(templateFilePath);
+          templateCache.specificTemplates[templateFilePath] =
+            await readFileContent(templateFilePath);
         }
         const templateContent = templateCache.specificTemplates[templateFilePath];
         const dom = injectContentIntoTemplate(templateContent, {
@@ -154,7 +163,7 @@ const processDirectory = (
       const tagsDropdownContent = generateTagsDropdown(tags, outputFilePath);
       // Cache main layout template
       if (!templateCache.mainLayout) {
-        templateCache.mainLayout = readFileContent(config.mainLayoutPath);
+        templateCache.mainLayout = await readFileContent(config.mainLayoutPath);
       }
       const mainLayoutContent = templateCache.mainLayout;
 
@@ -180,9 +189,10 @@ const processDirectory = (
 
       // Determine og:type based on page type (article for posts, website for others)
       // Check if this is a post page by looking at the path
-      const isPostPage = relativePath.includes('/blog/posts/') && !relativePath.endsWith('/blog/posts');
+      const isPostPage =
+        relativePath.includes('/blog/posts/') && !relativePath.endsWith('/blog/posts');
       const ogType = isPostPage ? 'article' : 'website';
-      
+
       // Replace placeholders in the main layout - all assets are at root
       // Provide defaults for missing fields
       let finalHtml = replacePlaceholders(mainLayoutContent, {
@@ -209,9 +219,8 @@ const processDirectory = (
       // Minify HTML for smaller file sizes
       finalHtml = minifyHtml(finalHtml);
 
-      writeFileContent(outputFilePath, finalHtml);
-      console.log(`(Apply-Layout.ts): Processed page -> ${outputFilePath}`);
+      await writeFileContent(outputFilePath, finalHtml);
+      logger.info('Apply-Layout.ts', `Processed page -> ${outputFilePath}`);
     }
-  });
+  }
 };
-

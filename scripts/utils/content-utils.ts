@@ -2,10 +2,24 @@ import { JSDOM } from 'jsdom';
 import matter from 'gray-matter';
 import { marked } from 'marked';
 import truncate from 'html-truncate';
-import fs from 'fs';
+import fsPromises from 'fs/promises';
 import path from 'path';
 import { readFileContent } from './path-and-file-utils.js';
-import type { ProcessMarkdownOptions, InjectContentOptions, ParsedFrontMatter, ParsedMarkdown, Post } from '../types/index.js';
+import { logger } from './logger.js';
+import type {
+  ProcessMarkdownOptions,
+  InjectContentOptions,
+  ParsedFrontMatter,
+  ParsedMarkdown,
+  Post,
+} from '../types/index.js';
+
+/**
+ * Constants for content processing
+ */
+const NO_PREVIEW_LIMIT = Number.POSITIVE_INFINITY;
+const DEFAULT_PREVIEW_LENGTH = 250;
+const DEFAULT_MAX_MARKDOWN_FILE_SIZE = 5 * 1024 * 1024; // 5MB default limit
 
 /**
  * Normalizes a tag for use in filenames (replaces spaces with dashes).
@@ -14,10 +28,10 @@ import type { ProcessMarkdownOptions, InjectContentOptions, ParsedFrontMatter, P
  * @throws {Error} If tag is not a string.
  */
 export const normalizeTagForFile = (tag: string): string => {
-    if (typeof tag !== 'string') {
-        throw new Error('Tag must be a string');
-    }
-    return tag.split(' ').join('-');
+  if (typeof tag !== 'string') {
+    throw new Error('Tag must be a string');
+  }
+  return tag.split(' ').join('-');
 };
 
 /**
@@ -27,10 +41,10 @@ export const normalizeTagForFile = (tag: string): string => {
  * @throws {Error} If tag is not a string.
  */
 export const denormalizeTagFromFile = (tag: string): string => {
-    if (typeof tag !== 'string') {
-        throw new Error('Tag must be a string');
-    }
-    return tag.split('-').join(' ');
+  if (typeof tag !== 'string') {
+    throw new Error('Tag must be a string');
+  }
+  return tag.split('-').join(' ');
 };
 
 /**
@@ -41,47 +55,50 @@ export const denormalizeTagFromFile = (tag: string): string => {
  * @returns The truncated HTML content.
  * @throws {Error} If htmlContent is not a string or length is invalid.
  */
-export const getFirstNthCharacters = (htmlContent: string, length: number = 250): string => {
-    if (typeof htmlContent !== 'string') {
-        throw new Error('HTML content must be a string');
+export const getFirstNthCharacters = (
+  htmlContent: string,
+  length: number = DEFAULT_PREVIEW_LENGTH,
+): string => {
+  if (typeof htmlContent !== 'string') {
+    throw new Error('HTML content must be a string');
+  }
+  if (typeof length !== 'number' || length < 0) {
+    throw new Error('Length must be a non-negative number');
+  }
+
+  // For previews, remove headings to avoid showing partial headings
+  if (length < NO_PREVIEW_LIMIT) {
+    const dom = new JSDOM(htmlContent);
+    const document = dom.window.document;
+
+    // Remove all headings (h1-h6) from preview
+    document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading: Element) => {
+      heading.remove();
+    });
+
+    // Get only the first paragraph for a clean preview (avoid code blocks and complex content)
+    const paragraphs = Array.from(document.querySelectorAll('p')) as Element[];
+
+    if (paragraphs.length > 0) {
+      // Take only the first paragraph for a clean, simple preview
+      const firstParagraph = paragraphs[0] as HTMLElement;
+      const pText = firstParagraph.textContent || '';
+
+      // If first paragraph is short enough, use it as-is
+      if (pText.length <= length) {
+        const previewHtml = firstParagraph.outerHTML.replace(/>\s+</g, '><').trim();
+        return previewHtml;
+      } else {
+        // Truncate if too long
+        const truncated = truncate(firstParagraph.outerHTML, length, { ellipsis: '...' });
+        return truncated.replace(/>\s+</g, '><').trim();
+      }
     }
-    if (typeof length !== 'number' || length < 0) {
-        throw new Error('Length must be a non-negative number');
-    }
 
-    // For previews, remove headings to avoid showing partial headings
-    if (length < Number.POSITIVE_INFINITY) {
-        const dom = new JSDOM(htmlContent);
-        const document = dom.window.document;
+    htmlContent = document.body.innerHTML;
+  }
 
-        // Remove all headings (h1-h6) from preview
-        document.querySelectorAll('h1, h2, h3, h4, h5, h6').forEach((heading: Element) => {
-            heading.remove();
-        });
-
-        // Get only the first paragraph for a clean preview (avoid code blocks and complex content)
-        const paragraphs = Array.from(document.querySelectorAll('p')) as Element[];
-
-        if (paragraphs.length > 0) {
-            // Take only the first paragraph for a clean, simple preview
-            const firstParagraph = paragraphs[0] as HTMLElement;
-            const pText = firstParagraph.textContent || '';
-
-            // If first paragraph is short enough, use it as-is
-            if (pText.length <= length) {
-                const previewHtml = firstParagraph.outerHTML.replace(/>\s+</g, '><').trim();
-                return previewHtml;
-            } else {
-                // Truncate if too long
-                const truncated = truncate(firstParagraph.outerHTML, length, { ellipsis: '...' });
-                return truncated.replace(/>\s+</g, '><').trim();
-            }
-        }
-
-        htmlContent = document.body.innerHTML;
-    }
-
-    return truncate(htmlContent, length, { ellipsis: '...' });
+  return truncate(htmlContent, length, { ellipsis: '...' });
 };
 
 /**
@@ -93,50 +110,47 @@ export const getFirstNthCharacters = (htmlContent: string, length: number = 250)
  * @throws {Error} If templateContent is not a string or data is not an object.
  */
 export const injectContentIntoTemplate = (
-    templateContent: string,
-    data: Record<string, unknown>,
-    options: InjectContentOptions = {},
+  templateContent: string,
+  data: Record<string, unknown>,
+  options: InjectContentOptions = {},
 ): JSDOM => {
-    if (typeof templateContent !== 'string') {
-        throw new Error('Template content must be a string');
+  if (typeof templateContent !== 'string') {
+    throw new Error('Template content must be a string');
+  }
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    throw new Error('Data must be an object');
+  }
+  const {
+    tagWrapper = (tag: string) => `<a href="#">${tag}</a>`,
+    tagsContainerSelector = '.tags',
+    tagDividerSelector = '#post-tag-divider',
+  } = options;
+
+  const dom = new JSDOM(templateContent);
+  const document = dom.window.document;
+
+  // Replace placeholders
+  Object.keys(data).forEach((key) => {
+    const placeholder = new RegExp(`{{{${key}}}}`, 'g');
+    const value = data[key];
+    document.body.innerHTML = document.body.innerHTML.replace(placeholder, String(value));
+  });
+
+  // Handle tags
+  const tagsContainer = document.querySelector(tagsContainerSelector);
+  const tagDivider = document.querySelector(tagDividerSelector);
+  if (tagsContainer) {
+    const tags = data.tags as string[] | undefined;
+    if (tags && tags.length > 0) {
+      const tagsList = tags.map(tagWrapper).join(' ');
+      tagsContainer.innerHTML = tagsList;
+    } else {
+      tagsContainer.remove();
+      if (tagDivider) tagDivider.remove();
     }
-    if (!data || typeof data !== 'object' || Array.isArray(data)) {
-        throw new Error('Data must be an object');
-    }
-    const {
-        tagWrapper = (tag: string) => `<a href="#">${tag}</a>`,
-        tagsContainerSelector = '.tags',
-        tagDividerSelector = '#post-tag-divider',
-    } = options;
+  }
 
-    const dom = new JSDOM(templateContent);
-    const document = dom.window.document;
-
-    // Replace placeholders
-    Object.keys(data).forEach((key) => {
-        const placeholder = new RegExp(`{{{${key}}}}`, 'g');
-        const value = data[key];
-        document.body.innerHTML = document.body.innerHTML.replace(
-            placeholder,
-            String(value),
-        );
-    });
-
-    // Handle tags
-    const tagsContainer = document.querySelector(tagsContainerSelector);
-    const tagDivider = document.querySelector(tagDividerSelector);
-    if (tagsContainer) {
-        const tags = data.tags as string[] | undefined;
-        if (tags && tags.length > 0) {
-            const tagsList = tags.map(tagWrapper).join(' ');
-            tagsContainer.innerHTML = tagsList;
-        } else {
-            tagsContainer.remove();
-            if (tagDivider) tagDivider.remove();
-        }
-    }
-
-    return dom;
+  return dom;
 };
 
 /**
@@ -145,43 +159,53 @@ export const injectContentIntoTemplate = (
  * @returns The parsed data and HTML content.
  */
 export const parseHtmlFrontMatter = (fileContent: string): ParsedFrontMatter => {
-    if (typeof fileContent !== 'string') {
-        throw new Error('File content must be a string');
-    }
-    try {
-        const { data, content } = matter(fileContent);
-        return { data: data || {}, content: content || '' };
-    } catch (error) {
-        const err = error as Error;
-        throw new Error(`Failed to parse front matter: ${err.message}`);
-    }
+  if (typeof fileContent !== 'string') {
+    throw new Error('File content must be a string');
+  }
+  try {
+    const { data, content } = matter(fileContent);
+    return { data: data || {}, content: content || '' };
+  } catch (error) {
+    const err = error as Error;
+    throw new Error(`Failed to parse front matter: ${err.message}`);
+  }
 };
 
 /**
  * Cleans up excessive whitespace in HTML content.
  * Preserves whitespace in preformatted elements (pre, code, textarea).
+ *
+ * Note: This function processes the HTML string directly and may affect
+ * intentional whitespace in some edge cases (e.g., inline code spans,
+ * custom HTML structures). The function is designed to work with standard
+ * Markdown-generated HTML from the marked library.
+ *
  * @param html - The HTML content.
  * @returns The cleaned HTML content.
  */
 const cleanHtmlWhitespace = (html: string): string => {
-    if (typeof html !== 'string') {
-        return html;
-    }
+  if (typeof html !== 'string') {
+    return html;
+  }
 
-    return html
-        // Remove excessive newlines (more than 2 consecutive)
-        .replace(/\n{3,}/g, '\n\n')
-        // Remove whitespace between HTML tags (but preserve in pre/code/textarea)
-        // This regex matches > followed by whitespace followed by <
-        .replace(/>\s+</g, '><')
-        // Collapse multiple spaces/tabs to single space (but be careful with preformatted)
-        .replace(/[ \t]+/g, ' ')
-        // Trim each line
-        .split('\n')
-        .map((line) => line.trim())
-        .join('\n')
-        // Remove leading/trailing whitespace
-        .trim();
+  return (
+    html
+      // Remove excessive newlines (more than 2 consecutive)
+      .replace(/\n{3,}/g, '\n\n')
+      // Remove whitespace between HTML tags (but preserve in pre/code/textarea)
+      // This regex matches > followed by whitespace followed by <
+      // Note: This may affect intentional spacing in some edge cases
+      .replace(/>\s+</g, '><')
+      // Collapse multiple spaces/tabs to single space (but be careful with preformatted)
+      // Note: This is applied globally; pre/code/textarea content is handled by marked
+      .replace(/[ \t]+/g, ' ')
+      // Trim each line
+      .split('\n')
+      .map((line) => line.trim())
+      .join('\n')
+      // Remove leading/trailing whitespace
+      .trim()
+  );
 };
 
 /**
@@ -190,72 +214,154 @@ const cleanHtmlWhitespace = (html: string): string => {
  * @returns The parsed data and HTML content.
  */
 export const parseMarkdown = (fileContent: string): ParsedMarkdown => {
-    if (typeof fileContent !== 'string') {
-        throw new Error('File content must be a string');
-    }
-    try {
-        const { data, content } = matter(fileContent);
-        let htmlContent = marked(content || '') as string;
-        // Clean up whitespace
-        htmlContent = cleanHtmlWhitespace(htmlContent);
-        return { data: data || {}, htmlContent };
-    } catch (error) {
-        const err = error as Error;
-        throw new Error(`Failed to parse markdown: ${err.message}`);
-    }
+  if (typeof fileContent !== 'string') {
+    throw new Error('File content must be a string');
+  }
+  try {
+    const { data, content } = matter(fileContent);
+    let htmlContent = marked(content || '') as string;
+    // Clean up whitespace
+    htmlContent = cleanHtmlWhitespace(htmlContent);
+    return { data: data || {}, htmlContent };
+  } catch (error) {
+    const err = error as Error;
+    throw new Error(`Failed to parse markdown: ${err.message}`);
+  }
 };
 
 /**
- * Processes markdown files in a directory.
+ * Processes a single markdown file.
+ * @param file - The filename.
+ * @param directory - The directory containing the file.
+ * @param previewLength - The preview length limit.
+ * @param maxFileSize - Maximum file size in bytes.
+ * @param seenFilenames - Set of already seen filenames to detect duplicates.
+ * @returns Processed post or null if skipped.
+ */
+const processSingleMarkdownFile = async (
+  file: string,
+  directory: string,
+  previewLength: number,
+  maxFileSize: number,
+  seenFilenames: Set<string>,
+): Promise<Partial<Post> | null> => {
+  const filePath = path.join(directory, file);
+
+  // Check file size before processing
+  try {
+    const stats = await fsPromises.stat(filePath);
+    if (stats.size > maxFileSize) {
+      logger.warn(
+        'Content-utils.ts',
+        `File ${file} exceeds size limit (${(stats.size / 1024 / 1024).toFixed(2)}MB > ${maxFileSize / 1024 / 1024}MB), skipping.`,
+      );
+      return null;
+    }
+  } catch (error) {
+    const errorMessage = error instanceof Error ? error.message : String(error);
+    logger.warn(
+      'Content-utils.ts',
+      `Could not check file size for ${file}: ${errorMessage}. Skipping.`,
+    );
+    return null;
+  }
+
+  const fileContent = await readFileContent(filePath);
+  const { data, htmlContent } = parseMarkdown(fileContent);
+
+  // For preview content, remove the first H1 to avoid duplicate titles
+  let previewHtml = htmlContent;
+  if (previewLength < NO_PREVIEW_LIMIT) {
+    const previewDom = new JSDOM(htmlContent);
+    const previewDoc = previewDom.window.document;
+    const firstH1 = previewDoc.querySelector('h1');
+    if (firstH1) {
+      firstH1.remove();
+      previewHtml = previewDoc.body.innerHTML;
+    }
+  }
+
+  const htmlFileName = file.replace('.md', '.html');
+
+  // Note: Duplicate checking is done upfront before parallel processing.
+  // We still add to seenFilenames here as a safety measure for parallel processing,
+  // but we don't check since duplicates were already filtered out.
+  seenFilenames.add(htmlFileName);
+
+  return {
+    ...data, // Include all front matter data
+    htmlFileName,
+    content: htmlContent,
+    previewContent: getFirstNthCharacters(previewHtml, previewLength),
+  };
+};
+
+/**
+ * Processes markdown files in a directory in parallel for better performance.
  * @param directory - The directory containing markdown files.
  * @param options - Options for processing markdown files.
  * @returns An array of processed posts.
  * @throws {Error} If directory is not a string or options is not an object.
  */
-export const processMarkdownFiles = (directory: string, options: ProcessMarkdownOptions = {}): Partial<Post>[] => {
-    if (typeof directory !== 'string') {
-        throw new Error('Directory must be a string');
+export const processMarkdownFiles = async (
+  directory: string,
+  options: ProcessMarkdownOptions & { maxFileSize?: number } = {},
+): Promise<Partial<Post>[]> => {
+  if (typeof directory !== 'string') {
+    throw new Error('Directory must be a string');
+  }
+  if (options && (typeof options !== 'object' || Array.isArray(options))) {
+    throw new Error('Options must be an object');
+  }
+
+  // Return empty array if directory doesn't exist (allows graceful handling for first-time setup)
+  // Log a warning to help users identify configuration issues
+  try {
+    await fsPromises.access(directory);
+  } catch {
+    logger.warn(
+      'Content-utils.ts',
+      `Directory does not exist: ${directory}. Returning empty array.`,
+    );
+    return [];
+  }
+
+  const { previewLength = NO_PREVIEW_LIMIT, maxFileSize = DEFAULT_MAX_MARKDOWN_FILE_SIZE } =
+    options;
+  const files = (await fsPromises.readdir(directory)).filter((file) => file.endsWith('.md'));
+
+  if (files.length === 0) {
+    return [];
+  }
+
+  // Check for duplicate filenames upfront to avoid race conditions in parallel processing
+  const seenFilenames = new Set<string>();
+  const duplicateFiles: string[] = [];
+  const validFiles: string[] = [];
+
+  for (const file of files) {
+    const htmlFileName = file.replace('.md', '.html');
+    if (seenFilenames.has(htmlFileName)) {
+      duplicateFiles.push(file);
+      logger.warn(
+        'Content-utils.ts',
+        `Duplicate filename detected: ${htmlFileName}. This will cause one post to overwrite another. Skipping file: ${file}`,
+      );
+    } else {
+      seenFilenames.add(htmlFileName);
+      validFiles.push(file);
     }
-    if (options && (typeof options !== 'object' || Array.isArray(options))) {
-        throw new Error('Options must be an object');
-    }
+  }
 
-    // Return empty array if directory doesn't exist (allows graceful handling for first-time setup)
-    // Log a warning to help users identify configuration issues
-    if (!fs.existsSync(directory)) {
-        console.warn(`(Content-utils.ts): Directory does not exist: ${directory}. Returning empty array.`);
-        return [];
-    }
+  // Process valid files in parallel for better performance
+  const postPromises = validFiles.map((file) =>
+    processSingleMarkdownFile(file, directory, previewLength, maxFileSize, seenFilenames),
+  );
 
-    const { previewLength = Number.POSITIVE_INFINITY } = options;
-    const files = fs
-        .readdirSync(directory)
-        .filter((file) => file.endsWith('.md'));
+  const results = await Promise.all(postPromises);
 
-    return files.map((file) => {
-        const filePath = path.join(directory, file);
-        const fileContent = readFileContent(filePath);
-        const { data, htmlContent } = parseMarkdown(fileContent);
-
-        // For preview content, remove the first H1 to avoid duplicate titles
-        let previewHtml = htmlContent;
-        if (previewLength < Number.POSITIVE_INFINITY) {
-            const previewDom = new JSDOM(htmlContent);
-            const previewDoc = previewDom.window.document;
-            const firstH1 = previewDoc.querySelector('h1');
-            if (firstH1) {
-                firstH1.remove();
-                previewHtml = previewDoc.body.innerHTML;
-            }
-        }
-
-        return {
-            ...data, // Include all front matter data
-            htmlFileName: file.replace('.md', '.html'),
-            content: htmlContent,
-            previewContent: getFirstNthCharacters(previewHtml, previewLength),
-        };
-    });
+  // Filter out null results (skipped files)
+  return results.filter((post): post is Partial<Post> => post !== null);
 };
 
 /**
@@ -266,20 +372,21 @@ export const processMarkdownFiles = (directory: string, options: ProcessMarkdown
  * @throws {Error} If template is not a string or values is not an object.
  */
 export const replacePlaceholders = (template: string, values: Record<string, unknown>): string => {
-    if (typeof template !== 'string') {
-        throw new Error('Template must be a string');
+  if (typeof template !== 'string') {
+    throw new Error('Template must be a string');
+  }
+  if (!values || typeof values !== 'object' || Array.isArray(values)) {
+    throw new Error('Values must be an object');
+  }
+  return template.replace(/{{(\w+)}}/g, (placeholder, key: string) => {
+    const value = key in values ? values[key] : placeholder;
+    // Strip newlines from page breadcrumb to prevent layout shifts
+    if (key === 'page' && typeof value === 'string') {
+      const cleanedValue = value.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
+      return cleanedValue;
     }
-    if (!values || typeof values !== 'object' || Array.isArray(values)) {
-        throw new Error('Values must be an object');
-    }
-    return template.replace(/{{(\w+)}}/g, (placeholder, key) => {
-        let value = key in values ? values[key] : placeholder;
-        // Strip newlines from page breadcrumb to prevent layout shifts
-        if (key === 'page' && typeof value === 'string') {
-            value = value.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-        }
-        return String(value);
-    });
+    return String(value);
+  });
 };
 
 /**
@@ -288,18 +395,18 @@ export const replacePlaceholders = (template: string, values: Record<string, unk
  * @returns The escaped value as a string.
  */
 const escapeYamlValue = (value: unknown): string => {
-    if (value === null || value === undefined) {
-        return '""';
-    }
-    if (typeof value !== 'string') {
-        return JSON.stringify(value);
-    }
-    // Escape backslashes first, then quotes, then newlines
-    return `"${value
-        .replace(/\\/g, '\\\\')
-        .replace(/"/g, '\\"')
-        .replace(/\n/g, '\\n')
-        .replace(/\r/g, '\\r')}"`;
+  if (value === null || value === undefined) {
+    return '""';
+  }
+  if (typeof value !== 'string') {
+    return JSON.stringify(value);
+  }
+  // Escape backslashes first, then quotes, then newlines
+  return `"${value
+    .replace(/\\/g, '\\\\')
+    .replace(/"/g, '\\"')
+    .replace(/\n/g, '\\n')
+    .replace(/\r/g, '\\r')}"`;
 };
 
 /**
@@ -308,17 +415,17 @@ const escapeYamlValue = (value: unknown): string => {
  * @returns The escaped text safe for HTML insertion.
  */
 export const escapeHtml = (text: string): string => {
-    if (typeof text !== 'string') {
-        return '';
-    }
-    const map: Record<string, string> = {
-        '&': '&amp;',
-        '<': '&lt;',
-        '>': '&gt;',
-        '"': '&quot;',
-        "'": '&#039;',
-    };
-    return text.replace(/[&<>"']/g, (char) => map[char]);
+  if (typeof text !== 'string') {
+    return '';
+  }
+  const map: Record<string, string> = {
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#039;',
+  };
+  return text.replace(/[&<>"']/g, (char) => map[char]);
 };
 
 /**
@@ -328,13 +435,13 @@ export const escapeHtml = (text: string): string => {
  * @returns The truncated text.
  */
 export const truncateText = (text: string, length: number = 50): string => {
-    if (typeof text !== 'string') {
-        return '';
-    }
-    if (text.length <= length) {
-        return text;
-    }
-    return text.substring(0, length).trim() + '...';
+  if (typeof text !== 'string') {
+    return '';
+  }
+  if (text.length <= length) {
+    return text;
+  }
+  return text.substring(0, length).trim() + '...';
 };
 
 /**
@@ -343,10 +450,12 @@ export const truncateText = (text: string, length: number = 50): string => {
  * @param options - Additional options to include in the front matter.
  * @returns The front matter string.
  */
-export const generateFrontMatter = (data: Record<string, unknown>, options: Record<string, unknown> = {}): string => {
-    const mergedData = { ...data, ...options };
-    return `---\n${Object.entries(mergedData)
-        .map(([key, value]) => `${key}: ${escapeYamlValue(value)}`)
-        .join('\n')}\n---`;
+export const generateFrontMatter = (
+  data: Record<string, unknown>,
+  options: Record<string, unknown> = {},
+): string => {
+  const mergedData = { ...data, ...options };
+  return `---\n${Object.entries(mergedData)
+    .map(([key, value]) => `${key}: ${escapeYamlValue(value)}`)
+    .join('\n')}\n---`;
 };
-

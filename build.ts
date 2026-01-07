@@ -1,17 +1,18 @@
 #!/usr/bin/env node
 /**
  * Main build orchestrator for the static site generator.
- * 
+ *
  * This script:
- * 1. Compiles TypeScript source files to JavaScript in dist/
- * 2. Validates configuration
- * 3. Generates dynamic imports
- * 4. Bundles client-side code with Webpack
- * 5. Copies assets
- * 6. Generates HTML content from Markdown
- * 7. Processes CSS with Tailwind and PostCSS
- * 8. Minifies HTML output
- * 
+ * 1. Checks and auto-generates config if missing
+ * 2. Compiles TypeScript source files to JavaScript in dist/
+ * 3. Validates configuration
+ * 4. Generates dynamic imports
+ * 5. Bundles client-side code with Webpack
+ * 6. Copies assets
+ * 7. Generates HTML content from Markdown
+ * 8. Processes CSS with Tailwind and PostCSS
+ * 9. Minifies HTML output
+ *
  * The compiled JavaScript files are placed in the dist/ directory,
  * which is gitignored and regenerated on each build.
  */
@@ -19,101 +20,291 @@ import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
+import { readFileSync, existsSync } from 'fs';
 
 const execAsync = promisify(exec);
 const rootDir = process.cwd();
 
-(async (): Promise<void> => {
+// Simple logger for pre-compilation steps (before dist/ is available)
+// After TypeScript compilation, we'll use the compiled logger utility
+const preCompileLogger = {
+  info: (module: string, message: string): void => {
+    console.log(`[${module}] ${message}`);
+  },
+  warn: (module: string, message: string): void => {
+    console.warn(`[${module}] ⚠ ${message}`);
+  },
+  error: (module: string, message: string): void => {
+    console.error(`[${module}] ❌ ${message}`);
+  },
+};
+
+// Simple error formatter for pre-compilation steps
+// After TypeScript compilation, we'll use the compiled error-utils
+function formatErrorPreCompile(error: Error, context: string): string {
+  const isDev = process.env.NODE_ENV === 'development';
+  const stack = isDev && error.stack ? `\nStack: ${error.stack}` : '';
+  return `${context}: ${error.message}${stack}`;
+}
+
+// Build step timing
+interface BuildStep {
+  name: string;
+  startTime: number;
+  endTime?: number;
+  duration?: number;
+}
+
+const buildSteps: BuildStep[] = [];
+
+/**
+ * Gets the version from package.json
+ */
+function getVersion(): string {
   try {
-    const startTime = Date.now();
+    const packageJson = JSON.parse(readFileSync(path.join(rootDir, 'package.json'), 'utf8')) as {
+      version?: string;
+    };
+    return packageJson.version || 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
 
-    // Remove the public directory
-    const publicDir = path.join(rootDir, 'public');
-    await fs.rm(publicDir, { recursive: true, force: true });
+/**
+ * Times a build step
+ */
+function startStep(name: string): number {
+  const startTime = Date.now();
+  buildSteps.push({ name, startTime });
+  return startTime;
+}
 
-    // Remove temp directory
-    const tempDir = path.join(rootDir, '.build');
-    await fs.rm(tempDir, { recursive: true, force: true });
+function endStep(stepIndex: number): void {
+  const step = buildSteps[stepIndex];
+  if (step) {
+    step.endTime = Date.now();
+    step.duration = step.endTime - step.startTime;
+  }
+}
 
-    // Compile TypeScript first
-    console.log('Compiling TypeScript...');
-    try {
-      await execAsync('npx tsc');
-    } catch (error) {
-      const err = error as Error;
-      throw new Error(`TypeScript compilation failed: ${err.message}`);
+/**
+ * Prints build time breakdown
+ */
+function printBuildBreakdown(): void {
+  console.log('\nBuild time breakdown:');
+  buildSteps.forEach((step, index) => {
+    if (step.duration !== undefined) {
+      const seconds = (step.duration / 1000).toFixed(2);
+      console.log(`  ${index + 1}. ${step.name}: ${seconds}s`);
+    }
+  });
+}
+
+/**
+ * Checks if config file exists and creates it from example if missing.
+ */
+async function ensureConfigExists(): Promise<void> {
+  const configPath = path.join(rootDir, 'scripts', 'config.ts');
+  const exampleConfigPath = path.join(rootDir, 'scripts', 'example.config.ts');
+
+  if (!existsSync(configPath)) {
+    if (existsSync(exampleConfigPath)) {
+      preCompileLogger.info('build.ts', '📝 Config file not found. Creating from example...');
+      await fs.copyFile(exampleConfigPath, configPath);
+      preCompileLogger.info('build.ts', '✓ Created scripts/config.ts');
+      preCompileLogger.warn(
+        'build.ts',
+        '⚠️  Please edit scripts/config.ts with your settings and run build again.',
+      );
+      process.exit(0);
+    } else {
+      throw new Error(
+        'Config file (scripts/config.ts) not found and example config (scripts/example.config.ts) is missing.',
+      );
+    }
+  }
+}
+
+void (async (): Promise<void> => {
+  try {
+    // Handle command line arguments
+    const args = process.argv.slice(2);
+
+    if (args.includes('--version') || args.includes('-v')) {
+      console.log(getVersion());
+      process.exit(0);
     }
 
+    // Check and create config if missing (before TypeScript compilation)
+    await ensureConfigExists();
+
+    const isDryRun = args.includes('--dry-run');
+    const isIncremental = args.includes('--incremental');
+    const shouldClean = !isIncremental || args.includes('--clean');
+
+    if (isDryRun) {
+      preCompileLogger.info(
+        'build.ts',
+        'Dry run mode: Validating configuration and checking files...',
+      );
+    }
+
+    const overallStartTime = Date.now();
+
+    // Remove the public directory (unless incremental build)
+    const publicDir = path.join(rootDir, 'public');
+    if (shouldClean) {
+      const stepIndex = buildSteps.length;
+      startStep('Clean directories');
+      await fs.rm(publicDir, { recursive: true, force: true });
+      const tempDir = path.join(rootDir, '.build');
+      await fs.rm(tempDir, { recursive: true, force: true });
+      endStep(stepIndex);
+    } else {
+      preCompileLogger.info('build.ts', 'Using incremental build (skipping clean)...');
+    }
+
+    // Compile TypeScript first (with incremental compilation)
+    preCompileLogger.info('build.ts', 'Compiling TypeScript...');
+    const tscStepIndex = buildSteps.length;
+    startStep('TypeScript compilation');
+    try {
+      // Use incremental compilation for faster rebuilds
+      await execAsync('npx tsc --incremental');
+      endStep(tscStepIndex);
+    } catch (error) {
+      endStep(tscStepIndex);
+      const err = error as Error;
+      throw new Error(formatErrorPreCompile(err, 'TypeScript compilation failed'));
+    }
+
+    if (isDryRun) {
+      preCompileLogger.info('build.ts', '✓ Configuration and files validated successfully');
+      process.exit(0);
+    }
+
+    // After TypeScript compilation, import and use the compiled utilities
+    const loggerPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'logger.js');
+    const errorUtilsPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'error-utils.js');
+    const loggerModule = (await import(loggerPath)) as {
+      logger: {
+        info: (module: string, message: string) => void;
+        warn: (module: string, message: string) => void;
+        error: (module: string, message: string) => void;
+      };
+    };
+    const errorUtilsModule = (await import(errorUtilsPath)) as {
+      formatError: (error: Error, context: string) => string;
+    };
+    const logger = loggerModule.logger;
+    const formatError = errorUtilsModule.formatError;
+
     // Validate configuration after compilation (runs from dist/)
+    const validateStepIndex = buildSteps.length;
+    startStep('Configuration validation');
     const validateConfigPath = path.join(rootDir, 'dist', 'scripts', 'validate-config.js');
-    const { validateConfig } = await import(validateConfigPath);
-    validateConfig();
+    const validateConfigModule = (await import(validateConfigPath)) as {
+      validateConfig: () => void;
+    };
+    validateConfigModule.validateConfig();
+    endStep(validateStepIndex);
 
     // Generate dynamic imports
-    console.log('Generating dynamic imports...');
+    logger.info('build.ts', 'Generating dynamic imports...');
+    const importsStepIndex = buildSteps.length;
+    startStep('Generate imports');
     try {
       await execAsync('node dist/scripts/generate-imports.js');
+      endStep(importsStepIndex);
     } catch (error) {
+      endStep(importsStepIndex);
       const err = error as Error;
-      throw new Error(`generate-imports.js failed: ${err.message}`);
+      throw new Error(formatError(err, 'generate-imports.js failed'));
     }
 
     // Bundle website code using Webpack
-    console.log('Bundling website code using Webpack...');
+    logger.info('build.ts', 'Bundling website code using Webpack...');
+    const webpackStepIndex = buildSteps.length;
+    startStep('Webpack bundling');
     try {
       await execAsync('npx webpack --config webpack.config.js');
+      endStep(webpackStepIndex);
     } catch (error) {
+      endStep(webpackStepIndex);
       const err = error as Error;
-      throw new Error(`Webpack failed: ${err.message}`);
+      throw new Error(formatError(err, 'Webpack failed'));
     }
 
     // Copy necessary assets to the public directory
+    const assetsStepIndex = buildSteps.length;
+    startStep('Copy assets');
     const assetsSrc = path.join(rootDir, 'src', 'assets');
     const assetsDest = path.join(rootDir, 'public', 'assets');
     try {
       await fs.access(assetsSrc);
       await copyDirectory(assetsSrc, assetsDest);
+      endStep(assetsStepIndex);
     } catch (error) {
+      endStep(assetsStepIndex);
       const err = error as NodeJS.ErrnoException;
       if (err.code === 'ENOENT') {
-        console.warn('Assets directory not found, skipping asset copy.');
+        logger.warn('build.ts', 'Assets directory not found, skipping asset copy.');
       } else {
-        throw error;
+        throw new Error(formatError(err, 'Asset copy failed'));
       }
     }
 
     // Run the generation scripts to generate the output files
-    console.log('Running the generation scripts...');
+    logger.info('build.ts', 'Running the generation scripts...');
+    const generateStepIndex = buildSteps.length;
+    startStep('Generate HTML content');
     try {
       await execAsync('node dist/scripts/generate.js');
+      endStep(generateStepIndex);
     } catch (error) {
+      endStep(generateStepIndex);
       const err = error as Error;
-      throw new Error(`generate.js failed: ${err.message}`);
+      throw new Error(formatError(err, 'generate.js failed'));
     }
 
     // Process Tailwind CSS using PostCSS
-    console.log('Processing Tailwind CSS...');
+    logger.info('build.ts', 'Processing Tailwind CSS...');
+    const cssStepIndex = buildSteps.length;
+    startStep('Process CSS');
     try {
       await execAsync('node dist/scripts/build-css.js');
+      endStep(cssStepIndex);
     } catch (error) {
+      endStep(cssStepIndex);
       const err = error as Error;
-      throw new Error(`build-css.js failed: ${err.message}`);
+      throw new Error(formatError(err, 'build-css.js failed'));
     }
 
     // Copy root index.html and fix paths
+    const indexStepIndex = buildSteps.length;
+    startStep('Copy root index');
     const pagesIndexPath = path.join(publicDir, 'pages', 'index.html');
     const rootIndexPath = path.join(publicDir, 'index.html');
     try {
       const indexContent = await fs.readFile(pagesIndexPath, 'utf8');
       // Fix paths: replace /pages/ with / for root
+      // This handles all path references (href, src, action, etc.)
       const fixedContent = indexContent.replace(/\/pages\//g, '/');
       await fs.writeFile(rootIndexPath, fixedContent);
-      console.log('Created root index.html');
-    } catch (error) {
-      // Ignore if pages/index.html doesn't exist
+      logger.info('build.ts', 'Created root index.html');
+      endStep(indexStepIndex);
+    } catch {
+      endStep(indexStepIndex);
+      // Ignore if pages/index.html doesn't exist (not all sites have a root page)
+      if (process.env.NODE_ENV === 'development') {
+        logger.info('build.ts', 'No pages/index.html found, skipping root index creation');
+      }
     }
 
-    // Verify critical build outputs
+    // Verify critical build outputs and count files
+    const verifyStepIndex = buildSteps.length;
+    startStep('Verify outputs');
     const criticalFiles = [
       path.join(publicDir, 'styles', 'styles.css'),
       path.join(publicDir, 'js', 'bundle.js'),
@@ -128,22 +319,67 @@ const rootDir = process.cwd();
       }
     }
 
-    if (missingFiles.length > 0) {
-      console.warn('Warning: Some expected files were not generated:');
-      missingFiles.forEach(file => console.warn(`  - ${file}`));
+    // Count generated files
+    let fileCount = 0;
+    let htmlCount = 0;
+    try {
+      // Check if directory exists before counting
+      await fs.access(publicDir);
+      const countFiles = async (dir: string): Promise<void> => {
+        const entries = await fs.readdir(dir, { withFileTypes: true });
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            await countFiles(fullPath);
+          } else if (entry.isFile()) {
+            fileCount++;
+            if (entry.name.endsWith('.html')) {
+              htmlCount++;
+            }
+          }
+        }
+      };
+      await countFiles(publicDir);
+    } catch {
+      // Ignore counting errors (directory might not exist in incremental builds)
     }
 
-    const endTime = Date.now();
-    const buildTimeMs = endTime - startTime;
-    const buildTimeSec = Math.floor(buildTimeMs / 1000);
-    const remainingMs = buildTimeMs % 1000;
+    endStep(verifyStepIndex);
 
-    console.log(
-      `Build complete. Generated files are in the 'public' directory.`,
-    );
-    console.log(`Build time: ${buildTimeSec}s ${remainingMs}ms.`);
+    if (missingFiles.length > 0) {
+      logger.warn('build.ts', 'Some expected files were not generated:');
+      missingFiles.forEach((file) => logger.warn('build.ts', `  - ${file}`));
+    }
+
+    const overallEndTime = Date.now();
+    const overallBuildTimeMs = overallEndTime - overallStartTime;
+    const overallBuildTimeSec = Math.floor(overallBuildTimeMs / 1000);
+    const remainingMs = overallBuildTimeMs % 1000;
+
+    console.log('\n' + '='.repeat(50));
+    console.log(`Build complete. Generated files are in the 'public' directory.`);
+    console.log(`Total build time: ${overallBuildTimeSec}s ${remainingMs}ms`);
+    if (fileCount > 0) {
+      console.log(
+        `Generated ${fileCount} file${fileCount !== 1 ? 's' : ''} (${htmlCount} HTML page${htmlCount !== 1 ? 's' : ''})`,
+      );
+    }
+    printBuildBreakdown();
   } catch (error) {
-    console.error('Error during build process:', error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    // Try to use compiled error formatter, fallback to pre-compile version
+    let errorMessage: string;
+    try {
+      const errorUtilsPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'error-utils.js');
+      const errorUtilsModule = (await import(errorUtilsPath)) as {
+        formatError: (error: Error, context: string) => string;
+      };
+      errorMessage = errorUtilsModule.formatError(err, 'Build process');
+    } catch {
+      errorMessage = formatErrorPreCompile(err, 'Build process');
+    }
+    console.error('\n❌ Error during build process:');
+    console.error(errorMessage);
     process.exit(1);
   }
 })();
@@ -170,8 +406,7 @@ async function copyDirectory(src: string, dest: string): Promise<void> {
       }
     }
   } catch (error) {
-    console.error(`Error copying directory from ${src} to ${dest}:`, error);
-    throw error; // Re-throw to fail the build if asset copy fails
+    const err = error as Error;
+    throw new Error(`Error copying directory from ${src} to ${dest}: ${err.message}`);
   }
 }
-

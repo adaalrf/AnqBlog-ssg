@@ -2,7 +2,7 @@
   "compilerOptions": {
     "module": "ESNext",
     "target": "ESNext",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "outDir": "./dist",
     "rootDir": "./",
     "strict": true,
@@ -16,18 +16,14 @@
     "declaration": false,
     "sourceMap": false
   },
-  "include": [
-    "src/**/*.ts",
-    "scripts/**/*.ts",
-    "types/**/*.d.ts",
-    "*.ts"
-  ],
+  "include": ["src/**/*.ts", "scripts/**/*.ts", "types/**/*.d.ts", "*.ts"],
   "exclude": [
     "node_modules",
     "public",
     "legacy",
     "dist",
     ".build",
-    "src/ts"
+    "src/ts" // Excluded because src/ts files are bundled by Webpack separately
+    // Note: "src/**/*.ts" in include still matches src/ts, but exclude takes precedence
   ]
 }

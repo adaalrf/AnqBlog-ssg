@@ -7,14 +7,10 @@ import { parseDate } from './utils/date-utils.js';
 import { processMarkdownFiles, normalizeTagForFile } from './utils/content-utils.js';
 import { generateRSSFeed } from './generate-rss.js';
 import { generateSitemap } from './generate-sitemap.js';
+import { logger } from './utils/logger.js';
 import config from './config.js';
 import path from 'path';
-import type { Post } from './types/index.js';
-
-/**
- * Tags object mapping tag names to arrays of posts.
- */
-type Tags = Record<string, Post[]>;
+import type { Post, Tags } from './types/index.js';
 
 /**
  * Generates all HTML files for the static site.
@@ -31,19 +27,21 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     config.publicTagsOutputDirectory,
   ]);
 
-  console.log('(Generate.ts): Processing markdown files...');
-  const truncatedPosts = processAndSortMarkdownFiles(
-    config.postsContentDirectory,
-    { previewLength: config.previewLength },
-  );
+  logger.info('Generate.ts', 'Processing markdown files...');
+  const truncatedPosts = await processAndSortMarkdownFiles(config.postsContentDirectory, {
+    previewLength: config.previewLength,
+    maxFileSize: config.maxMarkdownFileSize,
+  });
 
-  const fullPosts = processAndSortMarkdownFiles(config.postsContentDirectory);
-  console.log(`(Generate.ts): Found ${fullPosts.length} post${fullPosts.length !== 1 ? 's' : ''}`);
+  const fullPosts = await processAndSortMarkdownFiles(config.postsContentDirectory, {
+    maxFileSize: config.maxMarkdownFileSize,
+  });
+  logger.info('Generate.ts', `Found ${fullPosts.length} post${fullPosts.length !== 1 ? 's' : ''}`);
 
   const tags = collectTags(fullPosts);
   const tagCount = Object.keys(tags).length;
   if (tagCount > 0) {
-    console.log(`(Generate.ts): Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
+    logger.info('Generate.ts', `Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
   }
 
   await generateIntermediatePostHtmlFiles(
@@ -52,14 +50,14 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     config.tempPostsOutputDirectory,
   );
 
-  generatePaginatedBlogHtmlFiles(
+  await generatePaginatedBlogHtmlFiles(
     truncatedPosts,
     config.postsPerPage,
     config.templateBlogPath,
     config.tempBlogOutputPath,
   );
 
-  generateTagPages(
+  await generateTagPages(
     tags,
     truncatedPosts,
     config.postsPerPage,
@@ -68,7 +66,7 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     config.tempTagsOutputDirectory,
   );
 
-  applyLayoutToHtmlFiles(
+  await applyLayoutToHtmlFiles(
     [
       {
         inputDir: config.tempPostsOutputDirectory,
@@ -93,20 +91,25 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   // Generate RSS feed
   const rssContent = generateRSSFeed(fullPosts);
   const rssPath = path.join(config.publicContentOutputDirectory, 'rss.xml');
-  writeFileContent(rssPath, rssContent);
-  console.log('(Generate.ts): Generated RSS feed -> rss.xml');
+  await writeFileContent(rssPath, rssContent);
+  logger.info('Generate.ts', 'Generated RSS feed -> rss.xml');
 
   // Generate sitemap
   const sitemapPages = [
     { url: config.siteUrl, lastmod: new Date() },
-    { url: `${config.siteUrl}/blog`, lastmod: fullPosts.length > 0 ? fullPosts[0].date : new Date() },
+    {
+      url: `${config.siteUrl}/blog`,
+      lastmod: fullPosts.length > 0 ? fullPosts[0].date : new Date(),
+    },
     ...fullPosts.map((post) => ({
       url: `${config.siteUrl}/blog/posts/${post.htmlFileName}`,
       lastmod: post.date,
     })),
     // Add tag pages
     ...Object.keys(tags).map((tag) => {
-      const tagPosts = fullPosts.filter((post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag));
+      const tagPosts = fullPosts.filter(
+        (post) => post.tags && Array.isArray(post.tags) && post.tags.includes(tag),
+      );
       const latestPostDate = tagPosts.length > 0 ? tagPosts[0].date : new Date();
       return {
         url: `${config.siteUrl}/blog/tags/${normalizeTagForFile(tag)}.html`,
@@ -118,8 +121,8 @@ const generateAllHtmlFiles = async (): Promise<void> => {
 
   const sitemapContent = generateSitemap(sitemapPages);
   const sitemapPath = path.join(config.publicContentOutputDirectory, 'sitemap.xml');
-  writeFileContent(sitemapPath, sitemapContent);
-  console.log('(Generate.ts): Generated sitemap -> sitemap.xml');
+  await writeFileContent(sitemapPath, sitemapContent);
+  logger.info('Generate.ts', 'Generated sitemap -> sitemap.xml');
 };
 
 /**
@@ -136,15 +139,19 @@ const ensureDirectoriesExist = (directories: string[]): void => {
  * @param options - Options for processing (e.g., previewLength).
  * @returns Array of processed and sorted posts.
  */
-const processAndSortMarkdownFiles = (directory: string, options: { previewLength?: number } = {}): Post[] => {
-  return processMarkdownFiles(directory, options)
+const processAndSortMarkdownFiles = async (
+  directory: string,
+  options: { previewLength?: number; maxFileSize?: number } = {},
+): Promise<Post[]> => {
+  const posts = await processMarkdownFiles(directory, options);
+  return posts
     .map((post): Post => {
       // Validate required fields
       if (!post.title) {
-        console.warn(`Post missing title: ${post.htmlFileName || 'unknown'}`);
+        logger.warn('Generate.ts', `Post missing title: ${post.htmlFileName || 'unknown'}`);
       }
       if (!post.content) {
-        console.warn(`Post missing content: ${post.htmlFileName || 'unknown'}`);
+        logger.warn('Generate.ts', `Post missing content: ${post.htmlFileName || 'unknown'}`);
       }
 
       // Parse date with error handling
@@ -154,7 +161,10 @@ const processAndSortMarkdownFiles = (directory: string, options: { previewLength
           postDate = typeof post.date === 'string' ? parseDate(post.date) : new Date(post.date);
         } catch (error) {
           const err = error as Error;
-          console.warn(`Post has invalid date "${post.date}" (${post.htmlFileName || 'unknown'}): ${err.message}. Using current date.`);
+          logger.warn(
+            'Generate.ts',
+            `Post has invalid date "${String(post.date)}" (${post.htmlFileName || 'unknown'}): ${err.message}. Using current date.`,
+          );
         }
       }
 
@@ -162,7 +172,7 @@ const processAndSortMarkdownFiles = (directory: string, options: { previewLength
         ...post,
         title: (post.title as string) || 'Untitled',
         date: postDate,
-        tags: Array.isArray(post.tags) ? (post.tags as string[]) : [],
+        tags: Array.isArray(post.tags) ? post.tags : [],
         content: (post.content as string) || '',
         previewContent: (post.previewContent as string) || '',
         htmlFileName: (post.htmlFileName as string) || '',
@@ -173,6 +183,7 @@ const processAndSortMarkdownFiles = (directory: string, options: { previewLength
 
 /**
  * Collects all tags from posts and groups posts by tag.
+ * Normalizes tags (trim whitespace) and filters empty tags to prevent issues.
  * @param posts - Array of post objects.
  * @returns Object mapping tag names to arrays of posts.
  */
@@ -182,10 +193,16 @@ const collectTags = (posts: Post[]): Tags => {
     // Handle posts without tags
     if (post.tags && Array.isArray(post.tags)) {
       post.tags.forEach((tag) => {
-        if (!tags[tag]) {
-          tags[tag] = [];
+        // Normalize tag: trim whitespace and filter empty
+        const normalizedTag = typeof tag === 'string' ? tag.trim() : String(tag).trim();
+        // Skip empty tags
+        if (!normalizedTag) {
+          return;
         }
-        tags[tag].push(post);
+        if (!tags[normalizedTag]) {
+          tags[normalizedTag] = [];
+        }
+        tags[normalizedTag].push(post);
       });
     }
   });
@@ -193,7 +210,9 @@ const collectTags = (posts: Post[]): Tags => {
 };
 
 generateAllHtmlFiles().catch((error) => {
-  console.error('Error generating HTML files:', error);
+  logger.error(
+    'Generate.ts',
+    `Error generating HTML files: ${error instanceof Error ? error.message : String(error)}`,
+  );
   process.exit(1);
 });
-

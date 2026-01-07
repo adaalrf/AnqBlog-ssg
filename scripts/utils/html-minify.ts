@@ -18,10 +18,7 @@ export const minifyHtml = (html: string, options: MinifyOptions = {}): string =>
     return html;
   }
 
-  const {
-    removeComments = true,
-    collapseWhitespace = true,
-  } = options;
+  const { removeComments = true, collapseWhitespace = true } = options;
 
   // Elements that preserve whitespace and should not be minified
   // Order matters: process outer containers first (pre, textarea) before inner ones (code)
@@ -69,4 +66,3 @@ export const minifyHtml = (html: string, options: MinifyOptions = {}): string =>
 
   return minified.trim();
 };
-

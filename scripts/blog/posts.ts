@@ -10,10 +10,11 @@ import {
 import {
   ensureDirectoryExists,
   writeFileContent,
-  readFileContent,
   sanitizeFilename,
 } from '../utils/path-and-file-utils.js';
+import { getCachedTemplate } from '../utils/template-utils.js';
 import { formatDate, formatDateISO } from '../utils/date-utils.js';
+import { logger } from '../utils/logger.js';
 import config from '../config.js';
 import type { Post } from '../types/index.js';
 
@@ -31,77 +32,87 @@ export const generateIntermediatePostHtmlFiles = async (
   ensureDirectoryExists(tempPostsOutputDirectory);
 
   const totalPosts = posts.length;
-  console.log(`(Posts.ts): Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
+  logger.info('Posts.ts', `Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
 
-  // Read template once to avoid redundant file reads
-  const templateContent = readFileContent(postTemplatePath);
+  // Read template once with caching
+  const templateContent = await getCachedTemplate(postTemplatePath);
 
   // Process posts in parallel for better performance
-  await Promise.all(posts.map(async (post, index) => {
-    // Format tags for display (escape to prevent XSS)
-    const tagsHtml = post.tags && post.tags.length > 0
-      ? post.tags
-        .map(
-          (tag) =>
-            `<a href="/blog/tags/${normalizeTagForFile(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
-        )
-        .join(' ')
-      : '';
+  await Promise.all(
+    posts.map(async (post, index) => {
+      // Format tags for display (escape to prevent XSS)
+      const tagsHtml =
+        post.tags && post.tags.length > 0
+          ? post.tags
+              .map(
+                (tag) =>
+                  `<a href="/blog/tags/${normalizeTagForFile(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
+              )
+              .join(' ')
+          : '';
 
-    // Replace placeholders directly (no title, just date, tags, and content)
-    const dom = new JSDOM(templateContent);
-    const document = dom.window.document;
+      // Replace placeholders directly (no title, just date, tags, and content)
+      const dom = new JSDOM(templateContent);
+      const document = dom.window.document;
 
-    // Replace placeholders
-    let bodyHtml = document.body.innerHTML
-      .replace(/\{\{date\}\}/g, formatDate(post.date))
-      .replace(/\{\{tags\}\}/g, tagsHtml)
-      .replace(/\{\{content\}\}/g, post.content);
+      // Replace placeholders
+      const bodyHtml = document.body.innerHTML
+        .replace(/\{\{date\}\}/g, formatDate(post.date))
+        .replace(/\{\{tags\}\}/g, tagsHtml)
+        .replace(/\{\{content\}\}/g, post.content);
 
-    document.body.innerHTML = bodyHtml;
+      document.body.innerHTML = bodyHtml;
 
-    // Update time element with ISO date attribute
-    const dateElement = document.querySelector('.post-date');
-    if (dateElement && dateElement.tagName.toLowerCase() === 'time') {
-      dateElement.setAttribute('datetime', formatDateISO(post.date));
-    }
+      // Update time element with ISO date attribute
+      const dateElement = document.querySelector('.post-date');
+      if (dateElement && dateElement.tagName.toLowerCase() === 'time') {
+        dateElement.setAttribute('datetime', formatDateISO(post.date));
+      }
 
-    // Remove tag divider if no tags
-    if (!tagsHtml) {
-      const tagDivider = document.querySelector('#tag-divider');
-      if (tagDivider) tagDivider.remove();
-    }
+      // Remove tag divider if no tags
+      if (!tagsHtml) {
+        const tagDivider = document.querySelector('#tag-divider');
+        if (tagDivider) tagDivider.remove();
+      }
 
-    const postContentElement = document.querySelector('#post-content');
-    if (!postContentElement) {
-      throw new Error(
-        `Post template missing required element:\n` +
-        `  Element: #post-content\n` +
-        `  Template: ${postTemplatePath}\n` +
-        `  Post: ${post.htmlFileName || 'unknown'}\n` +
-        `  Title: ${post.title || 'Untitled'}`
+      const postContentElement = document.querySelector('#post-content');
+      if (!postContentElement) {
+        throw new Error(
+          `Post template missing required element:\n` +
+            `  Element: #post-content\n` +
+            `  Template: ${postTemplatePath}\n` +
+            `  Post: ${post.htmlFileName || 'unknown'}\n` +
+            `  Title: ${post.title || 'Untitled'}`,
+        );
+      }
+      const htmlContent = postContentElement.outerHTML;
+
+      // Sanitize filename: remove/replace invalid characters
+      const sanitizedFileName = sanitizeFilename(post.htmlFileName);
+      const outputPath = path.join(tempPostsOutputDirectory, sanitizedFileName);
+
+      // Use plain text truncation for breadcrumb (escape to prevent XSS)
+      const truncatedTitle = truncateText(
+        post.title || 'Untitled',
+        config.titleTruncationLengthBreadcrumb,
       );
-    }
-    const htmlContent = postContentElement.outerHTML;
+      const escapedTruncatedTitle = escapeHtml(truncatedTitle);
+      const modifiedPathBar = `/ <a href="/blog">Blog</a> / <em>${escapedTruncatedTitle}</em>`
+        .replace(/\s+/g, ' ')
+        .trim();
+      // Add dynamic front matter to the content
+      const finalHtml = `${generateFrontMatter(post as Record<string, unknown>, {
+        page: modifiedPathBar,
+      })}\n${htmlContent}`;
 
-    // Sanitize filename: remove/replace invalid characters
-    const sanitizedFileName = sanitizeFilename(post.htmlFileName);
-    const outputPath = path.join(tempPostsOutputDirectory, sanitizedFileName);
+      await writeFileContent(outputPath, finalHtml);
+      const current = index + 1;
+      logger.info('Posts.ts', `[${current}/${totalPosts}] Generated post -> ${outputPath}`);
+    }),
+  );
 
-    // Use plain text truncation for breadcrumb (escape to prevent XSS)
-    const truncatedTitle = truncateText(post.title || 'Untitled', config.titleTruncationLengthBreadcrumb);
-    const escapedTruncatedTitle = escapeHtml(truncatedTitle);
-    const modifiedPathBar = `/ <a href="/blog">Blog</a> / <em>${escapedTruncatedTitle}</em>`.replace(/\s+/g, ' ').trim();
-    // Add dynamic front matter to the content
-    const finalHtml = `${generateFrontMatter(post as Record<string, unknown>, {
-      page: modifiedPathBar,
-    })}\n${htmlContent}`;
-
-    writeFileContent(outputPath, finalHtml);
-    const current = index + 1;
-    console.log(`(Posts.ts): [${current}/${totalPosts}] Generated post -> ${outputPath}`);
-  }));
-
-  console.log(`(Posts.ts): ✓ Completed processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}`);
+  logger.info(
+    'Posts.ts',
+    `✓ Completed processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}`,
+  );
 };
-

@@ -21,11 +21,7 @@ export const parseDate = (dateString: string): Date => {
       const [, year, month, day] = isoMatch.map(Number);
       const date = new Date(year, month - 1, day);
       // Validate the date is actually valid
-      if (
-        date.getFullYear() === year &&
-        date.getMonth() === month - 1 &&
-        date.getDate() === day
-      ) {
+      if (date.getFullYear() === year && date.getMonth() === month - 1 && date.getDate() === day) {
         return date;
       }
     }
@@ -59,11 +55,7 @@ export const parseDate = (dateString: string): Date => {
   const date = new Date(year, month - 1, day);
 
   // Validate the date is actually valid (catches cases like 32.13.2026)
-  if (
-    date.getFullYear() !== year ||
-    date.getMonth() !== month - 1 ||
-    date.getDate() !== day
-  ) {
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day) {
     throw new Error(`Invalid date: ${dateString}`);
   }
 
@@ -105,4 +97,3 @@ export const formatDateISO = (date: Date): string => {
   const day = String(date.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}`;
 };
-

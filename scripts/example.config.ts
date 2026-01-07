@@ -1,9 +1,9 @@
-import { fpr } from './utils/path-and-file-utils.js';
-import type { SiteConfig, PathConfig } from './types/config.js';
+import { fpr } from './utils/path-and-file-utils';
+import type { SiteConfig, PathConfig } from './types/config';
 
 /**
  * Example configuration file for the static site generator.
- * 
+ *
  * Copy this file to `scripts/config.ts` and customize the values for your site.
  * The `config.ts` file is gitignored and should contain your site-specific settings.
  */
@@ -21,6 +21,7 @@ const siteConfig: SiteConfig = {
   paginationWindowSize: 5, // Number of page links in pagination
   dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
   siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
+  maxMarkdownFileSize: 5 * 1024 * 1024, // Maximum markdown file size in bytes (default: 5MB)
 };
 
 /**
@@ -32,7 +33,7 @@ const pathConfig: PathConfig = {
   contentDirectory: fpr('src/content'),
   postsContentDirectory: fpr('src/content/blog/posts'),
   templatePostsPath: fpr('src/templates/post-template.html'),
-  templateBlogPath: fpr('src/templates/blog-template.html'),
+  templateBlogPath: fpr('src/templates/listing-template.html'),
   templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
   templateTagsPath: fpr('src/templates/tags-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
@@ -51,7 +52,6 @@ const pathConfig: PathConfig = {
 const config = {
   ...siteConfig,
   ...pathConfig,
-};
+} satisfies SiteConfig & PathConfig;
 
 export default config;
-

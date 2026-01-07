@@ -1,0 +1,17 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+dist/
+public/
+.build/
+
+# Generated files
+src/ts/main.ts
+
+# Config files (keep their format)
+package-lock.json
+
+# Logs
+*.log
+

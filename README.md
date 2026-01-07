@@ -49,7 +49,7 @@ Write blog posts in Markdown and place them in `src/content/blog/posts/`:
 ```markdown
 ---
 title: 'My First Blog Post'
-date: '03.01.2026'  # or use ISO 8601: '2026-01-03'
+date: '03.01.2026' # or use ISO 8601: '2026-01-03'
 tags: ['personal', 'introduction']
 ---
 
@@ -70,19 +70,19 @@ Then edit `scripts/config.ts` to customize your site:
 
 ```typescript
 const siteConfig = {
-  siteName: 'My Blog',                      // Site name displayed in header
-  siteDescription: 'My awesome blog',       // Site description for meta tags
-  siteUrl: 'https://example.com',           // Base URL (used for canonical URLs and Open Graph)
+  siteName: 'My Blog', // Site name displayed in header
+  siteDescription: 'My awesome blog', // Site description for meta tags
+  siteUrl: 'https://example.com', // Base URL (used for canonical URLs and Open Graph)
   githubUrl: 'https://github.com/username', // GitHub profile URL
-  authorName: 'username',                   // Author name displayed in footer
-  copyrightYear: new Date().getFullYear(),  // Copyright year (auto-updates)
-  postsPerPage: 5,                          // Number of posts per paginated page
-  previewLength: 200,                       // Character length for post previews
-  titleTruncationLength: 25,                // Max title length in post listings
-  titleTruncationLengthBreadcrumb: 20,      // Max title length in breadcrumbs
-  paginationWindowSize: 5,                  // Number of page links in pagination
-  dateLocale: 'en-US',                      // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
-  siteLanguage: 'en',                       // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
+  authorName: 'username', // Author name displayed in footer
+  copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
+  postsPerPage: 5, // Number of posts per paginated page
+  previewLength: 200, // Character length for post previews
+  titleTruncationLength: 25, // Max title length in post listings
+  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
+  paginationWindowSize: 5, // Number of page links in pagination
+  dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
+  siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
 };
 ```
 
@@ -96,6 +96,39 @@ npm run build
 
 Output files are generated in the `public/` directory.
 
+**Build Options:**
+
+- `--version` or `-v` - Display the version number and exit
+- `--dry-run` - Validate configuration and check files without generating output
+- `--incremental` - Skip cleaning directories for faster rebuilds (use with caution)
+- `--clean` - Force clean build (removes `public/` and `.build/` directories)
+
+**Examples:**
+
+```bash
+# Standard build
+npm run build
+
+# Check configuration without building
+npm run build -- --dry-run
+
+# Incremental build (faster, but may leave stale files)
+npm run build -- --incremental
+
+# Force clean build
+npm run build -- --clean
+
+# Show version
+npm run build -- --version
+```
+
+The build process displays:
+
+- Real-time progress for each step
+- Build time breakdown per step
+- Total file count and HTML page count
+- Total build time
+
 ### Serve Locally (Development)
 
 Preview the site locally using the built-in Node.js server:
@@ -107,6 +140,7 @@ npm run serve
 The site will be available at `http://localhost:8080` by default.
 
 **Custom Port:** Set the `PORT` environment variable to use a different port:
+
 ```bash
 PORT=3000 npm run serve
 ```
@@ -159,11 +193,11 @@ anq-blog-ssg/
 
 ### Templates
 
-Edit files in `src/templates/` to modify the HTML structure and layout:
+Edit files in `src/templates/`, or add your own templates, to modify the HTML structure and layout:
 
 - `layout-template.html` - Main page wrapper (header, footer, navigation)
 - `post-template.html` - Individual blog post layout
-- `blog-template.html` - Blog listing page layout
+- `listing-template.html` - Blog and tag listing page layout (shared template)
 - `tags-template.html` - Tag page layout
 - `main-tags-template.html` - Tags index page layout
 
@@ -188,7 +222,7 @@ The `layout-template.html` supports the following placeholders that are automati
 - `{{scriptPath}}` - Path to JavaScript bundle (`/js/bundle.js`)
 - `{{gitLogoPath}}` - Path to GitHub icon (`/assets/github-icon.svg`)
 
-Content templates (`post-template.html`, `blog-template.html`, etc.) support:
+Content templates (`post-template.html`, `listing-template.html`, etc.) support:
 
 - `{{content}}` - Full post content (HTML)
 - `{{previewContent}}` - Truncated preview content
@@ -213,19 +247,19 @@ Edit `scripts/config.ts` to customize your site settings. The configuration is s
 
 ```typescript
 const siteConfig = {
-  siteName: 'My Blog',                    // Site name displayed in header
-  siteDescription: 'My awesome blog',     // Site description for meta tags
-  siteUrl: 'https://example.com',          // Base URL (used for canonical URLs and Open Graph)
+  siteName: 'My Blog', // Site name displayed in header
+  siteDescription: 'My awesome blog', // Site description for meta tags
+  siteUrl: 'https://example.com', // Base URL (used for canonical URLs and Open Graph)
   githubUrl: 'https://github.com/username', // GitHub profile URL
-  authorName: 'username',                  // Author name displayed in footer
+  authorName: 'username', // Author name displayed in footer
   copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
-  postsPerPage: 5,                         // Number of posts per paginated page
-  previewLength: 200,                      // Character length for post previews
-  titleTruncationLength: 25,               // Max title length in post listings
-  titleTruncationLengthBreadcrumb: 20,      // Max title length in breadcrumbs
-  paginationWindowSize: 5,                  // Number of page links in pagination
-  dateLocale: 'en-US',                      // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
-  siteLanguage: 'en',                       // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
+  postsPerPage: 5, // Number of posts per paginated page
+  previewLength: 200, // Character length for post previews
+  titleTruncationLength: 25, // Max title length in post listings
+  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
+  paginationWindowSize: 5, // Number of page links in pagination
+  dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
+  siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
 };
 ```
 
@@ -243,6 +277,7 @@ Add or modify interactive features by editing files in `src/ts/`:
 ### Build fails with "ENOENT" errors
 
 **Solution:** Ensure required directories exist:
+
 - `src/content/blog/posts/` - For blog posts
 - `src/templates/` - For HTML templates
 - `src/styles/` - For CSS source files
@@ -251,14 +286,16 @@ Check that template files are present and verify file permissions.
 
 ### CSS not loading
 
-**Solution:** 
+**Solution:**
+
 1. Run `npm run build` to regenerate CSS
 2. Verify that `public/styles/styles.css` exists after build
 3. Ensure template paths use absolute paths from root (`/styles/styles.css`)
 
 ### Posts not appearing
 
-**Solution:** 
+**Solution:**
+
 1. Ensure markdown files are in `src/content/blog/posts/`
 2. Check front matter format (YAML with `---` delimiters)
 3. Verify date format is either:
@@ -268,7 +305,8 @@ Check that template files are present and verify file permissions.
 
 ### Template elements not found
 
-**Solution:** 
+**Solution:**
+
 1. Ensure templates contain required elements:
    - `#post-content` - For post pages
    - `.post-item` - For blog/tag listings
@@ -278,7 +316,8 @@ Check that template files are present and verify file permissions.
 
 ### Theme toggle not visible
 
-**Solution:** 
+**Solution:**
+
 - On desktop: The theme toggle is in the top navigation bar. If it's hidden, check that the path bar isn't too long (it should truncate automatically)
 - On mobile: The theme toggle is in the burger menu dropdown
 - Ensure JavaScript is enabled in your browser

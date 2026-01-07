@@ -54,7 +54,12 @@ src/ts/main.ts
 
 # Compiled TypeScript files (generated from .ts sources)
 dist/
-*.js
+dist/**/*.js
+scripts/**/*.js
+src/ts/**/*.js
+*.tsbuildinfo
+
+# Keep config files that are needed
 !webpack.config.js
 !postcss.config.js
 !tailwind.config.js

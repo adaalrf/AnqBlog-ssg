@@ -59,7 +59,12 @@ export const createPostItem = (
 
   const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
   // Escape title to prevent XSS attacks
-  const escapedTitle = escapeHtml(getFirstNthCharacters(title, (config as { titleTruncationLength: number }).titleTruncationLength));
+  const escapedTitle = escapeHtml(
+    getFirstNthCharacters(
+      title,
+      (config as { titleTruncationLength: number }).titleTruncationLength,
+    ),
+  );
   const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${escapedTitle}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true) as Element;
@@ -67,14 +72,14 @@ export const createPostItem = (
   if (titleElement) {
     titleElement.innerHTML = titleLink;
   }
-  
+
   // Update time element with ISO date and formatted display
   const dateElement = postItem.querySelector('.post-date');
   if (dateElement) {
     dateElement.setAttribute('datetime', formatDateISO(date));
     dateElement.textContent = formatDate(date);
   }
-  
+
   const contentElement = postItem.querySelector('.content');
   if (contentElement) {
     contentElement.innerHTML = previewContent;
@@ -131,7 +136,9 @@ export const updatePaginationLinks = (
   const nextLink = paginationDiv.querySelector('.next-page') as HTMLAnchorElement;
 
   if (!previousLink || !nextLink) {
-    throw new Error('Pagination template must contain elements with classes "previous-page" and "next-page"');
+    throw new Error(
+      'Pagination template must contain elements with classes "previous-page" and "next-page"',
+    );
   }
   const tagWithDash = normalizeTagForFile(tag);
 
@@ -154,7 +161,9 @@ export const updatePaginationLinks = (
   const pageLink3 = document.getElementById('page-link-3');
 
   if (!pageLink1 || !pageLink3) {
-    throw new Error('Pagination template must contain elements with ids "page-link-1" and "page-link-3"');
+    throw new Error(
+      'Pagination template must contain elements with ids "page-link-1" and "page-link-3"',
+    );
   }
 
   const classesNormalPageLink = pageLink1.className.split(' ').filter(Boolean);
@@ -166,9 +175,7 @@ export const updatePaginationLinks = (
   // Helper function to update pagination links
   const updatePaginationLink = (pageLink: Element, index: number, isCurrentPage: boolean): void => {
     pageLink.className = '';
-    const classNames = isCurrentPage
-      ? classesCurrentPageLink
-      : classesNormalPageLink;
+    const classNames = isCurrentPage ? classesCurrentPageLink : classesNormalPageLink;
     pageLink.classList.add(...classNames);
 
     // Build the href based on whether it's a tag page or blog page
@@ -178,7 +185,10 @@ export const updatePaginationLinks = (
       if (index === 0) {
         href = getWebPath(`${tagWithDash}.html`, `/blog/tags/${tagWithDash}.html`);
       } else {
-        href = getWebPath(`${tagWithDash}-page-${index + 1}.html`, `/blog/tags/${tagWithDash}-page-${index + 1}.html`);
+        href = getWebPath(
+          `${tagWithDash}-page-${index + 1}.html`,
+          `/blog/tags/${tagWithDash}-page-${index + 1}.html`,
+        );
       }
     } else {
       // Blog pages: /blog/ or /blog/index.html or /blog/blog-page-2.html
@@ -204,16 +214,25 @@ export const updatePaginationLinks = (
       pageLink.classList.remove('hidden');
     }
   };
-  const startPage = Math.max(0, Math.min(totalPages - (config as { paginationWindowSize: number }).paginationWindowSize, pageIndex - 2));
-  const endPage = Math.min(totalPages, startPage + (config as { paginationWindowSize: number }).paginationWindowSize);
+  const startPage = Math.max(
+    0,
+    Math.min(
+      totalPages - (config as { paginationWindowSize: number }).paginationWindowSize,
+      pageIndex - 2,
+    ),
+  );
+  const endPage = Math.min(
+    totalPages,
+    startPage + (config as { paginationWindowSize: number }).paginationWindowSize,
+  );
 
   // Update the pagination links
   for (let i = startPage; i < endPage; i++) {
-    const pageLink = paginationDiv.querySelector(
-      `#page-link-${i - startPage + 1}`,
-    );
+    const pageLink = paginationDiv.querySelector(`#page-link-${i - startPage + 1}`);
     if (!pageLink) {
-      throw new Error(`Pagination template must contain element with id "page-link-${i - startPage + 1}"`);
+      throw new Error(
+        `Pagination template must contain element with id "page-link-${i - startPage + 1}"`,
+      );
     }
     const isActivePage = i === pageIndex; // Determine if the current page is the active page
     updatePaginationLink(pageLink, i, isActivePage); // Update the pagination link with the appropriate details
@@ -258,4 +277,3 @@ export const updatePaginationLinks = (
     previousLink.setAttribute('aria-label', 'Previous page');
   }
 };
-

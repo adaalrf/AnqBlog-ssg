@@ -4,6 +4,7 @@ import tailwindcss from 'tailwindcss';
 import autoprefixer from 'autoprefixer';
 import config from './config.js';
 import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
+import { logger } from './utils/logger.js';
 
 /**
  * Processes the input CSS file with PostCSS, Tailwind CSS, and Autoprefixer.
@@ -30,25 +31,26 @@ const processCSS = async (): Promise<void> => {
 
     // Write the processed CSS to the output file
     await fs.writeFile(outputFilePath, result.css);
-    console.log(`(CSS.ts): Generated css file -> ${outputFilePath}`);
+    logger.info('CSS.ts', `Generated css file -> ${outputFilePath}`);
 
     // Write source map if available
     if (result.map) {
       await fs.writeFile(outputFilePath + '.map', result.map.toString());
     }
   } catch (error) {
-    console.error('(CSS.ts): Failed to process CSS file ->', error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error('CSS.ts', `Failed to process CSS file: ${err.message}`);
     throw error;
   }
 };
 
 // Execute CSS processing
-(async () => {
+void (async () => {
   try {
     await processCSS();
   } catch (error) {
-    console.error('(CSS.ts): Failed to process CSS:', error);
+    const err = error instanceof Error ? error : new Error(String(error));
+    logger.error('CSS.ts', `Failed to process CSS: ${err.message}`);
     process.exit(1);
   }
 })();
-

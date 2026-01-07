@@ -24,19 +24,21 @@ export function generateRSSFeed(posts: Post[]): string {
   // Limit to 20 most recent posts
   const feedPosts = posts.slice(0, 20);
 
-  const items = feedPosts.map((post) => {
-    const url = `${config.siteUrl}/blog/posts/${post.htmlFileName}`;
-    const pubDate = new Date(post.date).toUTCString();
-    const description = escapeXml(post.previewContent || '');
+  const items = feedPosts
+    .map((post) => {
+      const url = `${config.siteUrl}/blog/posts/${post.htmlFileName}`;
+      const pubDate = new Date(post.date).toUTCString();
+      const description = escapeXml(post.previewContent || '');
 
-    return `    <item>
+      return `    <item>
       <title>${escapeXml(post.title)}</title>
       <link>${url}</link>
       <guid>${url}</guid>
       <pubDate>${pubDate}</pubDate>
       <description>${description}</description>
     </item>`;
-  }).join('\n');
+    })
+    .join('\n');
 
   return `<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
@@ -51,4 +53,3 @@ ${items}
   </channel>
 </rss>`;
 }
-

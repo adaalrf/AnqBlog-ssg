@@ -1,17 +1,10 @@
-import {
-  paginatePosts,
-  createPostItem,
-  updatePaginationLinks,
-} from '../utils/pagination-utils.js';
-import {
-  readFileContent,
-  ensureDirectoryExists,
-} from '../utils/path-and-file-utils.js';
-import { getListingTemplatePath } from '../utils/template-utils.js';
+import { paginatePosts, createPostItem, updatePaginationLinks } from '../utils/pagination-utils.js';
+import { ensureDirectoryExists, writeFileContent } from '../utils/path-and-file-utils.js';
+import { getListingTemplatePath, getCachedTemplate } from '../utils/template-utils.js';
 import { generateFrontMatter } from '../utils/content-utils.js';
+import { logger } from '../utils/logger.js';
 import config from '../config.js';
 import path from 'path';
-import fs from 'fs';
 import { JSDOM } from 'jsdom';
 import type { Post } from '../types/index.js';
 
@@ -22,12 +15,12 @@ import type { Post } from '../types/index.js';
  * @param templateBlogPath - The path to the blog template.
  * @param tempBlogOutputPath - The directory to save the paginated blog pages.
  */
-export const generatePaginatedBlogHtmlFiles = (
+export const generatePaginatedBlogHtmlFiles = async (
   posts: Post[],
   postsPerPage: number,
   templateBlogPath: string,
   tempBlogOutputPath: string,
-): void => {
+): Promise<void> => {
   ensureDirectoryExists(tempBlogOutputPath);
 
   const blogContent = paginatePosts(posts, postsPerPage);
@@ -38,16 +31,17 @@ export const generatePaginatedBlogHtmlFiles = (
   }
 
   const totalPages = blogContent.length;
-  console.log(`(Blog.ts): Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
+  logger.info('Blog.ts', `Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
 
-  // Read the shared listing template
+  // Read the shared listing template (with caching)
   const listingTemplatePath = getListingTemplatePath();
-  let blogTemplateContent = readFileContent(listingTemplatePath);
+  let blogTemplateContent = await getCachedTemplate(listingTemplatePath);
   // Replace containerId placeholder with 'blog'
   blogTemplateContent = blogTemplateContent.replace(/\{\{containerId\}\}/g, 'blog');
 
   // Generate each paginated page
-  blogContent.forEach((pagePosts, pageIndex) => {
+  for (let pageIndex = 0; pageIndex < blogContent.length; pageIndex++) {
+    const pagePosts = blogContent[pageIndex];
     // Create a fresh DOM instance for each page
     const dom = new JSDOM(blogTemplateContent);
     const document = dom.window.document;
@@ -57,44 +51,46 @@ export const generatePaginatedBlogHtmlFiles = (
     if (!postItemTemplate) {
       throw new Error(
         `Blog template missing required element:\n` +
-        `  Element: .post-item\n` +
-        `  Template: ${templateBlogPath}\n` +
-        `  Listing template: ${listingTemplatePath}\n` +
-        `  Page: ${pageIndex + 1}`
+          `  Element: .post-item\n` +
+          `  Template: ${templateBlogPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Page: ${pageIndex + 1}`,
       );
     }
     if (!postLinksDiv) {
       throw new Error(
         `Blog template missing required element:\n` +
-        `  Element: #post-links-div\n` +
-        `  Template: ${templateBlogPath}\n` +
-        `  Listing template: ${listingTemplatePath}\n` +
-        `  Page: ${pageIndex + 1}`
+          `  Element: #post-links-div\n` +
+          `  Template: ${templateBlogPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Page: ${pageIndex + 1}`,
       );
     }
 
     // Add only posts for the current page
     pagePosts.forEach((post) => {
-      const postItem = createPostItem(
-        post,
-        postItemTemplate,
-        '/blog/posts',
-        '/blog/tags',
-      );
+      const postItem = createPostItem(post, postItemTemplate, '/blog/posts', '/blog/tags');
       postLinksDiv.appendChild(postItem);
     });
 
     postItemTemplate.remove();
 
-    updatePaginationLinks(document, pageIndex, blogContent, '', config.publicBlogOutputPath, config.publicContentOutputDirectory);
+    updatePaginationLinks(
+      document,
+      pageIndex,
+      blogContent,
+      '',
+      config.publicBlogOutputPath,
+      config.publicContentOutputDirectory,
+    );
     const blogElement = document.querySelector('#blog');
     if (!blogElement) {
       throw new Error(
         `Blog template missing required element:\n` +
-        `  Element: #blog\n` +
-        `  Template: ${templateBlogPath}\n` +
-        `  Listing template: ${listingTemplatePath}\n` +
-        `  Page: ${pageIndex + 1}`
+          `  Element: #blog\n` +
+          `  Template: ${templateBlogPath}\n` +
+          `  Listing template: ${listingTemplatePath}\n` +
+          `  Page: ${pageIndex + 1}`,
       );
     }
     const content = blogElement.outerHTML;
@@ -105,16 +101,27 @@ export const generatePaginatedBlogHtmlFiles = (
 
     const modifiedPathBar = `/ <em>Blog</em>`.replace(/\s+/g, ' ').trim();
     // Add dynamic front matter to the content
-    const finalHtml = `${generateFrontMatter({
-      page: modifiedPathBar,
-      title: 'Blog',
-    }, {})}\n${content}`;
+    const finalHtml = `${generateFrontMatter(
+      {
+        page: modifiedPathBar,
+        title: 'Blog',
+      },
+      {},
+    )}\n${content}`;
 
-    fs.writeFileSync(outputFilePath, finalHtml);
-    const current = pageIndex + 1;
-    console.log(`(Blog.ts): [${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
-  });
+    try {
+      await writeFileContent(outputFilePath, finalHtml);
+      const current = pageIndex + 1;
+      logger.info('Blog.ts', `[${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
+    } catch (error) {
+      const err = error as Error;
+      logger.error('Blog.ts', `Failed to write blog page ${pageIndex + 1}: ${err.message}`);
+      throw new Error(`Failed to write blog page to ${outputFilePath}: ${err.message}`);
+    }
+  }
 
-  console.log(`(Blog.ts): ✓ Completed generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}`);
+  logger.info(
+    'Blog.ts',
+    `✓ Completed generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}`,
+  );
 };
-

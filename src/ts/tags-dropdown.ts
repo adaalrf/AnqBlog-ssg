@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (dropdownMenu && dropdownToggle) {
     // Create the dropdown with shared logic
-    createDropdown('tags-dropdown', 'tags-dropdown-menu');
+    void createDropdown('tags-dropdown', 'tags-dropdown-menu');
 
     // Tags dropdown has special behavior: it's a link that should navigate
     // The dropdown is just a preview/quick access, clicking should navigate

@@ -50,38 +50,26 @@ function setTheme(theme: 'light' | 'dark'): void {
     if (theme === 'light') {
       htmlElement.classList.replace('dark', 'light');
       if (toggleThemeBtn) {
-        toggleThemeBtn.appendChild(
-          createIconElement(sunIconPath, 'Sun icon', 24, 24),
-        );
+        toggleThemeBtn.appendChild(createIconElement(sunIconPath, 'Sun icon', 24, 24));
         toggleThemeBtn.classList.remove('hidden');
       }
       if (toggleThemeBtnMobile) {
-        toggleThemeBtnMobile.appendChild(
-          createIconElement(sunIconPath, 'Sun icon', 24, 24),
-        );
+        toggleThemeBtnMobile.appendChild(createIconElement(sunIconPath, 'Sun icon', 24, 24));
         toggleThemeBtnMobile.classList.remove('hidden');
       }
-      burgerMenu.appendChild(
-        createIconElement(burgerLightPath, 'Burger menu', 36, 36),
-      );
+      burgerMenu.appendChild(createIconElement(burgerLightPath, 'Burger menu', 36, 36));
       localStorage.setItem('theme', 'light');
     } else {
       htmlElement.classList.replace('light', 'dark');
       if (toggleThemeBtn) {
-        toggleThemeBtn.appendChild(
-          createIconElement(moonIconPath, 'Moon icon', 24, 24),
-        );
+        toggleThemeBtn.appendChild(createIconElement(moonIconPath, 'Moon icon', 24, 24));
         toggleThemeBtn.classList.remove('hidden');
       }
       if (toggleThemeBtnMobile) {
-        toggleThemeBtnMobile.appendChild(
-          createIconElement(moonIconPath, 'Moon icon', 24, 24),
-        );
+        toggleThemeBtnMobile.appendChild(createIconElement(moonIconPath, 'Moon icon', 24, 24));
         toggleThemeBtnMobile.classList.remove('hidden');
       }
-      burgerMenu.appendChild(
-        createIconElement(burgerDarkPath, 'Burger menu', 36, 36),
-      );
+      burgerMenu.appendChild(createIconElement(burgerDarkPath, 'Burger menu', 36, 36));
       localStorage.setItem('theme', 'dark');
     }
   }
@@ -109,9 +97,13 @@ if (document.readyState === 'loading') {
 }
 
 if (toggleThemeBtn) {
-  toggleThemeBtn.addEventListener('click', toggleTheme);
+  toggleThemeBtn.addEventListener('click', () => {
+    toggleTheme();
+  });
 }
 
 if (toggleThemeBtnMobile) {
-  toggleThemeBtnMobile.addEventListener('click', toggleTheme);
+  toggleThemeBtnMobile.addEventListener('click', () => {
+    toggleTheme();
+  });
 }
