@@ -1,5 +1,6 @@
 import fsPromises from 'fs/promises';
 import { fpr, writeFileContent } from './utils/path-and-file-utils.js';
+import { formatError } from './utils/error-utils.js';
 import { logger } from './utils/logger.js';
 
 const dirPath = fpr('src/ts');
@@ -8,6 +9,7 @@ const outputPath = fpr('src/ts/main.ts');
 /**
  * Generates the main.ts file by reading all .ts files in the src/ts directory except main.ts.
  * Only includes root-level files (not files in subdirectories like utils/).
+ * @throws {Error} If the directory cannot be read, output path is a directory, or file writing fails.
  */
 const generateImports = async (): Promise<void> => {
   // Read all entries in the directory
@@ -48,14 +50,12 @@ document.addEventListener('DOMContentLoaded', () => {
   // Write the main.ts file
   await writeFileContent(outputPath, mainContent);
 
-  logger.info('Imports.ts', `Generated imports file -> ${outputPath}`);
+  logger.info('generate-imports.ts', `Generated imports file -> ${outputPath}`);
 };
 
 // Execute the imports generation
 generateImports().catch((error) => {
-  logger.error(
-    'Imports.ts',
-    `Error generating imports: ${error instanceof Error ? error.message : String(error)}`,
-  );
+  const err = error instanceof Error ? error : new Error(String(error));
+  logger.error('generate-imports.ts', formatError(err, 'Error generating imports'));
   process.exit(1);
 });

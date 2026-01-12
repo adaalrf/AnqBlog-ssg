@@ -17,6 +17,7 @@ function escapeXml(str: string): string {
 
 /**
  * Generates an RSS 2.0 feed XML string from an array of posts.
+ * Limits the feed to the 20 most recent posts.
  * @param posts - Array of post objects with title, date, htmlFileName, previewContent.
  * @returns The RSS feed XML string.
  */

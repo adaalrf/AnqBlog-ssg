@@ -63,7 +63,7 @@ Standalone pages can be added to `src/content/pages/`. These support front matte
 Copy the example configuration file if you haven't already:
 
 ```bash
-cp scripts/example.config.js scripts/config.js
+cp scripts/example.config.ts scripts/config.ts
 ```
 
 Then edit `scripts/config.ts` to customize your site:
@@ -197,8 +197,7 @@ Edit files in `src/templates/`, or add your own templates, to modify the HTML st
 
 - `layout-template.html` - Main page wrapper (header, footer, navigation)
 - `post-template.html` - Individual blog post layout
-- `listing-template.html` - Blog and tag listing page layout (shared template)
-- `tags-template.html` - Tag page layout
+- `listing-template.html` - Blog and tag listing page layout (shared template; per-tag pages reuse this file)
 - `main-tags-template.html` - Tags index page layout
 
 #### Template Placeholders

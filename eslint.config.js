@@ -108,5 +108,5 @@ export default tseslint.config(
       'eslint.config.js',
       'src/ts/main.ts',
     ],
-  }
+  },
 );

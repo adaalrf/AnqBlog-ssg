@@ -1,5 +1,5 @@
-import { fpr } from './utils/path-and-file-utils';
-import type { SiteConfig, PathConfig } from './types/config';
+import { fpr } from './utils/path-and-file-utils.js';
+import type { SiteConfig, PathConfig, Config } from './types/config.js';
 
 /**
  * Example configuration file for the static site generator.
@@ -35,7 +35,6 @@ const pathConfig: PathConfig = {
   templatePostsPath: fpr('src/templates/post-template.html'),
   templateBlogPath: fpr('src/templates/listing-template.html'),
   templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
-  templateTagsPath: fpr('src/templates/tags-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
   tempPostsOutputDirectory: fpr('.build/blog/posts'),
   tempTagsOutputDirectory: fpr('.build/blog/tags'),
@@ -52,6 +51,6 @@ const pathConfig: PathConfig = {
 const config = {
   ...siteConfig,
   ...pathConfig,
-} satisfies SiteConfig & PathConfig;
+} satisfies Config;
 
 export default config;

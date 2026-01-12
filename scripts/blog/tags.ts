@@ -1,20 +1,16 @@
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import config from '../config.js';
 import { paginatePosts, createPostItem, updatePaginationLinks } from '../utils/pagination-utils.js';
 import {
   generateFrontMatter,
-  normalizeTagForFile,
   denormalizeTagFromFile,
   escapeHtml,
+  getTagSlug,
 } from '../utils/content-utils.js';
-import {
-  ensureDirectoryExists,
-  writeFileContent,
-  sanitizeFilename,
-} from '../utils/path-and-file-utils.js';
+import { ensureDirectoryExists, writeFileContent } from '../utils/path-and-file-utils.js';
 import { getListingTemplatePath, getCachedTemplate } from '../utils/template-utils.js';
 import { logger } from '../utils/logger.js';
-import config from '../config.js';
-import path from 'path';
-import { JSDOM } from 'jsdom';
 import type { Post, Tags } from '../types/index.js';
 
 /**
@@ -31,15 +27,14 @@ interface TagLink {
  * @param tags - The tags with associated posts.
  * @param posts - The array of posts.
  * @param postsPerPage - The number of posts per page.
- * @param templateTagsPath - The path to the tags template.
  * @param templateMainTagsPath - The path to the main tags index template.
  * @param tempTagsOutputDirectory - The directory to save the paginated tag pages.
+ * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generateTagPages = async (
   tags: Tags,
   posts: Post[],
   postsPerPage: number,
-  templateTagsPath: string,
   templateMainTagsPath: string,
   tempTagsOutputDirectory: string,
 ): Promise<void> => {
@@ -67,7 +62,7 @@ export const generateTagPages = async (
   });
 
   logger.info(
-    'Tags.ts',
+    'tags.ts',
     `Processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})...`,
   );
 
@@ -90,7 +85,6 @@ export const generateTagPages = async (
         throw new Error(
           `Tags template missing required element:\n` +
             `  Element: .post-item\n` +
-            `  Template: ${templateTagsPath}\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -100,7 +94,6 @@ export const generateTagPages = async (
         throw new Error(
           `Tags template missing required element:\n` +
             `  Element: #post-links-div\n` +
-            `  Template: ${templateTagsPath}\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -129,7 +122,6 @@ export const generateTagPages = async (
         throw new Error(
           `Tags template missing required element:\n` +
             `  Element: #tag\n` +
-            `  Template: ${templateTagsPath}\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -137,7 +129,7 @@ export const generateTagPages = async (
       }
       const content = tagElement.outerHTML;
       // Sanitize tag for filename
-      const filesWithDash = sanitizeFilename(normalizeTagForFile(tag));
+      const filesWithDash = getTagSlug(tag);
 
       const outputFilePath =
         pageIndex === 0
@@ -161,7 +153,7 @@ export const generateTagPages = async (
       await writeFileContent(outputFilePath, finalHtml);
       currentPage++;
       logger.info(
-        'Tags.ts',
+        'tags.ts',
         `[${currentPage}/${totalTagPages}] Generated tag page -> ${outputFilePath}`,
       );
 
@@ -219,7 +211,7 @@ export const generateTagPages = async (
 
   tagLinks.forEach((tagLink) => {
     if (!tagLink.link || !tagLink.tag) {
-      logger.error('Tags.ts', `Invalid tagLink: ${JSON.stringify(tagLink)}`);
+      logger.error('tags.ts', `Invalid tagLink: ${JSON.stringify(tagLink)}`);
       return;
     }
     const linkElement = document.createElement('a');
@@ -261,9 +253,9 @@ export const generateTagPages = async (
   )}\n${content}`;
 
   await writeFileContent(mainTagsPath, finalIndexHtml);
-  logger.info('Tags.ts', `Generated main tags page -> ${mainTagsPath}`);
+  logger.info('tags.ts', `Generated main tags page -> ${mainTagsPath}`);
   logger.info(
-    'Tags.ts',
+    'tags.ts',
     `✓ Completed processing ${totalTags} tag${totalTags !== 1 ? 's' : ''} (${totalTagPages} page${totalTagPages !== 1 ? 's' : ''})`,
   );
 };

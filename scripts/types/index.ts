@@ -13,15 +13,6 @@ export interface ProcessMarkdownOptions {
 }
 
 /**
- * Options for injecting content into templates.
- */
-export interface InjectContentOptions {
-  tagWrapper?: (tag: string) => string;
-  tagsContainerSelector?: string;
-  tagDividerSelector?: string;
-}
-
-/**
  * Front matter data from markdown files.
  */
 export interface FrontMatterData {

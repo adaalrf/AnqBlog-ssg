@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { minifyHtml } from '../html-minify';
+import { minifyHtml } from '../html-minify.js';
 
 test('minifyHtml: removes whitespace between tags', () => {
   const html = '<div>  <p>Hello</p>  </div>';

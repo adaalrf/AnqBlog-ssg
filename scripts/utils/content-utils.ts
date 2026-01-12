@@ -4,11 +4,10 @@ import { marked } from 'marked';
 import truncate from 'html-truncate';
 import fsPromises from 'fs/promises';
 import path from 'path';
-import { readFileContent } from './path-and-file-utils.js';
+import { readFileContent, sanitizeFilename } from './path-and-file-utils.js';
 import { logger } from './logger.js';
 import type {
   ProcessMarkdownOptions,
-  InjectContentOptions,
   ParsedFrontMatter,
   ParsedMarkdown,
   Post,
@@ -32,6 +31,29 @@ export const normalizeTagForFile = (tag: string): string => {
     throw new Error('Tag must be a string');
   }
   return tag.split(' ').join('-');
+};
+
+/**
+ * Converts a tag into a filesystem-safe slug and lowercases it.
+ * Falls back to a sanitized raw tag or 'tag' when normalization produces an empty string.
+ * @param tag - The tag value
+ */
+export const getTagSlug = (tag: string): string => {
+  const normalized = normalizeTagForFile(tag);
+  const slugified = sanitizeFilename(normalized)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  if (slugified) {
+    return slugified;
+  }
+  const fallback = sanitizeFilename(tag)
+    .toLowerCase()
+    .replace(/[^a-z0-9-]/g, '')
+    .replace(/-+/g, '-')
+    .replace(/^-+|-+$/g, '');
+  return fallback || 'tag';
 };
 
 /**
@@ -105,14 +127,12 @@ export const getFirstNthCharacters = (
  * Injects content into a template.
  * @param templateContent - The template content.
  * @param data - The data to inject.
- * @param options - Options for injecting tags.
  * @returns The DOM object with injected content.
  * @throws {Error} If templateContent is not a string or data is not an object.
  */
 export const injectContentIntoTemplate = (
   templateContent: string,
   data: Record<string, unknown>,
-  options: InjectContentOptions = {},
 ): JSDOM => {
   if (typeof templateContent !== 'string') {
     throw new Error('Template content must be a string');
@@ -120,11 +140,9 @@ export const injectContentIntoTemplate = (
   if (!data || typeof data !== 'object' || Array.isArray(data)) {
     throw new Error('Data must be an object');
   }
-  const {
-    tagWrapper = (tag: string) => `<a href="#">${tag}</a>`,
-    tagsContainerSelector = '.tags',
-    tagDividerSelector = '#post-tag-divider',
-  } = options;
+  const tagWrapper = (tag: string) => `<a href="#">${tag}</a>`;
+  const tagsContainerSelector = '.tags';
+  const tagDividerSelector = '#post-tag-divider';
 
   const dom = new JSDOM(templateContent);
   const document = dom.window.document;
@@ -209,6 +227,41 @@ const cleanHtmlWhitespace = (html: string): string => {
 };
 
 /**
+ * Sanitizes generated HTML by stripping dangerous elements/attributes while leaving code-related tags intact.
+ * Removes <script>/<style> tags and attributes that start with "on" or point to javascript: URLs.
+ */
+export const sanitizeGeneratedHtml = (html: string): string => {
+  if (typeof html !== 'string') {
+    return html;
+  }
+
+  const dom = new JSDOM(html);
+  const document = dom.window.document;
+
+  document.querySelectorAll('script,style').forEach((element) => element.remove());
+
+  const elements = document.body ? Array.from(document.body.querySelectorAll('*')) : [];
+  elements.forEach((element) => {
+    Array.from(element.attributes).forEach((attr) => {
+      const attrName = attr.name.toLowerCase();
+      if (attrName.startsWith('on')) {
+        element.removeAttribute(attr.name);
+        return;
+      }
+      const attrValue = (attr.value || '').trim().toLowerCase();
+      if (
+        (attrName === 'href' || attrName === 'src') &&
+        (attrValue.startsWith('javascript:') || attrValue.startsWith('data:text/html'))
+      ) {
+        element.removeAttribute(attr.name);
+      }
+    });
+  });
+
+  return document.body ? document.body.innerHTML : '';
+};
+
+/**
  * Parses and converts markdown to HTML.
  * @param fileContent - The markdown file content.
  * @returns The parsed data and HTML content.
@@ -222,6 +275,8 @@ export const parseMarkdown = (fileContent: string): ParsedMarkdown => {
     let htmlContent = marked(content || '') as string;
     // Clean up whitespace
     htmlContent = cleanHtmlWhitespace(htmlContent);
+    // Sanitize the generated HTML while preserving code blocks
+    htmlContent = sanitizeGeneratedHtml(htmlContent);
     return { data: data || {}, htmlContent };
   } catch (error) {
     const err = error as Error;

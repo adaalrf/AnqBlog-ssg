@@ -1,20 +1,22 @@
+import path from 'path';
+import config from './config.js';
 import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
 import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
 import { ensureDirectoryExists, writeFileContent } from './utils/path-and-file-utils.js';
 import { parseDate } from './utils/date-utils.js';
-import { processMarkdownFiles, normalizeTagForFile } from './utils/content-utils.js';
+import { processMarkdownFiles, getTagSlug } from './utils/content-utils.js';
 import { generateRSSFeed } from './generate-rss.js';
 import { generateSitemap } from './generate-sitemap.js';
+import { formatError } from './utils/error-utils.js';
 import { logger } from './utils/logger.js';
-import config from './config.js';
-import path from 'path';
 import type { Post, Tags } from './types/index.js';
 
 /**
  * Generates all HTML files for the static site.
  * Orchestrates the entire generation process including posts, blog pages, tag pages, and layout application.
+ * @throws {Error} If markdown processing, file generation, or layout application fails.
  */
 const generateAllHtmlFiles = async (): Promise<void> => {
   ensureDirectoriesExist([
@@ -27,7 +29,7 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     config.publicTagsOutputDirectory,
   ]);
 
-  logger.info('Generate.ts', 'Processing markdown files...');
+  logger.info('generate.ts', 'Processing markdown files...');
   const truncatedPosts = await processAndSortMarkdownFiles(config.postsContentDirectory, {
     previewLength: config.previewLength,
     maxFileSize: config.maxMarkdownFileSize,
@@ -36,12 +38,12 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   const fullPosts = await processAndSortMarkdownFiles(config.postsContentDirectory, {
     maxFileSize: config.maxMarkdownFileSize,
   });
-  logger.info('Generate.ts', `Found ${fullPosts.length} post${fullPosts.length !== 1 ? 's' : ''}`);
+  logger.info('generate.ts', `Found ${fullPosts.length} post${fullPosts.length !== 1 ? 's' : ''}`);
 
   const tags = collectTags(fullPosts);
   const tagCount = Object.keys(tags).length;
   if (tagCount > 0) {
-    logger.info('Generate.ts', `Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
+    logger.info('generate.ts', `Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
   }
 
   await generateIntermediatePostHtmlFiles(
@@ -61,7 +63,6 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     tags,
     truncatedPosts,
     config.postsPerPage,
-    config.templateTagsPath,
     config.templateMainTagsPath,
     config.tempTagsOutputDirectory,
   );
@@ -92,7 +93,7 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   const rssContent = generateRSSFeed(fullPosts);
   const rssPath = path.join(config.publicContentOutputDirectory, 'rss.xml');
   await writeFileContent(rssPath, rssContent);
-  logger.info('Generate.ts', 'Generated RSS feed -> rss.xml');
+  logger.info('generate.ts', 'Generated RSS feed -> rss.xml');
 
   // Generate sitemap
   const sitemapPages = [
@@ -112,7 +113,7 @@ const generateAllHtmlFiles = async (): Promise<void> => {
       );
       const latestPostDate = tagPosts.length > 0 ? tagPosts[0].date : new Date();
       return {
-        url: `${config.siteUrl}/blog/tags/${normalizeTagForFile(tag)}.html`,
+        url: `${config.siteUrl}/blog/tags/${getTagSlug(tag)}.html`,
         lastmod: latestPostDate,
       };
     }),
@@ -122,12 +123,13 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   const sitemapContent = generateSitemap(sitemapPages);
   const sitemapPath = path.join(config.publicContentOutputDirectory, 'sitemap.xml');
   await writeFileContent(sitemapPath, sitemapContent);
-  logger.info('Generate.ts', 'Generated sitemap -> sitemap.xml');
+  logger.info('generate.ts', 'Generated sitemap -> sitemap.xml');
 };
 
 /**
  * Ensures multiple directories exist.
  * @param directories - Array of directory paths to ensure exist.
+ * @throws {Error} If any directory path is invalid or creation fails.
  */
 const ensureDirectoriesExist = (directories: string[]): void => {
   directories.forEach(ensureDirectoryExists);
@@ -136,8 +138,9 @@ const ensureDirectoriesExist = (directories: string[]): void => {
 /**
  * Processes markdown files from a directory and sorts them by date.
  * @param directory - The directory containing markdown files.
- * @param options - Options for processing (e.g., previewLength).
- * @returns Array of processed and sorted posts.
+ * @param options - Options for processing (e.g., previewLength, maxFileSize).
+ * @returns Promise that resolves to an array of processed and sorted posts.
+ * @throws {Error} If directory cannot be read or markdown processing fails.
  */
 const processAndSortMarkdownFiles = async (
   directory: string,
@@ -148,10 +151,10 @@ const processAndSortMarkdownFiles = async (
     .map((post): Post => {
       // Validate required fields
       if (!post.title) {
-        logger.warn('Generate.ts', `Post missing title: ${post.htmlFileName || 'unknown'}`);
+        logger.warn('generate.ts', `Post missing title: ${post.htmlFileName || 'unknown'}`);
       }
       if (!post.content) {
-        logger.warn('Generate.ts', `Post missing content: ${post.htmlFileName || 'unknown'}`);
+        logger.warn('generate.ts', `Post missing content: ${post.htmlFileName || 'unknown'}`);
       }
 
       // Parse date with error handling
@@ -162,7 +165,7 @@ const processAndSortMarkdownFiles = async (
         } catch (error) {
           const err = error as Error;
           logger.warn(
-            'Generate.ts',
+            'generate.ts',
             `Post has invalid date "${String(post.date)}" (${post.htmlFileName || 'unknown'}): ${err.message}. Using current date.`,
           );
         }
@@ -210,9 +213,7 @@ const collectTags = (posts: Post[]): Tags => {
 };
 
 generateAllHtmlFiles().catch((error) => {
-  logger.error(
-    'Generate.ts',
-    `Error generating HTML files: ${error instanceof Error ? error.message : String(error)}`,
-  );
+  const err = error instanceof Error ? error : new Error(String(error));
+  logger.error('generate.ts', formatError(err, 'Error generating HTML files'));
   process.exit(1);
 });

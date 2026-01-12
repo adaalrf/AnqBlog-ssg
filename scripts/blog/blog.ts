@@ -1,11 +1,11 @@
+import path from 'path';
+import { JSDOM } from 'jsdom';
+import config from '../config.js';
 import { paginatePosts, createPostItem, updatePaginationLinks } from '../utils/pagination-utils.js';
 import { ensureDirectoryExists, writeFileContent } from '../utils/path-and-file-utils.js';
 import { getListingTemplatePath, getCachedTemplate } from '../utils/template-utils.js';
 import { generateFrontMatter } from '../utils/content-utils.js';
 import { logger } from '../utils/logger.js';
-import config from '../config.js';
-import path from 'path';
-import { JSDOM } from 'jsdom';
 import type { Post } from '../types/index.js';
 
 /**
@@ -14,6 +14,7 @@ import type { Post } from '../types/index.js';
  * @param postsPerPage - The number of posts per page.
  * @param templateBlogPath - The path to the blog template.
  * @param tempBlogOutputPath - The directory to save the paginated blog pages.
+ * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generatePaginatedBlogHtmlFiles = async (
   posts: Post[],
@@ -31,7 +32,7 @@ export const generatePaginatedBlogHtmlFiles = async (
   }
 
   const totalPages = blogContent.length;
-  logger.info('Blog.ts', `Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
+  logger.info('blog.ts', `Generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}...`);
 
   // Read the shared listing template (with caching)
   const listingTemplatePath = getListingTemplatePath();
@@ -112,16 +113,16 @@ export const generatePaginatedBlogHtmlFiles = async (
     try {
       await writeFileContent(outputFilePath, finalHtml);
       const current = pageIndex + 1;
-      logger.info('Blog.ts', `[${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
+      logger.info('blog.ts', `[${current}/${totalPages}] Generated blog page -> ${outputFilePath}`);
     } catch (error) {
       const err = error as Error;
-      logger.error('Blog.ts', `Failed to write blog page ${pageIndex + 1}: ${err.message}`);
+      logger.error('blog.ts', `Failed to write blog page ${pageIndex + 1}: ${err.message}`);
       throw new Error(`Failed to write blog page to ${outputFilePath}: ${err.message}`);
     }
   }
 
   logger.info(
-    'Blog.ts',
+    'blog.ts',
     `✓ Completed generating ${totalPages} blog page${totalPages !== 1 ? 's' : ''}`,
   );
 };

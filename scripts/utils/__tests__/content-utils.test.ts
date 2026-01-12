@@ -5,7 +5,9 @@ import {
   denormalizeTagFromFile,
   escapeHtml,
   truncateText,
-} from '../content-utils';
+  getTagSlug,
+  sanitizeGeneratedHtml,
+} from '../content-utils.js';
 
 test('normalizeTagForFile: replaces spaces with dashes', () => {
   assert.strictEqual(normalizeTagForFile('web development'), 'web-development');
@@ -66,4 +68,25 @@ test('truncateText: handles empty string', () => {
 
 test('truncateText: handles non-string input', () => {
   assert.strictEqual(truncateText(123 as unknown as string, 10), '');
+});
+
+test('getTagSlug: generates safe, lowercase slugs', () => {
+  assert.strictEqual(getTagSlug('Hello World!'), 'hello-world');
+  assert.strictEqual(getTagSlug('  MULTI  CASE???  '), 'multi-case');
+  assert.strictEqual(getTagSlug('!!!!'), 'tag');
+});
+
+test('sanitizeGeneratedHtml: removes scripts while keeping code blocks', () => {
+  const html =
+    '<div><script>alert("x")</script><code>&lt;script&gt;</code><a href="javascript:alert(1)">link</a></div>';
+  const sanitized = sanitizeGeneratedHtml(html);
+  assert.strictEqual(sanitized.includes('<script>'), false);
+  assert.ok(sanitized.includes('<code>&lt;script&gt;</code>'));
+  assert.strictEqual(sanitized.includes('href="javascript:'), false);
+});
+
+test('sanitizeGeneratedHtml: strips event handler attributes', () => {
+  const html = '<button onclick="do()">Click</button>';
+  const sanitized = sanitizeGeneratedHtml(html);
+  assert.strictEqual(sanitized.includes('onclick'), false);
 });

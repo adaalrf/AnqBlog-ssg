@@ -72,7 +72,7 @@
       class="hidden sm:flex flex-col md:flex-row md:items-center justify-between sm:max-w-lg md:min-max-w mx-auto gap-3 px-4 py-3">
       <div class="flex items-center min-w-0 flex-1 gap-3">
         <a href="/"
-          class="flex-shrink-0 hover:opacity-80 transition-opacity duration-200 ease-in-out focus-ring rounded-sm flex items-center">
+          class="shrink-0 hover:opacity-80 transition-opacity duration-200 ease-in-out focus-ring rounded-sm flex items-center">
           <h1 class="text-xl font-bold m-0 p-0 tracking-tight leading-tight">{{siteName}}</h1>
         </a>
         <nav id="path-bar-div" aria-label="Breadcrumb"
@@ -80,7 +80,7 @@
           {{page}}
         </nav>
       </div>
-      <nav class="flex-shrink-0 flex items-center" aria-label="Main navigation">
+      <nav class="shrink-0 flex items-center" aria-label="Main navigation">
         <ul class="flex space-x-6 items-center m-0 p-0">
           <li>
             <a href="/" class="nav-link">Home</a>
@@ -98,7 +98,7 @@
           <li>
             <a href="{{githubUrl}}" target="_blank" rel="noopener noreferrer" class="nav-link">gitHub</a>
           </li>
-          <li class="flex-shrink-0">
+          <li class="shrink-0">
             <button id="toggle-theme-btn" type="button"
               class="hidden hover:opacity-70 transition-opacity duration-200 ease-in-out focus-ring rounded-sm"
               aria-label="Toggle theme">
@@ -109,7 +109,7 @@
       </nav>
     </div>
   </header>
-  <main id="main" class="min-w-72 sm:max-w-lg md:min-max-w mx-2 sm:mx-auto mb-8 flex-grow" aria-label="Main content">
+  <main id="main" class="min-w-72 sm:max-w-lg md:min-max-w mx-2 sm:mx-auto mb-8 grow" aria-label="Main content">
     <div class="card p-6 sm:p-8">
       {{children}}
     </div>

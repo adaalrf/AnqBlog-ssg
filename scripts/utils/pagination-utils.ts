@@ -1,9 +1,9 @@
 import path from 'path';
 import {
   getFirstNthCharacters,
-  normalizeTagForFile,
   denormalizeTagFromFile,
   escapeHtml,
+  getTagSlug,
 } from './content-utils.js';
 import { filePathToWebPath } from './path-and-file-utils.js';
 import { formatDate, formatDateISO } from './date-utils.js';
@@ -57,7 +57,7 @@ export const createPostItem = (
   if (!postsWebPath) postsWebPath = '/blog/posts';
   if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
-  const normalizedFileName = normalizeTagForFile(htmlFileName.replace('.html', ''));
+  const normalizedFileName = getTagSlug(htmlFileName.replace('.html', ''));
   // Escape title to prevent XSS attacks
   const escapedTitle = escapeHtml(
     getFirstNthCharacters(
@@ -95,7 +95,7 @@ export const createPostItem = (
       const tagsList = tags
         .map(
           (tag) =>
-            `<a href="${tagsWebPath}/${normalizeTagForFile(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
+            `<a href="${tagsWebPath}/${getTagSlug(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
         )
         .join(' ');
 
@@ -140,7 +140,7 @@ export const updatePaginationLinks = (
       'Pagination template must contain elements with classes "previous-page" and "next-page"',
     );
   }
-  const tagWithDash = normalizeTagForFile(tag);
+  const tagWithDash = getTagSlug(tag);
 
   /**
    * Helper function to get web path from file path, with fallback.

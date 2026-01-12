@@ -11,21 +11,84 @@
  * - Dark mode support
  * 
  * Structure:
- * - @layer base: Theme variables, typography, base element styles
+ * - @theme: Theme variables and configuration
+ * - @layer base: Base element styles
  * - @layer components: Reusable component classes
  * - @layer utilities: Custom utility classes
  */
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
+@layer base {
+  /* ============================================
+     THEME VARIABLES - Set defaults (light theme)
+     ============================================ */
+
+  :root {
+    --background: hsl(30, 20%, 96%);
+    --foreground: hsl(220, 15%, 18%);
+    --muted: hsla(30, 20%, 96%, 0.7);
+    --muted-foreground: hsla(220, 15%, 18%, 0.65);
+    --accent: hsl(193, 85%, 55%);
+    --accent-foreground: hsl(30, 20%, 96%);
+    --accent-hover: hsl(193, 85%, 50%);
+    --destructive: hsl(0, 72%, 55%);
+    --destructive-foreground: hsl(30, 20%, 96%);
+    --code: hsl(30, 18%, 92%);
+    --code-foreground: hsl(220, 15%, 18%);
+    --border: hsla(220, 15%, 18%, 0.12);
+    --ring: hsl(193, 85%, 55%);
+  }
+}
+
+@theme {
+  /* Map Tailwind colors to CSS variables for theme switching */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+
+  /* Typography plugin configuration */
+  --typography-prose-body: var(--color-foreground);
+  --typography-prose-headings: var(--color-foreground);
+  --typography-prose-lead: var(--color-foreground);
+  --typography-prose-links: var(--color-foreground);
+  --typography-prose-bold: var(--color-foreground);
+  --typography-prose-counters: var(--color-foreground);
+  --typography-prose-bullets: var(--color-foreground);
+  --typography-prose-hr: var(--color-foreground);
+  --typography-prose-quotes: var(--color-foreground);
+  --typography-prose-quote-borders: var(--color-foreground);
+  --typography-prose-captions: var(--color-foreground);
+  --typography-prose-kbd: var(--color-foreground);
+  --typography-prose-kbd-shadows: var(--color-foreground);
+  --typography-prose-code: var(--color-code-foreground);
+  --typography-prose-pre-code: var(--color-code-foreground);
+  --typography-prose-pre-bg: var(--color-code);
+  --typography-prose-code-bg: var(--color-code);
+  --typography-prose-th-borders: var(--color-foreground);
+  --typography-prose-td-borders: var(--color-foreground);
+}
 
 @layer base {
   /* ============================================
      THEME VARIABLES
      ============================================ */
 
-  /* Light theme */
+  /* Light theme (explicit, same as :root) */
   .light {
     --background: hsl(30, 20%, 96%);
     --foreground: hsl(220, 15%, 18%);
@@ -70,47 +133,82 @@
   }
 
   body {
-    @apply antialiased;
+    @apply antialiased text-foreground;
     font-feature-settings: 'kern' 1, 'liga' 1;
     text-rendering: optimizeLegibility;
   }
 
   /* Typography Scale - Responsive, accessible hierarchy */
   h1 {
-    @apply text-4xl sm:text-5xl font-bold leading-tight tracking-tight;
+    @apply text-4xl font-bold leading-tight tracking-tight;
     @apply mb-4 mt-0 text-foreground;
     font-feature-settings: 'kern' 1, 'liga' 1, 'calt' 1;
   }
 
+  @media (min-width: 640px) {
+    h1 {
+      @apply text-5xl;
+    }
+  }
+
   h2 {
-    @apply text-3xl sm:text-4xl font-bold leading-tight tracking-tight;
+    @apply text-3xl font-bold leading-tight tracking-tight;
     @apply mb-3 mt-8;
     font-feature-settings: 'kern' 1, 'liga' 1;
   }
 
+  @media (min-width: 640px) {
+    h2 {
+      @apply text-4xl;
+    }
+  }
+
   h3 {
-    @apply text-2xl sm:text-3xl font-semibold leading-snug tracking-tight;
+    @apply text-2xl font-semibold leading-snug tracking-tight;
     @apply mb-2 mt-6;
   }
 
+  @media (min-width: 640px) {
+    h3 {
+      @apply text-3xl;
+    }
+  }
+
   h4 {
-    @apply text-xl sm:text-2xl font-semibold leading-snug;
+    @apply text-xl font-semibold leading-snug;
     @apply mb-2 mt-4;
+  }
+
+  @media (min-width: 640px) {
+    h4 {
+      @apply text-2xl;
+    }
   }
 
   h5 {
-    @apply text-lg sm:text-xl font-medium leading-snug;
+    @apply text-lg font-medium leading-snug;
     @apply mb-2 mt-4;
   }
 
+  @media (min-width: 640px) {
+    h5 {
+      @apply text-xl;
+    }
+  }
+
   h6 {
-    @apply text-base sm:text-lg font-medium leading-snug;
+    @apply text-base font-medium leading-snug;
     @apply mb-2 mt-3;
   }
 
+  @media (min-width: 640px) {
+    h6 {
+      @apply text-lg;
+    }
+  }
+
   p {
-    @apply leading-7;
-    @apply mb-4;
+    @apply leading-7 mb-4 text-foreground;
   }
 
   /* Interactive Elements - Links, buttons, focus states */
@@ -160,8 +258,14 @@
   }
 
   .post-title {
-    @apply text-2xl sm:text-3xl font-bold leading-tight tracking-tight;
+    @apply text-2xl font-bold leading-tight tracking-tight;
     @apply mb-3;
+  }
+
+  @media (min-width: 640px) {
+    .post-title {
+      @apply text-3xl;
+    }
   }
 
   .post-title a {
@@ -174,21 +278,18 @@
     @apply font-medium;
   }
 
-  /* Code blocks */
-  pre:has(> code) {
-    @apply size-fit;
-    @apply rounded-lg;
-    @apply overflow-x-auto;
+  pre {
+    @apply bg-code text-code-foreground border border-border rounded-xl p-4 overflow-x-auto text-sm font-mono leading-relaxed;
+  }
+
+  pre code {
+    @apply leading-relaxed text-code-foreground bg-transparent;
   }
 
   code {
     @apply font-mono text-sm;
     @apply px-1.5 py-0.5 rounded;
-    @apply bg-code text-code-foreground;
-  }
-
-  pre code {
-    @apply p-0 bg-transparent;
+    @apply bg-code/70 text-code-foreground;
   }
 
   /* Lists */
@@ -339,8 +440,16 @@
 
   /* Layout utilities */
   .min-max-w {
-    max-width: 724px;
-    min-width: 724px;
+    max-width: 45rem;
+    min-width: 45rem;
+  }
+
+  /* Responsive variant for md breakpoint (768px) */
+  @media (width >=48rem) {
+    .md\:min-max-w {
+      max-width: 48rem;
+      min-width: 48rem;
+    }
   }
 
   .scrollbar-padding {

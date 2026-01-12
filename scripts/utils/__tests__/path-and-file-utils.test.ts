@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { sanitizeFilename, filePathToWebPath } from '../path-and-file-utils';
+import { sanitizeFilename, filePathToWebPath } from '../path-and-file-utils.js';
 
 test('sanitizeFilename: removes invalid filesystem characters', () => {
   // Multiple invalid chars get collapsed to single dash

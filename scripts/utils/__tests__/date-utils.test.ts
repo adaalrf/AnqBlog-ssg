@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert';
-import { parseDate, formatDateISO } from '../date-utils';
+import { parseDate, formatDateISO } from '../date-utils.js';
 
 test('parseDate: ISO 8601 format (YYYY-MM-DD)', () => {
   const date = parseDate('2026-01-03');

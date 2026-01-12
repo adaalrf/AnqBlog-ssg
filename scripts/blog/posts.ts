@@ -1,11 +1,12 @@
 import path from 'path';
 import { JSDOM } from 'jsdom';
+import config from '../config.js';
 import {
   generateFrontMatter,
   truncateText,
-  normalizeTagForFile,
   denormalizeTagFromFile,
   escapeHtml,
+  getTagSlug,
 } from '../utils/content-utils.js';
 import {
   ensureDirectoryExists,
@@ -15,7 +16,6 @@ import {
 import { getCachedTemplate } from '../utils/template-utils.js';
 import { formatDate, formatDateISO } from '../utils/date-utils.js';
 import { logger } from '../utils/logger.js';
-import config from '../config.js';
 import type { Post } from '../types/index.js';
 
 /**
@@ -23,6 +23,7 @@ import type { Post } from '../types/index.js';
  * @param posts - The array of posts.
  * @param postTemplatePath - The path to the post template.
  * @param tempPostsOutputDirectory - The directory to save the generated files.
+ * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generateIntermediatePostHtmlFiles = async (
   posts: Post[],
@@ -32,7 +33,7 @@ export const generateIntermediatePostHtmlFiles = async (
   ensureDirectoryExists(tempPostsOutputDirectory);
 
   const totalPosts = posts.length;
-  logger.info('Posts.ts', `Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
+  logger.info('posts.ts', `Processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}...`);
 
   // Read template once with caching
   const templateContent = await getCachedTemplate(postTemplatePath);
@@ -46,7 +47,7 @@ export const generateIntermediatePostHtmlFiles = async (
           ? post.tags
               .map(
                 (tag) =>
-                  `<a href="/blog/tags/${normalizeTagForFile(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
+                  `<a href="/blog/tags/${getTagSlug(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
               )
               .join(' ')
           : '';
@@ -107,12 +108,12 @@ export const generateIntermediatePostHtmlFiles = async (
 
       await writeFileContent(outputPath, finalHtml);
       const current = index + 1;
-      logger.info('Posts.ts', `[${current}/${totalPosts}] Generated post -> ${outputPath}`);
+      logger.info('posts.ts', `[${current}/${totalPosts}] Generated post -> ${outputPath}`);
     }),
   );
 
   logger.info(
-    'Posts.ts',
+    'posts.ts',
     `✓ Completed processing ${totalPosts} post${totalPosts !== 1 ? 's' : ''}`,
   );
 };

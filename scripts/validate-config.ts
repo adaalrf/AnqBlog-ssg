@@ -102,7 +102,7 @@ export function validateConfig(): void {
   }
 
   // Validate required paths exist
-  // Note: templateBlogPath and templateTagsPath are not required as the code uses listing-template.html
+  // Note: templateBlogPath is not required here because the shared listing template is used instead
   const requiredPaths: (keyof PathConfig)[] = [
     'postsContentDirectory',
     'mainLayoutPath',

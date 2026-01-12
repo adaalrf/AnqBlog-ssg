@@ -1,9 +1,10 @@
-import fs from 'fs/promises';
+import fsPromises from 'fs/promises';
 import postcss from 'postcss';
-import tailwindcss from 'tailwindcss';
+import tailwindcss from '@tailwindcss/postcss';
 import autoprefixer from 'autoprefixer';
 import config from './config.js';
 import { ensureDirectoryExists } from './utils/path-and-file-utils.js';
+import { formatError } from './utils/error-utils.js';
 import { logger } from './utils/logger.js';
 
 /**
@@ -21,7 +22,7 @@ const processCSS = async (): Promise<void> => {
     ensureDirectoryExists(outputFilePath);
 
     // Read the input CSS file
-    const css = await fs.readFile(inputFilePath, 'utf8');
+    const css = await fsPromises.readFile(inputFilePath, 'utf8');
 
     // Process the CSS with PostCSS, Tailwind CSS, and Autoprefixer
     const result = await postcss([tailwindcss, autoprefixer]).process(css, {
@@ -30,27 +31,23 @@ const processCSS = async (): Promise<void> => {
     });
 
     // Write the processed CSS to the output file
-    await fs.writeFile(outputFilePath, result.css);
-    logger.info('CSS.ts', `Generated css file -> ${outputFilePath}`);
+    await fsPromises.writeFile(outputFilePath, result.css);
+    logger.info('build-css.ts', `Generated css file -> ${outputFilePath}`);
 
     // Write source map if available
     if (result.map) {
-      await fs.writeFile(outputFilePath + '.map', result.map.toString());
+      await fsPromises.writeFile(outputFilePath + '.map', result.map.toString());
     }
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
-    logger.error('CSS.ts', `Failed to process CSS file: ${err.message}`);
+    logger.error('build-css.ts', formatError(err, 'Failed to process CSS file'));
     throw error;
   }
 };
 
 // Execute CSS processing
-void (async () => {
-  try {
-    await processCSS();
-  } catch (error) {
-    const err = error instanceof Error ? error : new Error(String(error));
-    logger.error('CSS.ts', `Failed to process CSS: ${err.message}`);
-    process.exit(1);
-  }
-})();
+processCSS().catch((error) => {
+  const err = error instanceof Error ? error : new Error(String(error));
+  logger.error('build-css.ts', formatError(err, 'Failed to process CSS'));
+  process.exit(1);
+});

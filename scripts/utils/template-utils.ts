@@ -1,5 +1,5 @@
-import { fpr, readFileContent } from './path-and-file-utils.js';
 import fsPromises from 'fs/promises';
+import { fpr, readFileContent } from './path-and-file-utils.js';
 
 /**
  * Template cache to avoid reading templates multiple times.
@@ -11,15 +11,6 @@ interface CachedTemplate {
 }
 
 const templateCache = new Map<string, CachedTemplate>();
-
-/**
- * Gets the path to a template file by name.
- * @param templateName - The name of the template (e.g., 'post', 'blog', 'tags').
- * @returns The absolute path to the template file.
- */
-export function getTemplatePath(templateName: string): string {
-  return fpr(`src/templates/${templateName}-template.html`);
-}
 
 /**
  * Gets the path to the shared listing template used by blog and tag pages.
@@ -61,11 +52,4 @@ export async function getCachedTemplate(templatePath: string): Promise<string> {
     templateCache.delete(templatePath);
     throw error;
   }
-}
-
-/**
- * Clears the template cache. Useful for testing or when templates are modified externally.
- */
-export function clearTemplateCache(): void {
-  templateCache.clear();
 }

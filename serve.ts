@@ -23,7 +23,7 @@
 
 import http from 'http';
 import path from 'path';
-import fs from 'fs/promises';
+import fsPromises from 'fs/promises';
 
 const port = Number(process.env.PORT) || 8080;
 const publicDir = path.resolve('./public');
@@ -94,7 +94,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       }
 
       // If the request points to a directory, serve the index.html file
-      const stats = await fs.stat(filePath);
+      const stats = await fsPromises.stat(filePath);
       if (stats.isDirectory()) {
         filePath = path.join(filePath, 'index.html');
         // Re-validate path safety after adding index.html (defensive check)
@@ -108,7 +108,7 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       const extname = String(path.extname(filePath)).toLowerCase();
       const contentType = mimeTypes[extname] || 'application/octet-stream';
 
-      const content = await fs.readFile(filePath);
+      const content = await fsPromises.readFile(filePath);
       res.writeHead(200, { 'Content-Type': contentType });
       res.end(content, 'utf-8');
     } catch (error) {
@@ -131,14 +131,14 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
         const notFoundPath = path.join(directoryPath, '404.html');
 
         try {
-          const notFoundContent = await fs.readFile(notFoundPath);
+          const notFoundContent = await fsPromises.readFile(notFoundPath);
           res.writeHead(404, { 'Content-Type': 'text/html' });
           res.end(notFoundContent, 'utf-8');
         } catch {
           // Fall back to root 404.html if directory-specific one doesn't exist
           try {
             const defaultNotFoundPath = path.join(publicDir, '404.html');
-            const defaultNotFoundContent = await fs.readFile(defaultNotFoundPath);
+            const defaultNotFoundContent = await fsPromises.readFile(defaultNotFoundPath);
             res.writeHead(404, { 'Content-Type': 'text/html' });
             res.end(defaultNotFoundContent, 'utf-8');
           } catch {

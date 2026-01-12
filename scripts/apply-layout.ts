@@ -1,9 +1,12 @@
+import fsPromises from 'fs/promises';
+import path from 'path';
+import config from './config.js';
 import {
   replacePlaceholders,
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
-  normalizeTagForFile,
   denormalizeTagFromFile,
+  getTagSlug,
 } from './utils/content-utils.js';
 import {
   fpr,
@@ -13,9 +16,6 @@ import {
 } from './utils/path-and-file-utils.js';
 import { minifyHtml } from './utils/html-minify.js';
 import { logger } from './utils/logger.js';
-import fsPromises from 'fs/promises';
-import path from 'path';
-import config from './config.js';
 import type { Tags } from './types/index.js';
 
 /**
@@ -42,14 +42,14 @@ interface TemplateCache {
  */
 const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
   if (!currentFilePath) {
-    logger.error('Apply-Layout.ts', 'Error: currentFilePath is undefined');
+    logger.error('apply-layout.ts', 'Error: currentFilePath is undefined');
     return '';
   }
 
   // Use absolute paths from site root for consistency
   return Object.keys(tags)
     .map((tag) => {
-      const filesWithDash = normalizeTagForFile(tag);
+      const filesWithDash = getTagSlug(tag);
       const filesWithoutDash = denormalizeTagFromFile(tag);
       return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
     })
@@ -60,6 +60,7 @@ const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
  * Applies the main layout to all HTML files in multiple directories.
  * @param directoryPairs - Array of directory pairs (input and output).
  * @param tags - Tags object.
+ * @throws {Error} If template files cannot be read, required elements are missing, or file writing fails.
  */
 export const applyLayoutToHtmlFiles = async (
   directoryPairs: DirectoryPair[],
@@ -220,7 +221,7 @@ const processDirectory = async (
       finalHtml = minifyHtml(finalHtml);
 
       await writeFileContent(outputFilePath, finalHtml);
-      logger.info('Apply-Layout.ts', `Processed page -> ${outputFilePath}`);
+      logger.info('apply-layout.ts', `Processed page -> ${outputFilePath}`);
     }
   }
 };
