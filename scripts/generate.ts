@@ -8,7 +8,6 @@ import {
   ensureDirectoryExists,
   writeFileContent,
   readFileContent,
-  fpr,
 } from './utils/path-and-file-utils.js';
 import { parseDate } from './utils/date-utils.js';
 import {
@@ -145,8 +144,10 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   logger.info('generate.ts', 'Generated robots.txt');
 
   // Generate 404 page
-  await generate404Page(tags);
-  logger.info('generate.ts', 'Generated 404 page');
+  const success404 = await generate404Page(tags);
+  if (success404) {
+    logger.info('generate.ts', 'Generated 404 page');
+  }
 };
 
 /**
@@ -253,10 +254,10 @@ const generateTagsDropdownFor404 = (tags: Tags): string => {
 /**
  * Generates a 404 error page.
  * @param tags - Tags object for generating dropdowns.
- * @throws {Error} If template files cannot be read or file writing fails.
+ * @returns Promise that resolves to true on success, false on error.
  */
-const generate404Page = async (tags: Tags): Promise<void> => {
-  const template404Path = path.join(fpr('src/templates'), '404-template.html');
+const generate404Page = async (tags: Tags): Promise<boolean> => {
+  const template404Path = config.template404Path;
   const output404Path = path.join(config.publicContentOutputDirectory, '404.html');
 
   try {
@@ -297,12 +298,14 @@ const generate404Page = async (tags: Tags): Promise<void> => {
     finalHtml = minifyHtml(finalHtml);
 
     await writeFileContent(output404Path, finalHtml);
+    return true;
   } catch (error) {
     const err = error as Error;
     logger.warn(
       'generate.ts',
       `Failed to generate 404 page: ${err.message}. Continuing without 404 page.`,
     );
+    return false;
   }
 };
 

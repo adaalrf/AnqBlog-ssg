@@ -8,14 +8,15 @@
 1. [Quick Start](#quick-start)
 2. [Features](#features)
 3. [Commands](#commands)
-4. [Content](#content)
-5. [Templates](#templates)
-6. [Output](#output)
-7. [Deployment](#deployment)
-8. [Project Structure](#project-structure)
-9. [Troubleshooting](#troubleshooting)
-10. [Contributing](#contributing)
-11. [License](#license)
+4. [Configuration](#configuration)
+5. [Content](#content)
+6. [Templates](#templates)
+7. [Output](#output)
+8. [Deployment](#deployment)
+9. [Project Structure](#project-structure)
+10. [Troubleshooting](#troubleshooting)
+11. [Contributing](#contributing)
+12. [License](#license)
 
 ## Quick Start
 
@@ -41,7 +42,7 @@ Build + preview:
 npm run build
 npm run serve
 ```
-Open `http://localhost:8080`.
+Open `http://localhost:8080` (default port). To use a different port, set the `PORT` environment variable: `PORT=3000 npm run serve`.
 
 ## Features
 - **Markdown posts** with YAML front matter (`src/content/blog/posts/*.md`)
@@ -59,7 +60,7 @@ npm run build -- --incremental # Skip cleaning public/ + .build/
 npm run build -- --clean      # Force clean public/ + .build/ before building
 npm run build -- --version    # Print package.json version
 
-npm run serve                 # Serve public/ locally (PORT=3000 npm run serve)
+npm run serve                 # Serve public/ locally (default port: 8080, override with PORT=3000 npm run serve)
 
 npm test
 npm run lint

@@ -17,6 +17,7 @@
  * - @layer utilities: Custom utility classes
  */
 
+@config "../../tailwind.config.js";
 @import "tailwindcss";
 
 @layer base {

@@ -36,6 +36,7 @@ export interface PathConfig {
   templatePostsPath: string;
   templateBlogPath: string;
   templateMainTagsPath: string;
+  template404Path: string;
   mainLayoutPath: string;
   tempPostsOutputDirectory: string;
   tempTagsOutputDirectory: string;

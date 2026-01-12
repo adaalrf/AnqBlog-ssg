@@ -1,4 +1,5 @@
 import config from './config.js';
+import { logger } from './utils/logger.js';
 
 /**
  * Configuration for robots.txt generation.
@@ -62,27 +63,35 @@ export function generateRobotsTxt(robotsConfig: RobotsConfig = {}): string {
         }
     }
 
-    // Default rules for all user agents
-    lines.push('User-agent: *');
+    // Default rules for all user agents (only if '*' is not already in userAgents)
+    if (!Object.prototype.hasOwnProperty.call(userAgents, '*')) {
+        lines.push('User-agent: *');
 
-    if (!allowAll) {
-        // If not allowing all, disallow everything first
-        lines.push('Disallow: /');
-        // Then allow specific paths
-        allowPaths.forEach((path) => {
-            lines.push(`Allow: ${path}`);
-        });
-    } else {
-        // If allowing all, just disallow specific paths
-        disallowPaths.forEach((path) => {
-            lines.push(`Disallow: ${path}`);
-        });
+        if (!allowAll) {
+            // If not allowing all, disallow everything first
+            lines.push('Disallow: /');
+            // Then allow specific paths
+            allowPaths.forEach((path) => {
+                lines.push(`Allow: ${path}`);
+            });
+        } else {
+            // If allowing all, just disallow specific paths
+            disallowPaths.forEach((path) => {
+                lines.push(`Disallow: ${path}`);
+            });
+        }
     }
 
     // Add sitemap reference
     if (includeSitemap) {
-        lines.push('');
-        lines.push(`Sitemap: ${config.siteUrl}/sitemap.xml`);
+        if (config.siteUrl && typeof config.siteUrl === 'string' && config.siteUrl.trim()) {
+            // Normalize siteUrl: trim whitespace and remove trailing slashes
+            const normalizedSiteUrl = config.siteUrl.trim().replace(/\/+$/, '');
+            lines.push('');
+            lines.push(`Sitemap: ${normalizedSiteUrl}/sitemap.xml`);
+        } else {
+            logger.warn('generate-robots.ts', 'Skipping sitemap reference: siteUrl is missing or invalid');
+        }
     }
 
     return lines.join('\n') + '\n';

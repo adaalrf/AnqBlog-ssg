@@ -147,7 +147,7 @@ void (async (): Promise<void> => {
     if (isDryRun) {
       preCompileLogger.info(
         'build.ts',
-        'Dry run mode: compiling + validating config (no outputs will be generated)...',
+        'Dry run: compiling + validating config — TypeScript will emit to dist/ but final outputs (e.g. public/) will NOT be generated',
       );
     }
 
