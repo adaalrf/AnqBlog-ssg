@@ -6,6 +6,7 @@ import {
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
   denormalizeTagFromFile,
+  escapeHtml,
   getTagSlug,
 } from './utils/content-utils.js';
 import {
@@ -51,7 +52,7 @@ const generateTagsDropdown = (tags: Tags, currentFilePath: string): string => {
     .map((tag) => {
       const filesWithDash = getTagSlug(tag);
       const filesWithoutDash = denormalizeTagFromFile(tag);
-      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
+      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${escapeHtml(filesWithoutDash)}</a></li>`;
     })
     .join('\n');
 };
@@ -176,16 +177,15 @@ const processDirectory = async (
       let relativePath = path.relative(publicDir, outputFilePath);
       // Normalize path separators
       relativePath = relativePath.replace(/\\/g, '/');
-      // Remove index.html and .html extension, but keep directory structure
+      // Remove index.html for directory URLs, but keep .html for other pages
       if (relativePath.endsWith('/index.html')) {
         relativePath = relativePath.replace(/\/index\.html$/, '');
-      } else if (relativePath.endsWith('.html')) {
-        relativePath = relativePath.replace(/\.html$/, '');
       }
       // Ensure it starts with /
       const urlPath = relativePath.startsWith('/') ? relativePath : '/' + relativePath;
-      // If empty or just '/', use base URL, otherwise append path
-      const canonicalUrl = urlPath === '/' ? config.siteUrl : config.siteUrl + urlPath;
+      // If empty or '/', use base URL. If '/index.html' (root index), also use base URL.
+      const canonicalUrl =
+        urlPath === '/' || urlPath === '/index.html' ? config.siteUrl : config.siteUrl + urlPath;
       const ogUrl = canonicalUrl;
 
       // Determine og:type based on page type (article for posts, website for others)

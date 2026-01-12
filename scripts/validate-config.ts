@@ -60,6 +60,12 @@ export function validateConfig(): void {
       `paginationWindowSize must be a positive integer, got: ${cfg.paginationWindowSize}`,
     );
   }
+  // The listing templates currently render 5 fixed page links (page-link-1..5).
+  if (Number.isInteger(cfg.paginationWindowSize) && cfg.paginationWindowSize > 5) {
+    errors.push(
+      `paginationWindowSize is too large for the default templates: ${cfg.paginationWindowSize} (max: 5)`,
+    );
+  }
 
   // Validate maxMarkdownFileSize if provided
   if (cfg.maxMarkdownFileSize !== undefined) {

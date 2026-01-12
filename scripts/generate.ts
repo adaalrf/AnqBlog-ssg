@@ -16,6 +16,7 @@ import {
   denormalizeTagFromFile,
   replacePlaceholders,
   parseHtmlFrontMatter,
+  escapeHtml,
 } from './utils/content-utils.js';
 import { generateRSSFeed } from './generate-rss.js';
 import { generateSitemap } from './generate-sitemap.js';
@@ -246,7 +247,7 @@ const generateTagsDropdownFor404 = (tags: Tags): string => {
     .map((tag) => {
       const filesWithDash = getTagSlug(tag);
       const filesWithoutDash = denormalizeTagFromFile(tag);
-      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
+      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${escapeHtml(filesWithoutDash)}</a></li>`;
     })
     .join('\n');
 };

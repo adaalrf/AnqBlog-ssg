@@ -78,9 +78,16 @@ function isPathSafe(resolvedPath: string): boolean {
 const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
   void (async () => {
     try {
-      // Extract and normalize the requested path
-      const url = req.url || '/';
-      const requestedPath = path.normalize(url.split('?')[0]);
+      const requestUrl = new URL(req.url || '/', `http://localhost:${port}`);
+      let requestedPath: string;
+      try {
+        requestedPath = decodeURIComponent(requestUrl.pathname);
+      } catch {
+        res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+        res.end('400 Bad Request: Invalid URL encoding');
+        return;
+      }
+      requestedPath = path.normalize(requestedPath);
 
       // Remove leading slash and resolve relative to public directory
       const relativePath = requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath;
@@ -110,19 +117,32 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
 
       const content = await fsPromises.readFile(filePath);
       res.writeHead(200, { 'Content-Type': contentType });
-      res.end(content, 'utf-8');
+      res.end(content);
     } catch (error) {
       const err = error as NodeJS.ErrnoException;
       if (err.code === 'ENOENT') {
         // File not found - try to serve a custom 404 page
-        const url = req.url || '/';
-        const requestedPath = path.normalize(url.split('?')[0]);
+        const requestUrl = new URL(req.url || '/', `http://localhost:${port}`);
+        let requestedPath: string;
+        try {
+          requestedPath = decodeURIComponent(requestUrl.pathname);
+        } catch {
+          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
+          res.end('404 Not Found', 'utf-8');
+          return;
+        }
+        requestedPath = path.normalize(requestedPath);
         const relativePath = requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath;
-        const directoryPath = path.resolve(publicDir, relativePath);
+
+        // Use the containing directory for file-like requests.
+        const resolvedRequestPath = path.resolve(publicDir, relativePath);
+        const directoryPath = requestedPath.endsWith('/')
+          ? resolvedRequestPath
+          : path.dirname(resolvedRequestPath);
 
         // Ensure directory path is safe (path traversal protection)
         if (!isPathSafe(directoryPath)) {
-          res.writeHead(404, { 'Content-Type': 'text/plain' });
+          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
           res.end('404 Not Found', 'utf-8');
           return;
         }
@@ -133,34 +153,34 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
         try {
           const notFoundContent = await fsPromises.readFile(notFoundPath);
           res.writeHead(404, { 'Content-Type': 'text/html' });
-          res.end(notFoundContent, 'utf-8');
+          res.end(notFoundContent);
         } catch {
           // Fall back to root 404.html if directory-specific one doesn't exist
           try {
             const defaultNotFoundPath = path.join(publicDir, '404.html');
             const defaultNotFoundContent = await fsPromises.readFile(defaultNotFoundPath);
             res.writeHead(404, { 'Content-Type': 'text/html' });
-            res.end(defaultNotFoundContent, 'utf-8');
+            res.end(defaultNotFoundContent);
           } catch {
             // No 404.html found anywhere - return plain text 404
-            res.writeHead(404, { 'Content-Type': 'text/plain' });
+            res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
             res.end('404 Not Found: The requested file or directory does not exist.', 'utf-8');
           }
         }
       } else if (err.code === 'EACCES') {
         // Permission denied
-        res.writeHead(403, { 'Content-Type': 'text/plain' });
+        res.writeHead(403, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end('403 Forbidden: Permission denied', 'utf-8');
       } else if (err.code === 'EISDIR') {
         // Requested path is a directory but no index.html found
-        res.writeHead(404, { 'Content-Type': 'text/plain' });
+        res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end('404 Not Found: Directory index not found', 'utf-8');
       } else {
         // Other server errors
         const errorMessage = err.code
           ? `500 Internal Server Error: ${err.code}`
           : '500 Internal Server Error: An unexpected error occurred';
-        res.writeHead(500, { 'Content-Type': 'text/plain' });
+        res.writeHead(500, { 'Content-Type': 'text/plain; charset=utf-8' });
         res.end(errorMessage, 'utf-8');
       }
     }

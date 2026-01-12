@@ -336,7 +336,8 @@ const processSingleMarkdownFile = async (
     }
   }
 
-  const htmlFileName = file.replace('.md', '.html');
+  const rawHtmlFileName = file.replace('.md', '.html');
+  const htmlFileName = sanitizeFilename(rawHtmlFileName);
 
   // Note: Duplicate checking is done upfront before parallel processing.
   // We still add to seenFilenames here as a safety measure for parallel processing,
@@ -395,12 +396,13 @@ export const processMarkdownFiles = async (
   const validFiles: string[] = [];
 
   for (const file of files) {
-    const htmlFileName = file.replace('.md', '.html');
+    const rawHtmlFileName = file.replace('.md', '.html');
+    const htmlFileName = sanitizeFilename(rawHtmlFileName);
     if (seenFilenames.has(htmlFileName)) {
       duplicateFiles.push(file);
       logger.warn(
         'Content-utils.ts',
-        `Duplicate filename detected: ${htmlFileName}. This will cause one post to overwrite another. Skipping file: ${file}`,
+        `Duplicate output filename detected after sanitization: ${htmlFileName}. This will cause one post to overwrite another. Skipping file: ${file}`,
       );
     } else {
       seenFilenames.add(htmlFileName);

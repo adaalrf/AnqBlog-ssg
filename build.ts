@@ -21,6 +21,7 @@ import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { readFileSync, existsSync } from 'fs';
+import { pathToFileURL } from 'url';
 
 const execAsync = promisify(exec);
 const rootDir = process.cwd();
@@ -171,30 +172,18 @@ void (async (): Promise<void> => {
     }
 
     // Compile TypeScript first (with incremental compilation)
-    preCompileLogger.info('build.ts', 'Compiling TypeScript...');
-    const tscStepIndex = buildSteps.length;
-    startStep('TypeScript compilation');
-    try {
-      // Use incremental compilation for faster rebuilds
-      await execAsync('npx tsc --incremental');
-      endStep(tscStepIndex);
-    } catch (error) {
-      endStep(tscStepIndex);
-      const err = error as Error;
-      throw new Error(formatErrorPreCompile(err, 'TypeScript compilation failed'));
-    }
-
-    // After TypeScript compilation, import and use the compiled utilities
+    // This build orchestrator runs from `dist/build.js` (after `tsc`).
+    // Do not invoke a second TypeScript compilation here.
     const loggerPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'logger.js');
     const errorUtilsPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'error-utils.js');
-    const loggerModule = (await import(loggerPath)) as {
+    const loggerModule = (await import(pathToFileURL(loggerPath).href)) as {
       logger: {
         info: (module: string, message: string) => void;
         warn: (module: string, message: string) => void;
         error: (module: string, message: string) => void;
       };
     };
-    const errorUtilsModule = (await import(errorUtilsPath)) as {
+    const errorUtilsModule = (await import(pathToFileURL(errorUtilsPath).href)) as {
       formatError: (error: Error, context: string) => string;
     };
     const logger = loggerModule.logger;
@@ -204,7 +193,7 @@ void (async (): Promise<void> => {
     const validateStepIndex = buildSteps.length;
     startStep('Configuration validation');
     const validateConfigPath = path.join(rootDir, 'dist', 'scripts', 'validate-config.js');
-    const validateConfigModule = (await import(validateConfigPath)) as {
+    const validateConfigModule = (await import(pathToFileURL(validateConfigPath).href)) as {
       validateConfig: () => void;
     };
     validateConfigModule.validateConfig();
@@ -377,7 +366,7 @@ void (async (): Promise<void> => {
     let errorMessage: string;
     try {
       const errorUtilsPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'error-utils.js');
-      const errorUtilsModule = (await import(errorUtilsPath)) as {
+      const errorUtilsModule = (await import(pathToFileURL(errorUtilsPath).href)) as {
         formatError: (error: Error, context: string) => string;
       };
       errorMessage = errorUtilsModule.formatError(err, 'Build process');

@@ -5,7 +5,7 @@ import {
   escapeHtml,
   getTagSlug,
 } from './content-utils.js';
-import { filePathToWebPath } from './path-and-file-utils.js';
+import { filePathToWebPath, sanitizeFilename } from './path-and-file-utils.js';
 import { formatDate, formatDateISO } from './date-utils.js';
 import config from '../config.js';
 import type { Post } from '../types/index.js';
@@ -57,7 +57,7 @@ export const createPostItem = (
   if (!postsWebPath) postsWebPath = '/blog/posts';
   if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
-  const normalizedFileName = getTagSlug(htmlFileName.replace('.html', ''));
+  const normalizedFileName = sanitizeFilename(htmlFileName);
   // Escape title to prevent XSS attacks
   const escapedTitle = escapeHtml(
     getFirstNthCharacters(
@@ -65,7 +65,7 @@ export const createPostItem = (
       (config as { titleTruncationLength: number }).titleTruncationLength,
     ),
   );
-  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}.html">${escapedTitle}</a>`;
+  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}">${escapedTitle}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true) as Element;
   const titleElement = postItem.querySelector('.post-title');
