@@ -215,6 +215,8 @@ const processDirectory = async (
         faviconPath: '/assets/favicon.ico',
         scriptPath: '/js/bundle.js',
         gitLogoPath: '/assets/github-icon.svg',
+        themesList: (config.themes || ['dark', 'light', 'rose', 'mono']).join(' '),
+        defaultTheme: config.defaultTheme || 'dark',
       });
 
       // Minify HTML for smaller file sizes

@@ -1,12 +1,12 @@
 import { createDropdown } from './utils/dropdown';
 
 document.addEventListener('DOMContentLoaded', () => {
-  const dropdownToggle = document.getElementById('tags-dropdown') as HTMLAnchorElement;
-  const dropdownMenu = document.getElementById('tags-dropdown-menu');
+  const dropdownToggle = document.querySelector<HTMLAnchorElement>('[data-hook="tags-dropdown-toggle"]');
+  const dropdownMenu = document.querySelector<HTMLElement>('[data-hook="tags-dropdown-menu"]');
 
   if (dropdownMenu && dropdownToggle) {
     // Create the dropdown with shared logic
-    void createDropdown('tags-dropdown', 'tags-dropdown-menu');
+    void createDropdown(dropdownToggle, dropdownMenu);
 
     // Tags dropdown has special behavior: it's a link that should navigate
     // The dropdown is just a preview/quick access, clicking should navigate

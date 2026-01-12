@@ -78,13 +78,13 @@ export const generateTagPages = async (
       // Create a new JSDOM instance from cached template for each page
       const dom = new JSDOM(templateTagsContent);
       const document = dom.window.document;
-      const postItemTemplate = document.querySelector('.post-item');
-      const postLinksDiv = document.getElementById('post-links-div');
+      const postItemTemplate = document.querySelector('[data-hook="post-item-template"]');
+      const postLinksDiv = document.querySelector('[data-hook="post-links"]');
 
       if (!postItemTemplate) {
         throw new Error(
           `Tags template missing required element:\n` +
-            `  Element: .post-item\n` +
+            `  Element: [data-hook="post-item-template"]\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -93,7 +93,7 @@ export const generateTagPages = async (
       if (!postLinksDiv) {
         throw new Error(
           `Tags template missing required element:\n` +
-            `  Element: #post-links-div\n` +
+            `  Element: [data-hook="post-links"]\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -117,11 +117,11 @@ export const generateTagPages = async (
       );
 
       // Save the tag page
-      const tagElement = document.querySelector('#tag');
+      const tagElement = document.querySelector('[data-container-id="tag"]');
       if (!tagElement) {
         throw new Error(
           `Tags template missing required element:\n` +
-            `  Element: #tag\n` +
+            `  Element: [data-container-id="tag"]\n` +
             `  Listing template: ${listingTemplatePath}\n` +
             `  Tag: ${tag}\n` +
             `  Page: ${pageIndex + 1}`,
@@ -172,18 +172,18 @@ export const generateTagPages = async (
   const indexTemplateContent = await getCachedTemplate(templateMainTagsPath);
   const dom = new JSDOM(indexTemplateContent);
   const document = dom.window.document;
-  const tagLinksContainer = document.getElementById('tag-links-container');
+  const tagLinksContainer = document.querySelector('[data-hook="tag-links"]');
 
   if (!tagLinksContainer) {
     throw new Error(
       `Tags index template missing required element:\n` +
-        `  Element: #tag-links-container\n` +
+        `  Element: [data-hook="tag-links"]\n` +
         `  Template: ${templateMainTagsPath}`,
     );
   }
 
-  const tagLinkLiTemplate = document.getElementById('tag-link-li');
-  const tagLinkAnchorTemplate = document.getElementById('tag-link');
+  const tagLinkLiTemplate = document.querySelector('[data-hook="tag-link-item-template"]');
+  const tagLinkAnchorTemplate = document.querySelector('[data-hook="tag-link-template"]');
 
   let linkElementLiClasses: string[] = [];
   let linkElementAnchorClasses: string[] = [];
@@ -236,9 +236,9 @@ export const generateTagPages = async (
     tagLinksContainer.appendChild(listItem);
   });
 
-  const tagsElement = document.querySelector('#tags');
+  const tagsElement = document.querySelector('[data-hook="tags-root"]');
   if (!tagsElement) {
-    throw new Error(`Tags index template missing required element: #tags`);
+    throw new Error('Tags index template missing required element: [data-hook="tags-root"]');
   }
   const content = tagsElement.outerHTML;
   const mainTagsPath = path.join(tempTagsOutputDirectory, 'index.html');

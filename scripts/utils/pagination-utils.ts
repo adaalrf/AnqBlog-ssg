@@ -68,26 +68,28 @@ export const createPostItem = (
   const titleLink = `<a href="${postsWebPath}/${normalizedFileName}">${escapedTitle}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true) as Element;
-  const titleElement = postItem.querySelector('.post-title');
+  const getHook = (hook: string) => postItem.querySelector(`[data-hook="${hook}"]`);
+
+  const titleElement = getHook('post-title');
   if (titleElement) {
     titleElement.innerHTML = titleLink;
   }
 
   // Update time element with ISO date and formatted display
-  const dateElement = postItem.querySelector('.post-date');
+  const dateElement = getHook('post-date');
   if (dateElement) {
     dateElement.setAttribute('datetime', formatDateISO(date));
     dateElement.textContent = formatDate(date);
   }
 
-  const contentElement = postItem.querySelector('.content');
+  const contentElement = getHook('post-preview');
   if (contentElement) {
     contentElement.innerHTML = previewContent;
   }
 
-  const tagsContainer = postItem.querySelector('.tags');
-  const tagsContainerMobile = postItem.querySelector('.tags-mobile');
-  const tagDivider = postItem.querySelector('#tag-divider');
+  const tagsContainer = getHook('tags');
+  const tagsContainerMobile = getHook('tags-mobile');
+  const tagDivider = getHook('tag-divider');
 
   if (tagsContainer && tagsContainerMobile) {
     if (tags && tags.length > 0) {
@@ -128,16 +130,18 @@ export const updatePaginationLinks = (
   outputDir: string | null = null,
   publicDir: string | null = null,
 ): void => {
-  const paginationDiv = document.querySelector('.pagination');
+  const paginationDiv = document.querySelector('[data-hook="pagination"]');
   if (!paginationDiv) {
-    throw new Error('Pagination template must contain an element with class "pagination"');
+    throw new Error('Pagination template must contain an element with data-hook="pagination"');
   }
-  const previousLink = paginationDiv.querySelector('.previous-page') as HTMLAnchorElement;
-  const nextLink = paginationDiv.querySelector('.next-page') as HTMLAnchorElement;
+  const previousLink = paginationDiv.querySelector(
+    '[data-pagination="previous"]',
+  ) as HTMLAnchorElement;
+  const nextLink = paginationDiv.querySelector('[data-pagination="next"]') as HTMLAnchorElement;
 
   if (!previousLink || !nextLink) {
     throw new Error(
-      'Pagination template must contain elements with classes "previous-page" and "next-page"',
+      'Pagination template must contain elements with data-pagination="previous" and data-pagination="next"',
     );
   }
   const tagWithDash = getTagSlug(tag);
@@ -157,17 +161,17 @@ export const updatePaginationLinks = (
   };
 
   // Get the classes for normal and current page links
-  const pageLink1 = document.getElementById('page-link-1');
-  const pageLink3 = document.getElementById('page-link-3');
+  const pageLinkNormal = paginationDiv.querySelector('[data-page-style="normal"]');
+  const pageLinkCurrent = paginationDiv.querySelector('[data-page-style="current"]');
 
-  if (!pageLink1 || !pageLink3) {
+  if (!pageLinkNormal || !pageLinkCurrent) {
     throw new Error(
-      'Pagination template must contain elements with ids "page-link-1" and "page-link-3"',
+      'Pagination template must contain elements with data-page-style="normal" and data-page-style="current"',
     );
   }
 
-  const classesNormalPageLink = pageLink1.className.split(' ').filter(Boolean);
-  const classesCurrentPageLink = pageLink3.className.split(' ').filter(Boolean);
+  const classesNormalPageLink = pageLinkNormal.className.split(' ').filter(Boolean);
+  const classesCurrentPageLink = pageLinkCurrent.className.split(' ').filter(Boolean);
 
   // Determine the range of pages to display
   const totalPages = paginatedPosts.length;
@@ -226,15 +230,21 @@ export const updatePaginationLinks = (
     startPage + (config as { paginationWindowSize: number }).paginationWindowSize,
   );
 
+  // Remove any previously generated links (defensive; templates should start clean)
+  paginationDiv.querySelectorAll('[data-generated="page-link"]').forEach((el) => el.remove());
+
+  // Remove the style templates from output (keep references for class extraction above)
+  pageLinkNormal.remove();
+  pageLinkCurrent.remove();
+
   // Update the pagination links
   for (let i = startPage; i < endPage; i++) {
-    const pageLink = paginationDiv.querySelector(`#page-link-${i - startPage + 1}`);
-    if (!pageLink) {
-      throw new Error(
-        `Pagination template must contain element with id "page-link-${i - startPage + 1}"`,
-      );
-    }
     const isActivePage = i === pageIndex; // Determine if the current page is the active page
+    const template = isActivePage ? pageLinkCurrent : pageLinkNormal;
+    const pageLink = template.cloneNode(true) as HTMLAnchorElement;
+    pageLink.removeAttribute('data-page-style');
+    pageLink.setAttribute('data-generated', 'page-link');
+    paginationDiv.insertBefore(pageLink, nextLink);
     updatePaginationLink(pageLink, i, isActivePage); // Update the pagination link with the appropriate details
   }
 

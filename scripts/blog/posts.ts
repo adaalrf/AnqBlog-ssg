@@ -65,22 +65,22 @@ export const generateIntermediatePostHtmlFiles = async (
       document.body.innerHTML = bodyHtml;
 
       // Update time element with ISO date attribute
-      const dateElement = document.querySelector('.post-date');
+      const dateElement = document.querySelector('[data-hook="post-date"]');
       if (dateElement && dateElement.tagName.toLowerCase() === 'time') {
         dateElement.setAttribute('datetime', formatDateISO(post.date));
       }
 
       // Remove tag divider if no tags
       if (!tagsHtml) {
-        const tagDivider = document.querySelector('#tag-divider');
+        const tagDivider = document.querySelector('[data-hook="tag-divider"]');
         if (tagDivider) tagDivider.remove();
       }
 
-      const postContentElement = document.querySelector('#post-content');
+      const postContentElement = document.querySelector('[data-hook="post-content"]');
       if (!postContentElement) {
         throw new Error(
           `Post template missing required element:\n` +
-            `  Element: #post-content\n` +
+            `  Element: [data-hook="post-content"]\n` +
             `  Template: ${postTemplatePath}\n` +
             `  Post: ${post.htmlFileName || 'unknown'}\n` +
             `  Title: ${post.title || 'Untitled'}`,

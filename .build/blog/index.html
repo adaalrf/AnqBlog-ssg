@@ -2,75 +2,72 @@
 page: "/ <em>Blog</em>"
 title: "Blog"
 ---
-<div id="blog">
+<div data-hook="listing-root" data-container-id="blog">
     <!-- Post listings section -->
-    <section id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    <section data-hook="post-links" class="flex flex-col list-none mb-6 gap-4">
         <!-- Template for individual post items (cloned and populated by scripts) -->
         
-    <article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-1.html">Getting Started with AnqB...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2026-01-03">Jan 3, 2026</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
+    <article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-1.html">Getting Started with AnqB...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2026-01-03">Jan 3, 2026</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>AnqBlog-ssg is a static site generator that converts Markdown to HTML. Build once, serve anywhere—no Node.js required on your web server.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>AnqBlog-ssg is a static site generator that converts Markdown to HTML. Build once, serve anywhere—no Node.js required on your web server.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/getting-started.html">getting started</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-2.html">Customization Guide</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2026-01-02">Jan 2, 2026</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-2.html">Customization Guide</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2026-01-02">Jan 2, 2026</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Tailor AnqBlog-ssg to match your style. Everything is configurable.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Tailor AnqBlog-ssg to match your style. Everything is configurable.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-3.html">Performance and Architect...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2026-01-01">Jan 1, 2026</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-3.html">Performance and Architect...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2026-01-01">Jan 1, 2026</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>AnqBlog-ssg is built for speed. Build times average under 2 seconds, and the output is optimized static files.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>AnqBlog-ssg is built for speed. Build times average under 2 seconds, and the output is optimized static files.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-4.html">Building a Modern Blog wi...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-31">Dec 31, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/web-dev.html">web dev</a> <a href="/blog/tags/static-sites.html">static sites</a> <a href="/blog/tags/tutorial.html">tutorial</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-4.html">Building a Modern Blog wi...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-31">Dec 31, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/web-dev.html">web dev</a> <a href="/blog/tags/static-sites.html">static sites</a> <a href="/blog/tags/tutorial.html">tutorial</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Static site generators have revolutionized how we build and deploy websites. They combine the best of both worlds: the simplicity of static files with the power of modern tooling.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Static site generators have revolutionized how we build and deploy websites. They combine the best of both worlds: the simplicity of static files with the power of modern tooling.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/web-dev.html">web dev</a> <a href="/blog/tags/static-sites.html">static sites</a> <a href="/blog/tags/tutorial.html">tutorial</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/web-dev.html">web dev</a> <a href="/blog/tags/static-sites.html">static sites</a> <a href="/blog/tags/tutorial.html">tutorial</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-5.html">Understanding Markdown Sy...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-30">Dec 30, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-5.html">Understanding Markdown Sy...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-30">Dec 30, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Markdown is a lightweight markup language that makes writing for the web easy and intuitive.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Markdown is a lightweight markup language that makes writing for the web easy and intuitive.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
         </article></section>
     <!-- Pagination navigation (links updated dynamically by scripts) -->
-    <nav aria-label="Pagination" class="pagination flex justify-center gap-4">
+    <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
         <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
-        <a href="/blog" class="current-page font-bold underline" id="page-link-1" aria-label="Go to page 1" data-page-number="1" aria-current="page">1</a>
-        <a href="/blog/blog-page-2.html" class="" id="page-link-2" aria-label="Go to page 2" data-page-number="2">2</a>
-        <a href="#" class="hidden current-page font-bold underline" id="page-link-3" aria-label="Go to page 3" aria-current="page" data-page-number="3"></a>
-        <a href="#" class="hidden" id="page-link-4" aria-label="Go to page 4" data-page-number="4"></a>
-        <a href="#" class="hidden" id="page-link-5" aria-label="Go to page 5" data-page-number="5"></a>
-        <a href="/blog/blog-page-2.html" class="next-page" aria-label="Next page" data-pagination="next">&gt;</a>
+        
+        
+        <a href="/blog" class="current-page font-bold underline" aria-current="page" data-generated="page-link" aria-label="Go to page 1" data-page-number="1">1</a><a href="/blog/blog-page-2.html" class="" data-generated="page-link" aria-label="Go to page 2" data-page-number="2">2</a><a href="/blog/blog-page-2.html" class="next-page" aria-label="Next page" data-pagination="next">&gt;</a>
     </nav>
 </div>

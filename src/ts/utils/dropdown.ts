@@ -1,19 +1,19 @@
 /**
  * Creates a dropdown menu with hover, click, keyboard, and accessibility support.
- * @param toggleId - The ID of the element that toggles the dropdown
- * @param menuId - The ID of the dropdown menu element
+ * @param toggle - The element (or ID) that toggles the dropdown
+ * @param menu - The dropdown menu element (or ID)
  * @param options - Configuration options for the dropdown
  */
 export function createDropdown(
-  toggleId: string,
-  menuId: string,
+  toggle: string | HTMLElement,
+  menu: string | HTMLElement,
   options: {
     closeOnClickOutside?: boolean;
     onToggle?: (isOpen: boolean) => void;
   } = {},
 ) {
-  const dropdownToggle = document.getElementById(toggleId) as HTMLElement;
-  const dropdownMenu = document.getElementById(menuId);
+  const dropdownToggle = typeof toggle === 'string' ? document.getElementById(toggle) : toggle;
+  const dropdownMenu = typeof menu === 'string' ? document.getElementById(menu) : menu;
 
   if (!dropdownMenu || !dropdownToggle) return;
 

@@ -1,5 +1,5 @@
 import { fpr } from './utils/path-and-file-utils.js';
-import type { SiteConfig, PathConfig, Config } from './types/config.js';
+import type { SiteConfig, PathConfig, Config, ThemeConfig, PluginConfig } from './types/config.js';
 
 /**
  * Example configuration file for the static site generator.
@@ -22,6 +22,21 @@ const siteConfig: SiteConfig = {
   dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
   siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
   maxMarkdownFileSize: 5 * 1024 * 1024, // Maximum markdown file size in bytes (default: 5MB)
+};
+
+/**
+ * Theme configuration settings for the static site generator.
+ */
+const themeConfig: ThemeConfig = {
+  themes: ['dark', 'light', 'rose', 'mono'],
+  defaultTheme: 'dark',
+};
+
+/**
+ * Plugin configuration settings for the static site generator.
+ */
+const pluginsConfig: PluginConfig = {
+  plugins: [], // Add `fpr('src/plugins/my-plugin.js')` entries if you need plugins.
 };
 
 /**
@@ -52,6 +67,8 @@ const pathConfig: PathConfig = {
 const config = {
   ...siteConfig,
   ...pathConfig,
+  ...themeConfig,
+  ...pluginsConfig,
 } satisfies Config;
 
 export default config;

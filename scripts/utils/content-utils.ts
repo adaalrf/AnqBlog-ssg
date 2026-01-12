@@ -141,8 +141,8 @@ export const injectContentIntoTemplate = (
     throw new Error('Data must be an object');
   }
   const tagWrapper = (tag: string) => `<a href="#">${tag}</a>`;
-  const tagsContainerSelector = '.tags';
-  const tagDividerSelector = '#post-tag-divider';
+  const tagsContainerSelector = '[data-hook="tags"]';
+  const tagDividerSelector = '[data-hook="tag-divider"]';
 
   const dom = new JSDOM(templateContent);
   const document = dom.window.document;

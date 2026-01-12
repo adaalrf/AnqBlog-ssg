@@ -2,75 +2,72 @@
 page: "/ <a href=\"/blog/tags\">Tags</a> / <em>guide</em>"
 title: "guide"
 ---
-<div id="tag">
+<div data-hook="listing-root" data-container-id="tag">
     <!-- Post listings section -->
-    <section id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    <section data-hook="post-links" class="flex flex-col list-none mb-6 gap-4">
         <!-- Template for individual post items (cloned and populated by scripts) -->
         
-    <article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-2.html">Customization Guide</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2026-01-02">Jan 2, 2026</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+    <article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-2.html">Customization Guide</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2026-01-02">Jan 2, 2026</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Tailor AnqBlog-ssg to match your style. Everything is configurable.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Tailor AnqBlog-ssg to match your style. Everything is configurable.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-5.html">Understanding Markdown Sy...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-30">Dec 30, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-5.html">Understanding Markdown Sy...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-30">Dec 30, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Markdown is a lightweight markup language that makes writing for the web easy and intuitive.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Markdown is a lightweight markup language that makes writing for the web easy and intuitive.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/tutorial.html">tutorial</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-6.html">Optimizing Your Build Pro...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-29">Dec 29, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-6.html">Optimizing Your Build Pro...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-29">Dec 29, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>A fast build process improves developer experience and enables faster iteration cycles.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>A fast build process improves developer experience and enables faster iteration cycles.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/performance.html">performance</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-7.html">Customizing Your Theme</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-28">Dec 28, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-7.html">Customizing Your Theme</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-28">Dec 28, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Make your blog uniquely yours with custom themes and styling.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Make your blog uniquely yours with custom themes and styling.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-        </article><article class="post-item">
-            <h1 class="post-title"><a href="/blog/posts/demo-post-10.html">Advanced Template Techniq...</a></h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date" datetime="2025-12-25">Dec 25, 2025</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
+        </article><article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title"><a href="/blog/posts/demo-post-10.html">Advanced Template Techniq...</a></h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date" datetime="2025-12-25">Dec 25, 2025</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto"><p>Templates are the foundation of your site's structure. Mastering them unlocks powerful customization options.</p></div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto"><p>Templates are the foundation of your site's structure. Mastering them unlocks powerful customization options.</p></div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile"><a href="/blog/tags/customization.html">customization</a> <a href="/blog/tags/architecture.html">architecture</a> <a href="/blog/tags/guide.html">guide</a></span>
             </div>
         </article></section>
     <!-- Pagination navigation (links updated dynamically by scripts) -->
-    <nav aria-label="Pagination" class="pagination flex justify-center gap-4">
+    <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
         <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
-        <a href="/blog/tags/guide.html" class="hidden current-page font-bold underline" id="page-link-1" aria-label="Go to page 1" data-page-number="1" aria-current="page">1</a>
-        <a href="#" class="hidden" id="page-link-2" aria-label="Go to page 2" data-page-number="2"></a>
-        <a href="#" class="hidden current-page font-bold underline" id="page-link-3" aria-label="Go to page 3" aria-current="page" data-page-number="3"></a>
-        <a href="#" class="hidden" id="page-link-4" aria-label="Go to page 4" data-page-number="4"></a>
-        <a href="#" class="hidden" id="page-link-5" aria-label="Go to page 5" data-page-number="5"></a>
-        <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
+        
+        
+        <a href="/blog/tags/guide.html" class="hidden current-page font-bold underline" aria-current="page" data-generated="page-link" aria-label="Go to page 1" data-page-number="1">1</a><a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
     </nav>
 </div>

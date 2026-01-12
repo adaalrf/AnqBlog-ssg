@@ -1,5 +1,5 @@
 <!-- Main tags index page template -->
-<div id="tags">
+<div data-hook="tags-root">
   <!-- Introduction section -->
   <div class="mb-8">
     <h1 class="text-3xl sm:text-4xl font-bold mb-4">Tags</h1>
@@ -10,23 +10,19 @@
 
   <!-- Tag links container -->
   <div class="mb-6">
-    <ul id="tag-links-container" class="flex flex-wrap gap-3 list-none p-0 m-0">
-      <li id="tag-link-li" class="hidden">
-        <a href="#" id="tag-link" class="tag-link-item"></a>
+    <ul data-hook="tag-links" class="flex flex-wrap gap-3 list-none p-0 m-0">
+      <li data-hook="tag-link-item-template" class="hidden">
+        <a href="#" data-hook="tag-link-template" class="tag-link-item"></a>
       </li>
       <!-- Links to tag pages will be inserted here -->
     </ul>
   </div>
 
   <!-- Pagination navigation (links updated dynamically by scripts) -->
-  <nav aria-label="Pagination" class="pagination flex justify-center gap-4">
+  <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
     <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
-    <a href="#" class="hidden" id="page-link-1" aria-label="Go to page 1" data-page-number="1"></a>
-    <a href="#" class="hidden" id="page-link-2" aria-label="Go to page 2" data-page-number="2"></a>
-    <a href="#" class="hidden current-page font-bold underline" id="page-link-3" aria-label="Go to page 3"
-      aria-current="page" data-page-number="3"></a>
-    <a href="#" class="hidden" id="page-link-4" aria-label="Go to page 4" data-page-number="4"></a>
-    <a href="#" class="hidden" id="page-link-5" aria-label="Go to page 5" data-page-number="5"></a>
+    <a href="#" class="hidden" data-page-style="normal"></a>
+    <a href="#" class="hidden current-page font-bold underline" data-page-style="current" aria-current="page"></a>
     <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
   </nav>
 </div>

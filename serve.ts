@@ -77,18 +77,19 @@ function isPathSafe(resolvedPath: string): boolean {
  */
 const server = http.createServer((req: http.IncomingMessage, res: http.ServerResponse): void => {
   void (async () => {
+    // Parse and decode URL path once at the top of the handler
+    const requestUrl = new URL(req.url || '/', `http://localhost:${port}`);
+    let requestedPath: string;
     try {
-      const requestUrl = new URL(req.url || '/', `http://localhost:${port}`);
-      let requestedPath: string;
-      try {
-        requestedPath = decodeURIComponent(requestUrl.pathname);
-      } catch {
-        res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
-        res.end('400 Bad Request: Invalid URL encoding');
-        return;
-      }
-      requestedPath = path.normalize(requestedPath);
+      requestedPath = decodeURIComponent(requestUrl.pathname);
+    } catch {
+      res.writeHead(400, { 'Content-Type': 'text/plain; charset=utf-8' });
+      res.end('400 Bad Request: Invalid URL encoding', 'utf-8');
+      return;
+    }
+    requestedPath = path.normalize(requestedPath);
 
+    try {
       // Remove leading slash and resolve relative to public directory
       const relativePath = requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath;
       let filePath = path.resolve(publicDir, relativePath);
@@ -122,16 +123,6 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
       const err = error as NodeJS.ErrnoException;
       if (err.code === 'ENOENT') {
         // File not found - try to serve a custom 404 page
-        const requestUrl = new URL(req.url || '/', `http://localhost:${port}`);
-        let requestedPath: string;
-        try {
-          requestedPath = decodeURIComponent(requestUrl.pathname);
-        } catch {
-          res.writeHead(404, { 'Content-Type': 'text/plain; charset=utf-8' });
-          res.end('404 Not Found', 'utf-8');
-          return;
-        }
-        requestedPath = path.normalize(requestedPath);
         const relativePath = requestedPath.startsWith('/') ? requestedPath.slice(1) : requestedPath;
 
         // Use the containing directory for file-like requests.
@@ -152,14 +143,14 @@ const server = http.createServer((req: http.IncomingMessage, res: http.ServerRes
 
         try {
           const notFoundContent = await fsPromises.readFile(notFoundPath);
-          res.writeHead(404, { 'Content-Type': 'text/html' });
+          res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
           res.end(notFoundContent);
         } catch {
           // Fall back to root 404.html if directory-specific one doesn't exist
           try {
             const defaultNotFoundPath = path.join(publicDir, '404.html');
             const defaultNotFoundContent = await fsPromises.readFile(defaultNotFoundPath);
-            res.writeHead(404, { 'Content-Type': 'text/html' });
+            res.writeHead(404, { 'Content-Type': 'text/html; charset=utf-8' });
             res.end(defaultNotFoundContent);
           } catch {
             // No 404.html found anywhere - return plain text 404

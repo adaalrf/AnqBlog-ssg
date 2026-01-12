@@ -26,6 +26,21 @@ export interface SiteConfig {
 }
 
 /**
+ * Theme configuration settings.
+ */
+export interface ThemeConfig {
+  themes: string[];
+  defaultTheme: string;
+}
+
+/**
+ * Plugin configuration settings.
+ */
+export interface PluginConfig {
+  plugins: string[];
+}
+
+/**
  * Path configuration settings.
  */
 export interface PathConfig {
@@ -50,4 +65,4 @@ export interface PathConfig {
 /**
  * Combined configuration (site + path).
  */
-export type Config = SiteConfig & PathConfig;
+export type Config = SiteConfig & PathConfig & ThemeConfig & PluginConfig;

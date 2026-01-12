@@ -1,30 +1,26 @@
 <!-- Listing template for blog and tag pages -->
-<div id="{{containerId}}">
+<div data-hook="listing-root" data-container-id="{{containerId}}">
     <!-- Post listings section -->
-    <section id="post-links-div" class="flex flex-col list-none mb-6 gap-4">
+    <section data-hook="post-links" class="flex flex-col list-none mb-6 gap-4">
         <!-- Template for individual post items (cloned and populated by scripts) -->
-        <article class="post-item">
-            <h1 class="post-title">{{titleLink}}</h1>
-            <div class="mb-4 flex items-center space-x-2">
-                <time class="post-date">{{date}}</time>
-                <span id="tag-divider" class="hidden sm:block">|</span>
-                <span class="tags hidden sm:flex gap-2 italic">{{tags}}</span>
+        <article class="post-item" data-hook="post-item-template">
+            <h1 class="post-title" data-hook="post-title">{{titleLink}}</h1>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date">{{date}}</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags">{{tags}}</span>
             </div>
-            <div class="content prose prose-sm sm:prose-base leading-normal" dir="auto">{{previewContent}}</div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto">{{previewContent}}</div>
             <div>
-                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic">{{tags}}</span>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile">{{tags}}</span>
             </div>
         </article>
     </section>
     <!-- Pagination navigation (links updated dynamically by scripts) -->
-    <nav aria-label="Pagination" class="pagination flex justify-center gap-4">
+    <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
         <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
-        <a href="#" class="hidden" id="page-link-1" aria-label="Go to page 1" data-page-number="1"></a>
-        <a href="#" class="hidden" id="page-link-2" aria-label="Go to page 2" data-page-number="2"></a>
-        <a href="#" class="hidden current-page font-bold underline" id="page-link-3" aria-label="Go to page 3"
-            aria-current="page" data-page-number="3"></a>
-        <a href="#" class="hidden" id="page-link-4" aria-label="Go to page 4" data-page-number="4"></a>
-        <a href="#" class="hidden" id="page-link-5" aria-label="Go to page 5" data-page-number="5"></a>
+        <a href="#" class="hidden" data-page-style="normal"></a>
+        <a href="#" class="hidden current-page font-bold underline" data-page-style="current" aria-current="page"></a>
         <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
     </nav>
 </div>

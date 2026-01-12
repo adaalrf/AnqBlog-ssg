@@ -1,0 +1,28 @@
+@layer base {
+  :root[data-theme='mono'] {
+    /* Colors */
+    --background: hsl(45, 40%, 96%);
+    --foreground: hsl(220, 15%, 12%);
+    --muted: hsla(45, 40%, 96%, 0.7);
+    --muted-foreground: hsla(220, 15%, 12%, 0.6);
+    --accent: hsl(220, 15%, 16%);
+    --accent-foreground: hsl(45, 40%, 96%);
+    --accent-hover: hsl(220, 15%, 24%);
+    --destructive: hsl(0, 70%, 50%);
+    --destructive-foreground: hsl(45, 40%, 96%);
+    --code: hsl(45, 30%, 91%);
+    --code-foreground: hsl(220, 15%, 12%);
+    --border: hsla(220, 15%, 12%, 0.14);
+    --ring: hsl(220, 15%, 16%);
+
+    /* Non-color tokens (Tailwind v4 CSS variables) */
+    --radius-sm: 0.25rem;
+    --radius-md: 0.25rem;
+    --radius-lg: 0.25rem;
+    --radius-xl: 0.25rem;
+    --blur-sm: 12px;
+    --font-sans: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono',
+      'Courier New', monospace;
+    --font-mono: var(--font-sans);
+  }
+}

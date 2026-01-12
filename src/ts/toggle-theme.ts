@@ -1,109 +1,89 @@
-const htmlElement = document.querySelector<HTMLElement>('html');
-const toggleThemeBtn = document.querySelector<HTMLElement>('#toggle-theme-btn');
-const toggleThemeBtnMobile = document.querySelector<HTMLElement>('#toggle-theme-btn-mobile');
-const burgerMenu = document.querySelector<HTMLElement>('#burger-dropdown');
-const savedTheme = localStorage.getItem('theme');
+const htmlElement = document.documentElement;
+const toggleButtons = Array.from(
+  document.querySelectorAll<HTMLElement>('[data-hook="theme-toggle"], [data-hook="theme-toggle-mobile"]'),
+);
+const menuToggle = document.querySelector<HTMLElement>('[data-hook="menu-toggle"]');
 
-// Use absolute paths from site root for static assets
-// This works regardless of the current page's location
-const sunIconPath = '/assets/icons/sun.svg';
-const moonIconPath = '/assets/icons/moon.svg';
-const burgerLightPath = '/assets/icons/burger-light.svg';
-const burgerDarkPath = '/assets/icons/burger-dark.svg';
+const burgerIcons = {
+  light: '/assets/icons/burger-light.svg',
+  dark: '/assets/icons/burger-dark.svg',
+};
 
-/**
- * Creates an <img> element for the theme icon.
- * @param {string} iconPath - The path to the icon.
- * @param {string} altText - Alternative text for accessibility.
- * @param {number} height - Height of the image.
- * @param {number} width - Width of the image.
- */
-function createIconElement(
-  iconPath: string,
-  altText: string,
-  height: number,
-  width: number,
-): HTMLImageElement {
+const themeLabel = (theme: string) => `Theme: ${theme}`;
+
+/** Return the configured theme names from the DOM (fallback to defaults). */
+const getThemes = (): string[] => {
+  const raw = htmlElement.dataset.themes ?? 'dark light rose mono';
+  const parsed = raw.split(/\s+/).map((t) => t.trim()).filter(Boolean);
+  return parsed.length > 0 ? parsed : ['dark', 'light'];
+};
+
+/** Determine the default theme stored on the document or first configured theme. */
+const getDefaultTheme = (): string => {
+  const defaultTheme = htmlElement.dataset.theme;
+  return defaultTheme ?? getThemes()[0];
+};
+
+/** Cycle to the next theme in the provided list. */
+const cycleTheme = (current: string, themes: string[]): string => {
+  const currentIndex = themes.indexOf(current);
+  return themes[(currentIndex + 1) % themes.length];
+};
+
+/** Update the burger menu icon to match the current theme lightness. */
+const renderBurgerIcon = (theme: string): void => {
+  if (!menuToggle) return;
+  const isLight = theme === 'light' || theme === 'mono';
+  const iconPath = isLight ? burgerIcons.light : burgerIcons.dark;
+  menuToggle.innerHTML = '';
   const img = document.createElement('img');
   img.src = iconPath;
-  img.alt = altText;
-  img.height = height;
-  img.width = width;
-  return img;
-}
+  img.alt = 'Menu';
+  img.width = 36;
+  img.height = 36;
+  menuToggle.appendChild(img);
+};
 
-/**
- * Sets the theme of the website.
- * @param {'light' | 'dark'} theme - The theme to set.
- */
-function setTheme(theme: 'light' | 'dark'): void {
-  if (htmlElement && burgerMenu) {
-    // Clear existing content
-    if (toggleThemeBtn) {
-      toggleThemeBtn.textContent = '';
-    }
-    if (toggleThemeBtnMobile) {
-      toggleThemeBtnMobile.textContent = '';
-    }
-    burgerMenu.textContent = '';
+/** Render the textual theme label on each toggle button. */
+const renderToggleLabels = (theme: string): void => {
+  toggleButtons.forEach((btn) => {
+    btn.textContent = '';
+    btn.textContent = themeLabel(theme);
+    btn.setAttribute('aria-label', `Current theme: ${theme}. Click to cycle themes.`);
+    btn.classList.remove('hidden');
+  });
+};
 
-    if (theme === 'light') {
-      htmlElement.classList.replace('dark', 'light');
-      if (toggleThemeBtn) {
-        toggleThemeBtn.appendChild(createIconElement(sunIconPath, 'Sun icon', 24, 24));
-        toggleThemeBtn.classList.remove('hidden');
-      }
-      if (toggleThemeBtnMobile) {
-        toggleThemeBtnMobile.appendChild(createIconElement(sunIconPath, 'Sun icon', 24, 24));
-        toggleThemeBtnMobile.classList.remove('hidden');
-      }
-      burgerMenu.appendChild(createIconElement(burgerLightPath, 'Burger menu', 36, 36));
-      localStorage.setItem('theme', 'light');
-    } else {
-      htmlElement.classList.replace('light', 'dark');
-      if (toggleThemeBtn) {
-        toggleThemeBtn.appendChild(createIconElement(moonIconPath, 'Moon icon', 24, 24));
-        toggleThemeBtn.classList.remove('hidden');
-      }
-      if (toggleThemeBtnMobile) {
-        toggleThemeBtnMobile.appendChild(createIconElement(moonIconPath, 'Moon icon', 24, 24));
-        toggleThemeBtnMobile.classList.remove('hidden');
-      }
-      burgerMenu.appendChild(createIconElement(burgerDarkPath, 'Burger menu', 36, 36));
-      localStorage.setItem('theme', 'dark');
-    }
-  }
-}
+const applyTheme = (theme: string) => {
+  htmlElement.dataset.theme = theme;
+  renderToggleLabels(theme);
+  renderBurgerIcon(theme);
+  localStorage.setItem('theme', theme);
+};
 
-/**
- * Toggles the theme between light and dark.
- */
-function toggleTheme(): void {
-  if (htmlElement?.classList.contains('light')) {
-    setTheme('dark');
-  } else {
-    setTheme('light');
-  }
-}
+const getStoredTheme = (themes: string[]): string | null => {
+  const stored = localStorage.getItem('theme');
+  return stored && themes.includes(stored) ? stored : null;
+};
 
-// Initialize theme on page load
+const initTheme = () => {
+  const themes = getThemes();
+  const stored = getStoredTheme(themes);
+  const defaultTheme = stored ?? getDefaultTheme();
+  applyTheme(defaultTheme);
+};
+
+const handleToggle = () => {
+  const themes = getThemes();
+  const current = htmlElement.dataset.theme ?? getDefaultTheme();
+  const next = cycleTheme(current, themes);
+  applyTheme(next);
+};
+
 if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', () => {
-    setTheme(savedTheme === 'light' ? 'light' : 'dark');
-  });
+  document.addEventListener('DOMContentLoaded', initTheme);
 } else {
-  // DOM already loaded
-  setTheme(savedTheme === 'light' ? 'light' : 'dark');
+  initTheme();
 }
 
-if (toggleThemeBtn) {
-  toggleThemeBtn.addEventListener('click', () => {
-    toggleTheme();
-  });
-}
-
-if (toggleThemeBtnMobile) {
-  toggleThemeBtnMobile.addEventListener('click', () => {
-    toggleTheme();
-  });
-}
+toggleButtons.forEach((btn) => btn.addEventListener('click', handleToggle));

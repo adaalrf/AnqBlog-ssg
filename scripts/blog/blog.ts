@@ -46,13 +46,13 @@ export const generatePaginatedBlogHtmlFiles = async (
     // Create a fresh DOM instance for each page
     const dom = new JSDOM(blogTemplateContent);
     const document = dom.window.document;
-    const postItemTemplate = document.querySelector('.post-item');
-    const postLinksDiv = document.getElementById('post-links-div');
+    const postItemTemplate = document.querySelector('[data-hook="post-item-template"]');
+    const postLinksDiv = document.querySelector('[data-hook="post-links"]');
 
     if (!postItemTemplate) {
       throw new Error(
         `Blog template missing required element:\n` +
-          `  Element: .post-item\n` +
+          `  Element: [data-hook="post-item-template"]\n` +
           `  Template: ${templateBlogPath}\n` +
           `  Listing template: ${listingTemplatePath}\n` +
           `  Page: ${pageIndex + 1}`,
@@ -61,7 +61,7 @@ export const generatePaginatedBlogHtmlFiles = async (
     if (!postLinksDiv) {
       throw new Error(
         `Blog template missing required element:\n` +
-          `  Element: #post-links-div\n` +
+          `  Element: [data-hook="post-links"]\n` +
           `  Template: ${templateBlogPath}\n` +
           `  Listing template: ${listingTemplatePath}\n` +
           `  Page: ${pageIndex + 1}`,
@@ -84,11 +84,11 @@ export const generatePaginatedBlogHtmlFiles = async (
       config.publicBlogOutputPath,
       config.publicContentOutputDirectory,
     );
-    const blogElement = document.querySelector('#blog');
+    const blogElement = document.querySelector('[data-container-id="blog"]');
     if (!blogElement) {
       throw new Error(
         `Blog template missing required element:\n` +
-          `  Element: #blog\n` +
+          `  Element: [data-container-id="blog"]\n` +
           `  Template: ${templateBlogPath}\n` +
           `  Listing template: ${listingTemplatePath}\n` +
           `  Page: ${pageIndex + 1}`,

@@ -1,14 +1,14 @@
 <!-- Post content template -->
 <section class="content-div">
-  <article id="post-content">
-    <div class="mb-4 flex items-center space-x-2">
-      <time class="post-date">{{date}}</time>
-      <span id="tag-divider" class="hidden sm:block">|</span>
-      <span class="tags hidden sm:flex gap-2 italic">{{tags}}</span>
+  <article data-hook="post-content">
+    <div class="post-meta">
+      <time class="post-date" data-hook="post-date">{{date}}</time>
+      <span class="hidden sm:block" data-hook="tag-divider">|</span>
+      <span class="tags hidden sm:flex gap-2 italic" data-hook="tags">{{tags}}</span>
     </div>
-    <div class="content prose prose-base sm:prose-lg max-w-none" dir="auto">{{content}}</div>
+    <div class="prose-article prose-theme" dir="auto">{{content}}</div>
     <div>
-      <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic">{{tags}}</span>
+      <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile">{{tags}}</span>
     </div>
   </article>
 </section>

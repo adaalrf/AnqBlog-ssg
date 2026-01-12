@@ -174,8 +174,28 @@ void (async (): Promise<void> => {
     // Compile TypeScript first (with incremental compilation)
     // This build orchestrator runs from `dist/build.js` (after `tsc`).
     // Do not invoke a second TypeScript compilation here.
+    const distDir = path.join(rootDir, 'dist');
+    if (!existsSync(distDir)) {
+      console.error('Error: dist/ directory not found.');
+      console.error('Please run `tsc` before running this script.');
+      process.exit(1);
+    }
+
     const loggerPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'logger.js');
     const errorUtilsPath = path.join(rootDir, 'dist', 'scripts', 'utils', 'error-utils.js');
+
+    if (!existsSync(loggerPath)) {
+      console.error(`Error: logger module not found at ${loggerPath}`);
+      console.error('Please run `tsc` before running this script.');
+      process.exit(1);
+    }
+
+    if (!existsSync(errorUtilsPath)) {
+      console.error(`Error: error-utils module not found at ${errorUtilsPath}`);
+      console.error('Please run `tsc` before running this script.');
+      process.exit(1);
+    }
+
     const loggerModule = (await import(pathToFileURL(loggerPath).href)) as {
       logger: {
         info: (module: string, message: string) => void;

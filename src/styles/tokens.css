@@ -1,0 +1,49 @@
+/**
+ * Design tokens (defaults)
+ * - Provide a complete, readable baseline in `:root`.
+ * - Theme presets override any of these via `:root[data-theme='…']`.
+ */
+
+@layer base {
+  :root {
+    --background: hsl(30, 20%, 96%);
+    --foreground: hsl(220, 15%, 18%);
+    --muted: hsla(30, 20%, 96%, 0.7);
+    --muted-foreground: hsla(220, 15%, 18%, 0.65);
+    --accent: hsl(193, 85%, 55%);
+    --accent-foreground: hsl(30, 20%, 96%);
+    --accent-hover: hsl(193, 85%, 50%);
+    --destructive: hsl(0, 72%, 55%);
+    --destructive-foreground: hsl(30, 20%, 96%);
+    --code: hsl(30, 18%, 92%);
+    --code-foreground: hsl(220, 15%, 18%);
+    --border: hsla(220, 15%, 18%, 0.12);
+    --ring: hsl(193, 85%, 55%);
+
+    /* Layout tokens */
+    --page-min-width: 18rem;
+    --page-max-width-sm: 32rem;
+    --page-max-width-md: 48rem;
+  }
+}
+
+@theme {
+  /* Map Tailwind colors to CSS variables for theme switching */
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-muted-foreground: var(--muted-foreground);
+  --color-primary: var(--foreground);
+  --color-primary-foreground: var(--background);
+  --color-secondary: var(--muted);
+  --color-secondary-foreground: var(--foreground);
+  --color-accent: var(--accent);
+  --color-accent-foreground: var(--accent-foreground);
+  --color-accent-hover: var(--accent-hover);
+  --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
+  --color-code: var(--code);
+  --color-code-foreground: var(--code-foreground);
+  --color-border: var(--border);
+  --color-ring: var(--ring);
+}

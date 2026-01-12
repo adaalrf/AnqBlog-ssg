@@ -11,12 +11,13 @@
 4. [Configuration](#configuration)
 5. [Content](#content)
 6. [Templates](#templates)
-7. [Output](#output)
-8. [Deployment](#deployment)
-9. [Project Structure](#project-structure)
-10. [Troubleshooting](#troubleshooting)
-11. [Contributing](#contributing)
-12. [License](#license)
+7. [Theming](#theming)
+8. [Output](#output)
+9. [Deployment](#deployment)
+10. [Project Structure](#project-structure)
+11. [Troubleshooting](#troubleshooting)
+12. [Contributing](#contributing)
+13. [License](#license)
 
 ## Quick Start
 
@@ -106,6 +107,23 @@ Notes:
   - `src/templates/404-template.html` (404 page)
 - Optional page-specific templates: for `src/content/pages/about.html`, you can add `src/templates/about-template.html`. Inside that template, use `{{{content}}}` to inject the page body.
 
+## Theming
+The default theme system is based on CSS variables and a `data-theme` attribute on the root `<html>` element.
+
+- Default tokens live in `src/styles/tokens.css`, and structural styles live in `src/styles/base.css` (both imported by `src/styles/tailwind.css`).
+- Theme presets live in `src/styles/themes/*.css` and only override CSS variables (tokens).
+- The active theme is set by `data-theme="…"`, and the theme toggle cycles the names listed in `data-themes="…"`.
+  - See `src/templates/layout-template.html` for defaults.
+  - See `src/ts/toggle-theme.ts` for the toggle behavior.
+
+To add a theme:
+1. Create `src/styles/themes/my-theme.css` with `:root[data-theme='my-theme'] { … }`.
+2. Add `my-theme` to `data-themes` in `src/templates/layout-template.html`.
+
+Notes:
+- You can override more than colors. Tailwind v4 exposes design tokens as CSS variables (e.g. `--radius-*`, `--font-sans`, `--blur-sm`).
+- `src/styles/themes/mono.css` is an example that overrides both the color tokens and a few non-color tokens.
+
 ## Output
 The build generates a static site in `public/`, including:
 - `public/index.html` (if `src/content/pages/index.html` exists)
@@ -139,7 +157,7 @@ anq-blog-ssg/
 - **Old pages still in `public/`** – Avoid `--incremental` for release builds, or run `npm run build -- --clean`.
 - **Posts not showing up** – Confirm posts are `*.md` under `src/content/blog/posts/` and have unique filenames.
 - **Dates look wrong / sorting is wrong** – Use `YYYY-MM-DD` or `DD.MM.YYYY` in front matter.
-- **Missing template elements** – Ensure templates still include required selectors like `#post-content`, `.post-item`, `#post-links-div`.
+- **Missing template elements** – The default templates use `data-hook="…"` attributes for build scripts; if you remove/rename hooks, update the selectors in `scripts/`.
 
 ## Contributing
 1. Fork the repository and create a branch (`git checkout -b feature/whatever`)
