@@ -4,13 +4,26 @@ import { generateIntermediatePostHtmlFiles } from './blog/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './blog/blog.js';
 import { generateTagPages } from './blog/tags.js';
 import { applyLayoutToHtmlFiles } from './apply-layout.js';
-import { ensureDirectoryExists, writeFileContent } from './utils/path-and-file-utils.js';
+import {
+  ensureDirectoryExists,
+  writeFileContent,
+  readFileContent,
+  fpr,
+} from './utils/path-and-file-utils.js';
 import { parseDate } from './utils/date-utils.js';
-import { processMarkdownFiles, getTagSlug } from './utils/content-utils.js';
+import {
+  processMarkdownFiles,
+  getTagSlug,
+  denormalizeTagFromFile,
+  replacePlaceholders,
+  parseHtmlFrontMatter,
+} from './utils/content-utils.js';
 import { generateRSSFeed } from './generate-rss.js';
 import { generateSitemap } from './generate-sitemap.js';
+import { generateRobotsTxt } from './generate-robots.js';
 import { formatError } from './utils/error-utils.js';
 import { logger } from './utils/logger.js';
+import { minifyHtml } from './utils/html-minify.js';
 import type { Post, Tags } from './types/index.js';
 
 /**
@@ -124,6 +137,16 @@ const generateAllHtmlFiles = async (): Promise<void> => {
   const sitemapPath = path.join(config.publicContentOutputDirectory, 'sitemap.xml');
   await writeFileContent(sitemapPath, sitemapContent);
   logger.info('generate.ts', 'Generated sitemap -> sitemap.xml');
+
+  // Generate robots.txt
+  const robotsContent = generateRobotsTxt();
+  const robotsPath = path.join(config.publicContentOutputDirectory, 'robots.txt');
+  await writeFileContent(robotsPath, robotsContent);
+  logger.info('generate.ts', 'Generated robots.txt');
+
+  // Generate 404 page
+  await generate404Page(tags);
+  logger.info('generate.ts', 'Generated 404 page');
 };
 
 /**
@@ -210,6 +233,77 @@ const collectTags = (posts: Post[]): Tags => {
     }
   });
   return tags;
+};
+
+/**
+ * Generates the tags dropdown HTML (helper function for 404 page).
+ * @param tags - The tags object.
+ * @returns The generated tags dropdown HTML.
+ */
+const generateTagsDropdownFor404 = (tags: Tags): string => {
+  return Object.keys(tags)
+    .map((tag) => {
+      const filesWithDash = getTagSlug(tag);
+      const filesWithoutDash = denormalizeTagFromFile(tag);
+      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${filesWithoutDash}</a></li>`;
+    })
+    .join('\n');
+};
+
+/**
+ * Generates a 404 error page.
+ * @param tags - Tags object for generating dropdowns.
+ * @throws {Error} If template files cannot be read or file writing fails.
+ */
+const generate404Page = async (tags: Tags): Promise<void> => {
+  const template404Path = path.join(fpr('src/templates'), '404-template.html');
+  const output404Path = path.join(config.publicContentOutputDirectory, '404.html');
+
+  try {
+    // Read the 404 template
+    const template404Content = await readFileContent(template404Path);
+    const { content } = parseHtmlFrontMatter(template404Content);
+
+    // Apply layout to the 404 page
+    const tagsDropdownContent = generateTagsDropdownFor404(tags);
+    const mainLayoutContent = await readFileContent(config.mainLayoutPath);
+
+    const finalTitle = `${config.siteName} | Page Not Found`;
+    const canonicalUrl = `${config.siteUrl}/404.html`;
+    const ogUrl = canonicalUrl;
+
+    // Replace placeholders in the main layout
+    let finalHtml = replacePlaceholders(mainLayoutContent, {
+      title: finalTitle,
+      page: '<a href="/">Home</a> / <span>404</span>',
+      children: content,
+      tagsDropdown: tagsDropdownContent,
+      siteName: config.siteName || '',
+      siteDescription: config.siteDescription || '',
+      githubUrl: config.githubUrl || '',
+      authorName: config.authorName || '',
+      copyrightYear: config.copyrightYear || new Date().getFullYear(),
+      siteLanguage: config.siteLanguage || 'en',
+      canonicalUrl: canonicalUrl,
+      ogUrl: ogUrl,
+      ogType: 'website',
+      stylesPath: '/styles/styles.css',
+      faviconPath: '/assets/favicon.ico',
+      scriptPath: '/js/bundle.js',
+      gitLogoPath: '/assets/github-icon.svg',
+    });
+
+    // Minify HTML
+    finalHtml = minifyHtml(finalHtml);
+
+    await writeFileContent(output404Path, finalHtml);
+  } catch (error) {
+    const err = error as Error;
+    logger.warn(
+      'generate.ts',
+      `Failed to generate 404 page: ${err.message}. Continuing without 404 page.`,
+    );
+  }
 };
 
 generateAllHtmlFiles().catch((error) => {

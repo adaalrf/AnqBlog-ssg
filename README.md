@@ -1,356 +1,150 @@
-# AnqBlog SSG
+# anq-blog-ssg
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT) [![Node.js](https://img.shields.io/badge/Node.js-18%2B-green.svg)](https://nodejs.org/) [![TypeScript](https://img.shields.io/badge/TypeScript-5.9-blue.svg)](https://www.typescriptlang.org/)
 
-A fast, lightweight static site generator that converts Markdown to HTML. Built with Node.js, featuring pagination, tag organization, SEO optimization, and modern tooling.
+`anq-blog-ssg` is a minimalist static site generator for a Markdown blog + a small set of HTML pages. It runs on Node.js (build-time only) and outputs a fully static site (`public/`) you can host anywhere.
 
-The build process requires Node.js, but the generated static site can be served on any web server without Node.js.
+## Table of Contents
+1. [Quick Start](#quick-start)
+2. [Features](#features)
+3. [Commands](#commands)
+4. [Content](#content)
+5. [Templates](#templates)
+6. [Output](#output)
+7. [Deployment](#deployment)
+8. [Project Structure](#project-structure)
+9. [Troubleshooting](#troubleshooting)
+10. [Contributing](#contributing)
+11. [License](#license)
 
-## Features
+## Quick Start
 
-- **Markdown to HTML** - Convert Markdown files with YAML front matter to static HTML
-- **Template-based Architecture** - Flexible HTML templates for complete design control
-- **Pagination** - Automatic pagination for blog listings with configurable posts per page
-- **Tag System** - Organize content with tags and generate dedicated tag pages
-- **SEO Optimization** - Automatic canonical URLs, Open Graph meta tags, and Twitter card support
-- **Dark Mode** - Built-in light/dark theme toggle with persistent user preference
-- **Performance Optimized** - Parallel processing, HTML minification, and efficient builds
-- **Tailwind CSS** - Modern utility-first CSS framework with custom theme support
-- **TypeScript** - Fully type-safe codebase (build scripts and client-side code)
-- **Build Progress** - Real-time progress indicators during build process
+### Requirements
+- Node.js 18 or newer
+- npm
 
-## Requirements
-
-- **Node.js** v18 or higher
-- **npm** or **yarn** package manager
-
-## Installation
-
-Clone the repository and install dependencies:
-
+### Setup
 ```bash
 git clone https://github.com/adaalrf/anq-blog-ssg.git
 cd anq-blog-ssg
 npm install
 ```
 
-Copy the example configuration file:
-
+Create your site config:
 ```bash
 cp scripts/example.config.ts scripts/config.ts
 ```
+Then edit `scripts/config.ts` with your site information (name, description, URLs, pagination, etc.).
 
-## Usage
-
-### Create Content
-
-Write blog posts in Markdown and place them in `src/content/blog/posts/`:
-
-```markdown
----
-title: 'My First Blog Post'
-date: '03.01.2026' # or use ISO 8601: '2026-01-03'
-tags: ['personal', 'introduction']
----
-
-Write your content here.
-```
-
-Standalone pages can be added to `src/content/pages/`. These support front matter for metadata.
-
-### Configure
-
-Copy the example configuration file if you haven't already:
-
-```bash
-cp scripts/example.config.ts scripts/config.ts
-```
-
-Then edit `scripts/config.ts` to customize your site:
-
-```typescript
-const siteConfig = {
-  siteName: 'My Blog', // Site name displayed in header
-  siteDescription: 'My awesome blog', // Site description for meta tags
-  siteUrl: 'https://example.com', // Base URL (used for canonical URLs and Open Graph)
-  githubUrl: 'https://github.com/username', // GitHub profile URL
-  authorName: 'username', // Author name displayed in footer
-  copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
-  postsPerPage: 5, // Number of posts per paginated page
-  previewLength: 200, // Character length for post previews
-  titleTruncationLength: 25, // Max title length in post listings
-  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
-  paginationWindowSize: 5, // Number of page links in pagination
-  dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
-  siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
-};
-```
-
-### Build
-
-Generate the static site:
-
+Build + preview:
 ```bash
 npm run build
-```
-
-Output files are generated in the `public/` directory.
-
-**Build Options:**
-
-- `--version` or `-v` - Display the version number and exit
-- `--dry-run` - Validate configuration and check files without generating output
-- `--incremental` - Skip cleaning directories for faster rebuilds (use with caution)
-- `--clean` - Force clean build (removes `public/` and `.build/` directories)
-
-**Examples:**
-
-```bash
-# Standard build
-npm run build
-
-# Check configuration without building
-npm run build -- --dry-run
-
-# Incremental build (faster, but may leave stale files)
-npm run build -- --incremental
-
-# Force clean build
-npm run build -- --clean
-
-# Show version
-npm run build -- --version
-```
-
-The build process displays:
-
-- Real-time progress for each step
-- Build time breakdown per step
-- Total file count and HTML page count
-- Total build time
-
-### Serve Locally (Development)
-
-Preview the site locally using the built-in Node.js server:
-
-```bash
 npm run serve
 ```
+Open `http://localhost:8080`.
 
-The site will be available at `http://localhost:8080` by default.
+## Features
+- **Markdown posts** with YAML front matter (`src/content/blog/posts/*.md`)
+- **Tags + tag index** (`/blog/tags/…`) generated from post front matter
+- **Pagination** for blog and tag pages
+- **Static pages** as HTML + optional front matter (`src/content/pages/*.html`)
+- **SEO outputs**: canonical URLs, Open Graph/Twitter meta tags, `sitemap.xml`, `robots.txt`, `rss.xml`
+- **Tailwind CSS** pipeline and a small client bundle (theme toggle + nav)
 
-**Custom Port:** Set the `PORT` environment variable to use a different port:
-
+## Commands
 ```bash
-PORT=3000 npm run serve
+npm run build                 # Generate the site into public/
+npm run build -- --dry-run    # Compile + validate config, no outputs
+npm run build -- --incremental # Skip cleaning public/ + .build/
+npm run build -- --clean      # Force clean public/ + .build/ before building
+npm run build -- --version    # Print package.json version
+
+npm run serve                 # Serve public/ locally (PORT=3000 npm run serve)
+
+npm test
+npm run lint
+npm run format
 ```
 
-> **Important:** `serve.ts` requires Node.js and is for **local development only**. The built site in `public/` contains only static files (HTML, CSS, JavaScript) and can be served by **any web server without Node.js**.
+Notes:
+- `scripts/config.ts` is intentionally gitignored; keep your site settings local or manage it in your own repo.
+- This repo’s `.gitignore` currently ignores `src/content/*`. If you want to commit your posts/pages, remove that ignore rule.
+
+## Configuration
+- Edit `scripts/config.ts` (typed by `scripts/types/config.ts`).
+- Common settings:
+  - `siteName`, `siteDescription`, `siteUrl`, `siteLanguage`
+  - `githubUrl`, `authorName`, `copyrightYear`
+  - `postsPerPage`, `paginationWindowSize`
+  - `previewLength`, `dateLocale`
+
+## Content
+
+### Blog posts (Markdown)
+- Add posts under `src/content/blog/posts/` as `*.md`.
+- Front matter supports any fields, but these are commonly used:
+  ```yaml
+  ---
+  title: My First Post
+  date: 2026-01-03 # or 03.01.2026
+  tags: [personal, launch]
+  ---
+  ```
+- The output filename comes from the source filename (e.g. `my-post.md` → `/blog/posts/my-post.html`).
+
+### Pages (HTML + optional front matter)
+- Add pages under `src/content/pages/` as `*.html`. YAML front matter is supported at the top of the file.
+- If you create `src/content/pages/index.html`, the build copies it to `public/index.html` so it becomes the site root (`/`).
+
+## Templates
+- `src/templates/layout-template.html` wraps every page; placeholders are filled in `scripts/apply-layout.ts`.
+- Built-in templates:
+  - `src/templates/post-template.html` (post body)
+  - `src/templates/listing-template.html` (blog + tag listings)
+  - `src/templates/main-tags-template.html` (tags index)
+  - `src/templates/404-template.html` (404 page)
+- Optional page-specific templates: for `src/content/pages/about.html`, you can add `src/templates/about-template.html`. Inside that template, use `{{{content}}}` to inject the page body.
+
+## Output
+The build generates a static site in `public/`, including:
+- `public/index.html` (if `src/content/pages/index.html` exists)
+- `public/blog/index.html` (+ `blog-page-2.html`, …)
+- `public/blog/posts/*.html`
+- `public/blog/tags/index.html` (+ `*.html`, `*-page-2.html`, …)
+- `public/rss.xml`, `public/sitemap.xml`, `public/robots.txt`, `public/404.html`
 
 ## Deployment
+Deploy `public/` to any static host (no Node.js runtime required).
 
-Deploy the contents of the `public/` directory to any static hosting service. **The generated site requires NO Node.js runtime** - it's pure HTML, CSS, and JavaScript that can be served by any web server (Apache, Nginx, Caddy, etc.) or static hosting service.
-
-### Example: Manual Deployment via SSH
-
-```bash
-scp -r public/* user@your-server:/var/www/html/
-```
-
-### Example: GitHub Pages
-
-```bash
-git subtree push --prefix public origin gh-pages
-```
+- Netlify / Cloudflare Pages / Vercel: build command `npm run build`, output directory `public`
+- Any server: copy `public/` to your web root (or upload to object storage + CDN)
+- GitHub Pages: use a workflow that builds and publishes `public/` (recommended because `public/` is gitignored)
 
 ## Project Structure
-
 ```
 anq-blog-ssg/
-├── src/
-│   ├── assets/          # Images, icons, favicon
-│   ├── content/         # Markdown content files
-│   │   ├── blog/posts/  # Blog post markdown files
-│   │   └── pages/       # Standalone page files
-│   ├── styles/          # Tailwind CSS source
-│   ├── templates/       # HTML templates
-│   └── ts/              # TypeScript source files
-├── scripts/             # Build scripts and utilities (TypeScript source)
-│   ├── blog/            # Blog-specific generators
-│   ├── utils/           # Utility functions
-│   └── types/           # TypeScript type definitions
-│       ├── index.ts     # Core types (Post, ProcessMarkdownOptions, etc.)
-│       └── config.ts    # Configuration types
-├── dist/                # Compiled JavaScript (generated, gitignored)
-├── .build/              # Temporary build artifacts (generated, not committed)
+├── scripts/             # Build helpers and generators (TypeScript)
+├── src/                 # Content, templates, styles, and client scripts
 ├── public/              # Generated static site (output)
-├── build.ts             # Main build orchestrator (TypeScript)
-├── serve.ts             # Local development server (TypeScript)
-└── package.json         # Dependencies and scripts
+├── dist/                # Compiled TypeScript output (build artifact)
+├── .build/              # Temporary build cache
+├── build.ts, serve.ts    # Orchestrators for build and preview
+├── package.json         # Scripts, tooling, and dependencies
+└── README.md            # This documentation
 ```
-
-## Customization
-
-### Templates
-
-Edit files in `src/templates/`, or add your own templates, to modify the HTML structure and layout:
-
-- `layout-template.html` - Main page wrapper (header, footer, navigation)
-- `post-template.html` - Individual blog post layout
-- `listing-template.html` - Blog and tag listing page layout (shared template; per-tag pages reuse this file)
-- `main-tags-template.html` - Tags index page layout
-
-#### Template Placeholders
-
-The `layout-template.html` supports the following placeholders that are automatically replaced during build:
-
-- `{{siteName}}` - Site name from config
-- `{{siteDescription}}` - Site description for meta tags
-- `{{siteLanguage}}` - HTML lang attribute (e.g., 'en', 'es', 'fr')
-- `{{title}}` - Page title (format: `{{siteName}} | {{pageTitle}}`)
-- `{{page}}` - Breadcrumb navigation path (HTML formatted)
-- `{{children}}` - Main content area (injected from other templates)
-- `{{tagsDropdown}}` - Generated HTML for tags dropdown menu
-- `{{githubUrl}}` - GitHub profile URL from config
-- `{{authorName}}` - Author name from config
-- `{{copyrightYear}}` - Copyright year (auto-updated)
-- `{{canonicalUrl}}` - Canonical URL for SEO
-- `{{ogUrl}}` - Open Graph URL
-- `{{stylesPath}}` - Path to CSS file (`/styles/styles.css`)
-- `{{faviconPath}}` - Path to favicon (`/assets/favicon.ico`)
-- `{{scriptPath}}` - Path to JavaScript bundle (`/js/bundle.js`)
-- `{{gitLogoPath}}` - Path to GitHub icon (`/assets/github-icon.svg`)
-
-Content templates (`post-template.html`, `listing-template.html`, etc.) support:
-
-- `{{content}}` - Full post content (HTML)
-- `{{previewContent}}` - Truncated preview content
-- `{{title}}` - Post title
-- `{{titleLink}}` - Post title as clickable link
-- `{{date}}` - Formatted publication date
-- `{{tags}}` - Post tags as HTML links
-
-### Styling
-
-Customize styles in `src/styles/tailwind.css` and configure Tailwind in `tailwind.config.js`. The project uses Tailwind's typography plugin for content styling. See the [Tailwind CSS documentation](https://tailwindcss.com/docs) for details.
-
-### Configuration
-
-Copy the example configuration file if you haven't already:
-
-```bash
-cp scripts/example.config.ts scripts/config.ts
-```
-
-Edit `scripts/config.ts` to customize your site settings. The configuration is split into `siteConfig` (user-facing settings) and `pathConfig` (internal paths). You typically only need to modify `siteConfig`:
-
-```typescript
-const siteConfig = {
-  siteName: 'My Blog', // Site name displayed in header
-  siteDescription: 'My awesome blog', // Site description for meta tags
-  siteUrl: 'https://example.com', // Base URL (used for canonical URLs and Open Graph)
-  githubUrl: 'https://github.com/username', // GitHub profile URL
-  authorName: 'username', // Author name displayed in footer
-  copyrightYear: new Date().getFullYear(), // Copyright year (auto-updates)
-  postsPerPage: 5, // Number of posts per paginated page
-  previewLength: 200, // Character length for post previews
-  titleTruncationLength: 25, // Max title length in post listings
-  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
-  paginationWindowSize: 5, // Number of page links in pagination
-  dateLocale: 'en-US', // Locale for date formatting (e.g., 'en-US', 'en-GB', 'de-DE', 'fr-FR')
-  siteLanguage: 'en', // HTML lang attribute (e.g., 'en', 'es', 'fr', 'de')
-};
-```
-
-### TypeScript
-
-Add or modify interactive features by editing files in `src/ts/`:
-
-- `toggle-theme.ts` - Theme switcher (light/dark mode)
-- `burger-dropdown.ts` - Mobile navigation menu
-- `tags-dropdown.ts` - Tags dropdown menu
-- `main.ts` - Entry point (auto-generated imports)
 
 ## Troubleshooting
+- **Build created `scripts/config.ts` and exited** – That’s first-run behavior when `scripts/config.ts` is missing; edit it and run `npm run build` again.
+- **Old pages still in `public/`** – Avoid `--incremental` for release builds, or run `npm run build -- --clean`.
+- **Posts not showing up** – Confirm posts are `*.md` under `src/content/blog/posts/` and have unique filenames.
+- **Dates look wrong / sorting is wrong** – Use `YYYY-MM-DD` or `DD.MM.YYYY` in front matter.
+- **Missing template elements** – Ensure templates still include required selectors like `#post-content`, `.post-item`, `#post-links-div`.
 
-### Build fails with "ENOENT" errors
-
-**Solution:** Ensure required directories exist:
-
-- `src/content/blog/posts/` - For blog posts
-- `src/templates/` - For HTML templates
-- `src/styles/` - For CSS source files
-
-Check that template files are present and verify file permissions.
-
-### CSS not loading
-
-**Solution:**
-
-1. Run `npm run build` to regenerate CSS
-2. Verify that `public/styles/styles.css` exists after build
-3. Ensure template paths use absolute paths from root (`/styles/styles.css`)
-
-### Posts not appearing
-
-**Solution:**
-
-1. Ensure markdown files are in `src/content/blog/posts/`
-2. Check front matter format (YAML with `---` delimiters)
-3. Verify date format is either:
-   - `DD.MM.YYYY` (e.g., `03.01.2026`)
-   - ISO 8601: `YYYY-MM-DD` (e.g., `2026-01-03`)
-4. Check build output for warnings about missing titles or invalid dates
-
-### Template elements not found
-
-**Solution:**
-
-1. Ensure templates contain required elements:
-   - `#post-content` - For post pages
-   - `.post-item` - For blog/tag listings
-   - `#post-links-div` - For paginated content
-2. Check template file names match expected patterns
-3. Review error messages for specific missing elements and file paths
-
-### Theme toggle not visible
-
-**Solution:**
-
-- On desktop: The theme toggle is in the top navigation bar. If it's hidden, check that the path bar isn't too long (it should truncate automatically)
-- On mobile: The theme toggle is in the burger menu dropdown
-- Ensure JavaScript is enabled in your browser
-
-## Build Process
-
-The build process includes several optimization steps executed in order:
-
-1. **TypeScript Compilation** - Compiles all TypeScript source files to JavaScript in `dist/` directory
-2. **Configuration Validation** - Validates site configuration and paths before building
-3. **Import Generation** - Automatically generates TypeScript imports from `src/ts/` directory
-4. **Code Bundling** - Bundles TypeScript with Webpack into a single JavaScript file
-5. **Asset Copying** - Copies static assets (images, icons, favicon) to output directory
-6. **Content Generation** - Processes Markdown files and generates HTML pages with pagination
-7. **CSS Processing** - Compiles Tailwind CSS with PostCSS and Autoprefixer
-8. **HTML Minification** - Optimizes HTML output (preserves code blocks and whitespace in `<pre>` tags)
-
-Build progress is displayed in real-time, showing the number of posts, pages, and tags being processed. The entire build process is optimized for speed with parallel processing where possible.
-
-**Note:** The `dist/` directory contains compiled JavaScript files and is automatically generated during the build process. It is gitignored and should not be committed to version control.
-
-## Performance
-
-- **Parallel Processing** - Posts are processed concurrently for faster builds
-- **HTML Minification** - Reduces file sizes by 10-20% while preserving code blocks
-- **Template Caching** - Templates are cached to minimize I/O operations
-- **Optimized Output** - Clean, minified HTML, CSS, and JavaScript
+## Contributing
+1. Fork the repository and create a branch (`git checkout -b feature/whatever`)
+2. Follow the existing TypeScript/HTML/Tailwind conventions
+3. Add tests if you introduce logic changes
+4. Open a pull request and describe the change
 
 ## License
-
-MIT License. See `LICENSE` for details.
-
----
-
-**Author:** [Adaalrf](https://github.com/adaalrf)
-
-For questions, issues, or contributions, please visit the [GitHub repository](https://github.com/adaalrf/anq-blog-ssg).
+MIT © [Adaalrf](https://github.com/adaalrf)

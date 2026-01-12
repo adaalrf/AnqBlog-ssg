@@ -141,12 +141,13 @@ void (async (): Promise<void> => {
 
     const isDryRun = args.includes('--dry-run');
     const isIncremental = args.includes('--incremental');
-    const shouldClean = !isIncremental || args.includes('--clean');
+    // Dry runs should not delete or write build outputs.
+    const shouldClean = !isDryRun && (!isIncremental || args.includes('--clean'));
 
     if (isDryRun) {
       preCompileLogger.info(
         'build.ts',
-        'Dry run mode: Validating configuration and checking files...',
+        'Dry run mode: compiling + validating config (no outputs will be generated)...',
       );
     }
 
@@ -162,7 +163,11 @@ void (async (): Promise<void> => {
       await fs.rm(tempDir, { recursive: true, force: true });
       endStep(stepIndex);
     } else {
-      preCompileLogger.info('build.ts', 'Using incremental build (skipping clean)...');
+      if (isDryRun) {
+        preCompileLogger.info('build.ts', 'Dry run: skipping clean...');
+      } else {
+        preCompileLogger.info('build.ts', 'Using incremental build (skipping clean)...');
+      }
     }
 
     // Compile TypeScript first (with incremental compilation)
@@ -177,11 +182,6 @@ void (async (): Promise<void> => {
       endStep(tscStepIndex);
       const err = error as Error;
       throw new Error(formatErrorPreCompile(err, 'TypeScript compilation failed'));
-    }
-
-    if (isDryRun) {
-      preCompileLogger.info('build.ts', '✓ Configuration and files validated successfully');
-      process.exit(0);
     }
 
     // After TypeScript compilation, import and use the compiled utilities
@@ -209,6 +209,12 @@ void (async (): Promise<void> => {
     };
     validateConfigModule.validateConfig();
     endStep(validateStepIndex);
+
+    if (isDryRun) {
+      logger.info('build.ts', '✓ Dry run complete (no outputs generated)');
+      printBuildBreakdown();
+      process.exit(0);
+    }
 
     // Generate dynamic imports
     logger.info('build.ts', 'Generating dynamic imports...');
