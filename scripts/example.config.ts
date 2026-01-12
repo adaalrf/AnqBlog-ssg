@@ -35,6 +35,7 @@ const pathConfig: PathConfig = {
   templatePostsPath: fpr('src/templates/post-template.html'),
   templateBlogPath: fpr('src/templates/listing-template.html'),
   templateMainTagsPath: fpr('src/templates/main-tags-template.html'),
+  template404Path: fpr('src/templates/404-template.html'),
   mainLayoutPath: fpr('src/templates/layout-template.html'),
   tempPostsOutputDirectory: fpr('.build/blog/posts'),
   tempTagsOutputDirectory: fpr('.build/blog/tags'),
