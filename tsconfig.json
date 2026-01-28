@@ -16,14 +16,13 @@
     "declaration": false,
     "sourceMap": false
   },
-  "include": ["src/**/*.ts", "scripts/**/*.ts", "types/**/*.d.ts", "*.ts"],
+  "include": ["core/**/*.ts", "modules/**/*.ts", "types/**/*.d.ts", "*.ts"],
   "exclude": [
     "node_modules",
     "public",
     "legacy",
     "dist",
     ".build",
-    "src/ts" // Excluded because src/ts files are bundled by Webpack separately
-    // Note: "src/**/*.ts" in include still matches src/ts, but exclude takes precedence
+    "client" // Excluded because client files are bundled by Webpack separately
   ]
 }

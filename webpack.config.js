@@ -1,7 +1,7 @@
 import { resolve } from 'path';
 
 export default {
-  entry: './src/ts/main.ts',
+  entry: './client/main.ts',
   mode: 'production',
   optimization: {
     usedExports: true,

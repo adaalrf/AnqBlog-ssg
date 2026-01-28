@@ -4,10 +4,10 @@
   "description": "A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.",
   "type": "module",
   "scripts": {
-    "build": "tsc --incremental && node dist/build.js",
-    "serve": "tsc --incremental && node dist/serve.js",
+    "build": "tsc --incremental && node dist/core/cli/build.js",
+    "serve": "tsc --incremental && node dist/core/cli/serve.js",
     "compile": "tsc",
-    "test": "tsc && node --test dist/scripts/utils/__tests__/*.test.js",
+    "test": "node -e \"require('fs').rmSync('dist', { recursive: true, force: true })\" && tsc && node --test dist/core/internal/__tests__/*.test.js dist/core/shared/__tests__/*.test.js dist/modules/**/__tests__/*.test.js",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
@@ -32,15 +32,18 @@
     "node": ">=18.0.0"
   },
   "exports": {
-    ".": "./build.ts",
-    "./scripts/*": "./scripts/*.ts"
+    ".": "./core/cli/build.ts",
+    "./core/*": "./core/*.ts"
   },
   "files": [
     "dist",
-    "scripts",
-    "src",
-    "build.ts",
-    "serve.ts",
+    "core",
+    "modules",
+    "content",
+    "templates",
+    "styles",
+    "assets",
+    "client",
     "webpack.config.js",
     "postcss.config.js",
     "tailwind.config.js",

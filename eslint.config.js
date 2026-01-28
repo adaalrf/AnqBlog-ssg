@@ -31,7 +31,7 @@ export default tseslint.config(
   },
   // Type-checked rules only for files in the TypeScript project
   {
-    files: ['scripts/**/*.ts', 'build.ts', 'serve.ts', 'types/**/*.ts'],
+    files: ['core/**/*.ts', 'modules/**/*.ts', 'types/**/*.ts'],
     extends: [...tseslint.configs.recommendedTypeChecked],
     languageOptions: {
       parserOptions: {
@@ -106,7 +106,7 @@ export default tseslint.config(
       'public/**',
       '.build/**',
       'eslint.config.js',
-      'src/ts/main.ts',
+      'client/main.ts',
     ],
   },
 );

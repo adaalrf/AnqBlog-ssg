@@ -5,7 +5,7 @@ public/
 legacy/
 
 # Ignore all files in content and templates directories
-src/content/*
+content/*
 
 # Files
 deploy.sh
@@ -50,13 +50,13 @@ lerna-debug.log*
 .cache/
 
 # Auto-generated files
-src/ts/main.ts
+client/main.ts
 
 # Compiled TypeScript files (generated from .ts sources)
 dist/
 dist/**/*.js
-scripts/**/*.js
-src/ts/**/*.js
+core/**/*.js
+client/**/*.js
 *.tsbuildinfo
 
 # Keep config files that are needed
@@ -65,5 +65,5 @@ src/ts/**/*.js
 !tailwind.config.js
 
 # Site-specific configuration (copy example.config.ts to config.ts)
-scripts/config.ts
-scripts/config.js
+core/config/config.ts
+core/config/config.js
