@@ -19,9 +19,9 @@
 
 ## Phase 3: Blog Module Internal Simplification
 - [x] Extract blog config validation into `modules/blog/config.ts`.
-- [ ] Extract blog feed/sitemap generation into `modules/blog/domain/seo.ts`.
-- [ ] Extract tag/dropdown rendering into `modules/blog/domain/navigation.ts`.
-- [ ] Reduce orchestration noise in `modules/blog/module.ts` to high-level use cases.
+- [x] Extract blog feed/sitemap generation into `modules/blog/domain/seo.ts`.
+- [x] Extract tag/dropdown rendering into `modules/blog/domain/navigation.ts`.
+- [x] Reduce orchestration noise in `modules/blog/module.ts` to high-level use cases.
 
 ## Phase 4: API Expansion Candidates
 - [ ] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.

@@ -38,6 +38,12 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - Validation uses `createModuleConfigApi` from `core/shared/module-config-api.ts`.
 - Blog config helpers live in `modules/blog/config.ts`.
 
+## Domain Services
+
+- `modules/blog/domain/posts.ts`: post normalization/sorting use cases.
+- `modules/blog/domain/navigation.ts`: tags aggregation and dropdown rendering.
+- `modules/blog/domain/seo.ts`: RSS and sitemap generation helpers.
+
 ## UI Slots
 
 - The module injects tag links through `context.ui.setSlot('tagsDropdown', html)`.
