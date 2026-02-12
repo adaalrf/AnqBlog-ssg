@@ -37,6 +37,8 @@ notes:
 core is standalone; modules extend it
 shared utilities are for core+modules only
 module docs are SSoT for module config
+serve is local-dev only; deploy static `public/` output
+showcase demo posts live in content/blog/posts/demo-post-*.md
 expanded roadmap/todos: TODO.md
 last_checks:
 build: pass

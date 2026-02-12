@@ -79,6 +79,7 @@ modules: ['blog'];
 - Pages: `content/pages/*.html` (front matter supported).
 - `content/pages/index.html` becomes `/`.
 - Blog content lives under the blog module docs.
+- Showcase demo posts are available in `content/blog/posts/demo-post-*.md` (guide/how-to + dev-diary mix).
 
 ## Templates
 

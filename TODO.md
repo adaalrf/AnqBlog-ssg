@@ -70,3 +70,14 @@
 - No module-specific branching in `core/`.
 - If a feature is module-specific, place type/validation/docs under `modules/<name>/`.
 - Update `README.md`, `AGENTS.md`, and module README(s) in the same PR as code changes.
+
+## Phase 8: Re-release Polish (Completed)
+- [x] Add and maintain a top-level `CHANGELOG.md` with `0.6.0` cut and post-cut unreleased fixes.
+- [x] Clarify `npm run serve` as local-dev only in `README.md` and deployment notes.
+- [x] Patch UX polish in header dropdowns:
+  - mobile/desktop dropdown viewport clamping and internal scrolling
+  - small trigger-to-menu spacing increase to reduce visual overlap
+- [x] Refresh demo post set as showcase content:
+  - replace outdated path/config references
+  - keep a guide/how-to majority with a smaller dev-diary set
+- [x] Validate final polish slices with `npm run lint --silent`, `npm test`, and `npm run build`.
