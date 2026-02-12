@@ -13,6 +13,18 @@ interface BuildLayoutPlaceholdersInput {
 }
 
 /**
+ * Builds a `<title>` value from site + optional page title.
+ * Falls back to site-only title when page title is empty.
+ */
+export const buildDocumentTitle = (siteName: string, pageTitle?: string): string => {
+  const normalizedPageTitle = typeof pageTitle === 'string' ? pageTitle.trim() : '';
+  if (!normalizedPageTitle) {
+    return siteName;
+  }
+  return `${siteName} | ${normalizedPageTitle}`;
+};
+
+/**
  * Builds the standard placeholder payload used by the main layout template.
  * Keeps core page rendering and 404 rendering aligned on shared defaults.
  */

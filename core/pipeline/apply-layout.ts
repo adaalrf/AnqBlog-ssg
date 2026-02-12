@@ -6,7 +6,7 @@ import {
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
 } from '../internal/content-utils.js';
-import { buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
+import { buildDocumentTitle, buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
 import {
   fpr,
   readFileContent,
@@ -145,7 +145,7 @@ const processDirectory = async (
       }
       const mainLayoutContent = templateCache.mainLayout;
 
-      const finalTitle = `${config.siteName} | ${(data.title as string) || ''}`;
+      const finalTitle = buildDocumentTitle(config.siteName, data.title as string | undefined);
 
       // Generate canonical URL and Open Graph URL from output file path.
       const urlPath = filePathToWebPath(outputFilePath, config.publicContentOutputDirectory);

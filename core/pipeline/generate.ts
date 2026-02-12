@@ -10,7 +10,7 @@ import {
 import { parseHtmlFrontMatter, replacePlaceholders } from '../internal/content-utils.js';
 import { generateRobotsTxt } from './generate-robots.js';
 import { formatError } from '../internal/error-utils.js';
-import { buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
+import { buildDocumentTitle, buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
 import { logger } from '../shared/logger.js';
 import { minifyHtml } from '../internal/html-minify.js';
 import type { ModuleContext } from '../types/module.js';
@@ -103,7 +103,7 @@ const generate404Page = async (layoutData: Record<string, string>): Promise<bool
     const { content } = parseHtmlFrontMatter(template404Content);
     const mainLayoutContent = await readFileContent(config.mainLayoutPath);
 
-    const finalTitle = `${config.siteName} | Page Not Found`;
+    const finalTitle = buildDocumentTitle(config.siteName, 'Page Not Found');
     const canonicalUrl = `${config.siteUrl}/404.html`;
     const ogUrl = canonicalUrl;
 

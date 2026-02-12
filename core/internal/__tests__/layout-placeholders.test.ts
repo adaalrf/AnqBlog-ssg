@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { test } from 'node:test';
 import type { Config } from '../../types/config.js';
-import { buildLayoutPlaceholders } from '../layout-placeholders.js';
+import { buildDocumentTitle, buildLayoutPlaceholders } from '../layout-placeholders.js';
 
 const createConfig = (): Config => ({
   siteName: 'Site',
@@ -65,4 +65,14 @@ test('buildLayoutPlaceholders: accepts explicit og overrides', () => {
 
   assert.equal(placeholders.ogUrl, 'https://cdn.example.com/404.html');
   assert.equal(placeholders.ogType, 'article');
+});
+
+test('buildDocumentTitle: omits separator for missing page title', () => {
+  assert.equal(buildDocumentTitle('Site', ''), 'Site');
+  assert.equal(buildDocumentTitle('Site', '   '), 'Site');
+  assert.equal(buildDocumentTitle('Site'), 'Site');
+});
+
+test('buildDocumentTitle: composes site and page title when present', () => {
+  assert.equal(buildDocumentTitle('Site', 'Post Title'), 'Site | Post Title');
 });
