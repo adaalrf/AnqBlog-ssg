@@ -22,6 +22,18 @@ export interface ModuleManager {
 export const createModuleManager = async (config: Config): Promise<ModuleManager> => {
   const moduleNames = Array.isArray(config.modules) ? config.modules : [];
   const modules = await loadModules(moduleNames);
+
+  for (const { module, name } of modules) {
+    if (typeof module.validate === 'function') {
+      try {
+        module.validate(config);
+      } catch (error) {
+        const err = error instanceof Error ? error : new Error(String(error));
+        throw new Error(`Module "${name}" validation failed: ${err.message}`);
+      }
+    }
+  }
+
   const layoutDirectoryPairs = modules.flatMap(({ module }) =>
     getModuleDirectoryPairs(module, config),
   );

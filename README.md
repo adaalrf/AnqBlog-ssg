@@ -38,13 +38,30 @@ npm run format
 ## Configuration
 
 - Edit `core/config/config.ts` (typed by `core/types/config.ts`).
+- Core config is split into:
+  - `CoreSiteConfig` + `CorePathConfig` + `ThemeConfig` + `ModuleConfig`.
+  - Module configs (for example `BlogModuleConfig`) enabled via `modules`.
 - `modules` enables optional modules (see module READMEs).
 - `core/config/config.ts` is gitignored by default.
+
+Example (`core` only):
+
+```ts
+modules: [];
+```
+
+Example (`core` + blog):
+
+```ts
+modules: ['blog'];
+// include BlogModuleConfig keys documented in modules/blog/README.md
+```
 
 ## Modules
 
 - Modules live under `modules/` and are enabled by name in `core/config/config.ts`.
 - Core works without modules (static pages, `robots.txt`, `404.html`).
+- Module config is only required when the module is enabled.
 - See module docs for setup: `modules/blog/README.md`.
 
 ## Content

@@ -1,6 +1,6 @@
 import fs from 'fs';
 import config from './config.js';
-import type { Config, PathConfig } from '../types/config.js';
+import type { BlogModuleConfig, Config, CorePathConfig } from '../types/config.js';
 
 /**
  * Validates the site configuration and path configuration.
@@ -10,6 +10,7 @@ import type { Config, PathConfig } from '../types/config.js';
 export function validateConfig(): void {
   const errors: string[] = [];
   const cfg = config as Config;
+  const modules = Array.isArray(cfg.modules) ? cfg.modules : [];
 
   // Validate required site config
   if (!cfg.siteName || typeof cfg.siteName !== 'string' || !cfg.siteName.trim()) {
@@ -27,43 +28,6 @@ export function validateConfig(): void {
       new URL(cfg.siteUrl);
     } catch {
       errors.push(`siteUrl must be a valid URL: ${cfg.siteUrl}`);
-    }
-  }
-
-  // Validate numeric configs
-  if (!Number.isInteger(cfg.postsPerPage) || cfg.postsPerPage < 1) {
-    errors.push(`postsPerPage must be a positive integer, got: ${cfg.postsPerPage}`);
-  }
-
-  if (typeof cfg.previewLength !== 'number' || cfg.previewLength < 0) {
-    errors.push(`previewLength must be a non-negative number, got: ${cfg.previewLength}`);
-  }
-
-  if (!Number.isInteger(cfg.titleTruncationLength) || cfg.titleTruncationLength < 1) {
-    errors.push(
-      `titleTruncationLength must be a positive integer, got: ${cfg.titleTruncationLength}`,
-    );
-  }
-
-  if (
-    !Number.isInteger(cfg.titleTruncationLengthBreadcrumb) ||
-    cfg.titleTruncationLengthBreadcrumb < 1
-  ) {
-    errors.push(
-      `titleTruncationLengthBreadcrumb must be a positive integer, got: ${cfg.titleTruncationLengthBreadcrumb}`,
-    );
-  }
-
-  if (!Number.isInteger(cfg.paginationWindowSize) || cfg.paginationWindowSize < 1) {
-    errors.push(
-      `paginationWindowSize must be a positive integer, got: ${cfg.paginationWindowSize}`,
-    );
-  }
-
-  // Validate maxMarkdownFileSize if provided
-  if (cfg.maxMarkdownFileSize !== undefined) {
-    if (typeof cfg.maxMarkdownFileSize !== 'number' || cfg.maxMarkdownFileSize < 1) {
-      errors.push(`maxMarkdownFileSize must be a positive number, got: ${cfg.maxMarkdownFileSize}`);
     }
   }
 
@@ -114,7 +78,7 @@ export function validateConfig(): void {
   }
 
   // Validate required core paths exist
-  const requiredPaths: (keyof PathConfig)[] = [
+  const requiredPaths: (keyof CorePathConfig)[] = [
     'contentDirectory',
     'mainLayoutPath',
     'template404Path',
@@ -124,13 +88,82 @@ export function validateConfig(): void {
   for (const pathKey of requiredPaths) {
     const pathValue = cfg[pathKey];
     if (!pathValue || typeof pathValue !== 'string') {
-      errors.push(`${pathKey} is required in pathConfig`);
+      errors.push(`${pathKey} is required in core path config`);
     } else if (!fs.existsSync(pathValue)) {
       errors.push(`${pathKey} path does not exist: ${pathValue}`);
     }
   }
 
+  if (modules.includes('blog')) {
+    validateBlogModuleConfig(cfg, errors);
+  }
+
   if (errors.length > 0) {
     throw new Error(`Configuration errors:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
+  }
+}
+
+function validateBlogModuleConfig(cfg: Config, errors: string[]): void {
+  const blogNumericFields: Array<{
+    key: keyof BlogModuleConfig;
+    min: number;
+    zeroAllowed?: boolean;
+  }> = [
+    { key: 'postsPerPage', min: 1 },
+    { key: 'previewLength', min: 0, zeroAllowed: true },
+    { key: 'titleTruncationLength', min: 1 },
+    { key: 'titleTruncationLengthBreadcrumb', min: 1 },
+    { key: 'paginationWindowSize', min: 1 },
+  ];
+
+  for (const { key, min, zeroAllowed } of blogNumericFields) {
+    const value = cfg[key];
+    if (typeof value !== 'number' || (!zeroAllowed && !Number.isInteger(value))) {
+      errors.push(`${String(key)} is required and must be a number`);
+      continue;
+    }
+    if (value < min) {
+      errors.push(`${String(key)} must be >= ${min}, got: ${String(value)}`);
+    }
+  }
+
+  if (
+    cfg.maxMarkdownFileSize !== undefined &&
+    (typeof cfg.maxMarkdownFileSize !== 'number' || cfg.maxMarkdownFileSize < 1)
+  ) {
+    errors.push(`maxMarkdownFileSize must be a positive number, got: ${cfg.maxMarkdownFileSize}`);
+  }
+
+  const requiredBlogPaths: Array<keyof BlogModuleConfig> = [
+    'postsContentDirectory',
+    'templatePostsPath',
+    'templateBlogPath',
+    'templateMainTagsPath',
+    'tempPostsOutputDirectory',
+    'tempTagsOutputDirectory',
+    'tempBlogOutputPath',
+    'publicBlogOutputPath',
+    'publicPostsOutputDirectory',
+    'publicTagsOutputDirectory',
+  ];
+
+  for (const pathKey of requiredBlogPaths) {
+    const pathValue = cfg[pathKey];
+    if (!pathValue || typeof pathValue !== 'string') {
+      errors.push(`${String(pathKey)} is required when blog module is enabled`);
+      continue;
+    }
+
+    // Only validate source/template paths exist. Output directories may not exist yet.
+    if (
+      pathKey === 'postsContentDirectory' ||
+      pathKey === 'templatePostsPath' ||
+      pathKey === 'templateBlogPath' ||
+      pathKey === 'templateMainTagsPath'
+    ) {
+      if (!fs.existsSync(pathValue)) {
+        errors.push(`${String(pathKey)} path does not exist: ${pathValue}`);
+      }
+    }
   }
 }

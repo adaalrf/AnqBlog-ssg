@@ -1,5 +1,5 @@
 import path from 'path';
-import type { Config } from '../../core/types/config.js';
+import type { BlogModuleConfig, Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
 import { parseDate } from '../../core/shared/date-utils.js';
@@ -20,22 +20,28 @@ import type { LayoutDirectoryPair } from '../../core/types/layout.js';
 
 const blogModule: Module = {
   name: 'blog',
-  directoryPairs: (config: Config): LayoutDirectoryPair[] => [
-    {
-      inputDir: config.tempPostsOutputDirectory,
-      outputDir: config.publicPostsOutputDirectory,
-    },
-    {
-      inputDir: config.tempTagsOutputDirectory,
-      outputDir: config.publicTagsOutputDirectory,
-    },
-    {
-      inputDir: config.tempBlogOutputPath,
-      outputDir: config.publicBlogOutputPath,
-    },
-  ],
+  validate: (config: Config): void => {
+    getBlogConfig(config);
+  },
+  directoryPairs: (config: Config): LayoutDirectoryPair[] => {
+    const blogConfig = getBlogConfig(config);
+    return [
+      {
+        inputDir: blogConfig.tempPostsOutputDirectory,
+        outputDir: blogConfig.publicPostsOutputDirectory,
+      },
+      {
+        inputDir: blogConfig.tempTagsOutputDirectory,
+        outputDir: blogConfig.publicTagsOutputDirectory,
+      },
+      {
+        inputDir: blogConfig.tempBlogOutputPath,
+        outputDir: blogConfig.publicBlogOutputPath,
+      },
+    ];
+  },
   run: async (context: ModuleContext) => {
-    const { config } = context;
+    const config = getBlogConfig(context.config);
 
     logger.info('blog-module', 'Processing markdown files...');
     const truncatedPosts = await processAndSortMarkdownFiles(config.postsContentDirectory, {
@@ -158,7 +164,7 @@ const generateTagsDropdown = (tags: Tags): string => {
     .join('\n');
 };
 
-const generateRssFeed = async (posts: Post[], config: Config): Promise<void> => {
+const generateRssFeed = async (posts: Post[], config: Config & BlogModuleConfig): Promise<void> => {
   const rssPath = path.join(config.publicContentOutputDirectory, 'rss.xml');
   const items = posts.map((post) => ({
     title: post.title,
@@ -177,7 +183,11 @@ const generateRssFeed = async (posts: Post[], config: Config): Promise<void> => 
   logger.info('blog-module', 'Generated RSS feed -> rss.xml');
 };
 
-const generateSitemapFile = async (posts: Post[], tags: Tags, config: Config): Promise<void> => {
+const generateSitemapFile = async (
+  posts: Post[],
+  tags: Tags,
+  config: Config & BlogModuleConfig,
+): Promise<void> => {
   const sitemapPath = path.join(config.publicContentOutputDirectory, 'sitemap.xml');
   const sitemapContent = generateSitemap(buildSitemapPages(posts, tags, config));
   await writeFileContent(sitemapPath, sitemapContent);
@@ -187,7 +197,7 @@ const generateSitemapFile = async (posts: Post[], tags: Tags, config: Config): P
 const buildSitemapPages = (
   posts: Post[],
   tags: Tags,
-  config: Config,
+  config: Config & BlogModuleConfig,
 ): { url: string; lastmod: Date }[] => {
   return [
     { url: config.siteUrl, lastmod: new Date() },
@@ -211,6 +221,60 @@ const buildSitemapPages = (
     }),
     { url: `${config.siteUrl}/blog/tags`, lastmod: new Date() },
   ];
+};
+
+const getBlogConfig = (config: Config): Config & BlogModuleConfig => {
+  assertBlogConfig(config);
+  return config as Config & BlogModuleConfig;
+};
+
+const assertBlogConfig = (config: Config): void => {
+  const requiredStringKeys: Array<keyof BlogModuleConfig> = [
+    'postsContentDirectory',
+    'templatePostsPath',
+    'templateBlogPath',
+    'templateMainTagsPath',
+    'tempPostsOutputDirectory',
+    'tempTagsOutputDirectory',
+    'tempBlogOutputPath',
+    'publicBlogOutputPath',
+    'publicPostsOutputDirectory',
+    'publicTagsOutputDirectory',
+  ];
+  for (const key of requiredStringKeys) {
+    const value = config[key];
+    if (typeof value !== 'string' || !value.trim()) {
+      throw new Error(`Missing or invalid blog config key: ${String(key)}`);
+    }
+  }
+
+  assertPositiveInteger(config.postsPerPage, 'postsPerPage');
+  assertNonNegativeNumber(config.previewLength, 'previewLength');
+  assertPositiveInteger(config.titleTruncationLength, 'titleTruncationLength');
+  assertPositiveInteger(config.titleTruncationLengthBreadcrumb, 'titleTruncationLengthBreadcrumb');
+  assertPositiveInteger(config.paginationWindowSize, 'paginationWindowSize');
+
+  if (config.maxMarkdownFileSize !== undefined) {
+    assertPositiveNumber(config.maxMarkdownFileSize, 'maxMarkdownFileSize');
+  }
+};
+
+const assertPositiveInteger = (value: unknown, key: string): void => {
+  if (!Number.isInteger(value) || (value as number) < 1) {
+    throw new Error(`Missing or invalid blog config key: ${key}`);
+  }
+};
+
+const assertNonNegativeNumber = (value: unknown, key: string): void => {
+  if (typeof value !== 'number' || value < 0) {
+    throw new Error(`Missing or invalid blog config key: ${key}`);
+  }
+};
+
+const assertPositiveNumber = (value: unknown, key: string): void => {
+  if (typeof value !== 'number' || value < 1) {
+    throw new Error(`Missing or invalid blog config key: ${key}`);
+  }
 };
 
 export default blogModule;

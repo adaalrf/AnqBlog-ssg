@@ -6,23 +6,17 @@
  */
 
 /**
- * Site configuration settings.
+ * Core site configuration settings.
  */
-export interface SiteConfig {
+export interface CoreSiteConfig {
   siteName: string;
   siteDescription: string;
   siteUrl: string;
   githubUrl: string;
   authorName: string;
   copyrightYear: number;
-  postsPerPage: number;
-  previewLength: number;
-  titleTruncationLength: number;
-  titleTruncationLengthBreadcrumb: number;
-  paginationWindowSize: number;
   dateLocale: string;
   siteLanguage: string;
-  maxMarkdownFileSize?: number; // Maximum file size in bytes (default: 5MB)
 }
 
 /**
@@ -41,28 +35,56 @@ export interface ModuleConfig {
 }
 
 /**
- * Path configuration settings.
+ * Core path configuration settings.
  */
-export interface PathConfig {
+export interface CorePathConfig {
   inputCSS: string;
   outputCSS: string;
   contentDirectory: string;
+  template404Path: string;
+  mainLayoutPath: string;
+  publicContentOutputDirectory: string;
+}
+
+/**
+ * Blog module site configuration settings.
+ */
+export interface BlogSiteConfig {
+  postsPerPage: number;
+  previewLength: number;
+  titleTruncationLength: number;
+  titleTruncationLengthBreadcrumb: number;
+  paginationWindowSize: number;
+  maxMarkdownFileSize?: number; // Maximum file size in bytes (default: 5MB)
+}
+
+/**
+ * Blog module path configuration settings.
+ */
+export interface BlogPathConfig {
   postsContentDirectory: string;
   templatePostsPath: string;
   templateBlogPath: string;
   templateMainTagsPath: string;
-  template404Path: string;
-  mainLayoutPath: string;
   tempPostsOutputDirectory: string;
   tempTagsOutputDirectory: string;
   tempBlogOutputPath: string;
-  publicContentOutputDirectory: string;
   publicBlogOutputPath: string;
   publicPostsOutputDirectory: string;
   publicTagsOutputDirectory: string;
 }
 
 /**
- * Combined configuration (site + path).
+ * Blog module combined config settings.
  */
-export type Config = SiteConfig & PathConfig & ThemeConfig & ModuleConfig;
+export type BlogModuleConfig = BlogSiteConfig & BlogPathConfig;
+
+/**
+ * Core configuration that is always required.
+ */
+export type CoreConfig = CoreSiteConfig & CorePathConfig & ThemeConfig & ModuleConfig;
+
+/**
+ * Final merged configuration used by the build system.
+ */
+export type Config = CoreConfig & Partial<BlogModuleConfig>;

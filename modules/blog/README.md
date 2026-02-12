@@ -12,7 +12,7 @@ modules: ['blog'];
 
 ## Required Config
 
-These keys must be set in `core/config/config.ts`:
+These keys must be set in `core/config/config.ts` when the module list includes `'blog'`:
 
 - `postsContentDirectory`
 - `templatePostsPath`
@@ -27,6 +27,9 @@ These keys must be set in `core/config/config.ts`:
 - `postsPerPage`
 - `paginationWindowSize`
 - `previewLength`
+- `titleTruncationLength`
+- `titleTruncationLengthBreadcrumb`
+- `maxMarkdownFileSize` (optional)
 
 ## Content
 
