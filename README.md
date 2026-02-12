@@ -69,6 +69,7 @@ modules: ['blog'];
 ## Plan
 
 - Active plan and expanded TODOs live in `TODO.md`.
+- Re-release notes and change history live in `CHANGELOG.md`.
 
 ## Content
 
