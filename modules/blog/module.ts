@@ -1,9 +1,9 @@
 import path from 'path';
-import fs from 'fs';
 import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
 import { parseDate } from '../../core/shared/date-utils.js';
+import { createModuleConfigApi } from '../../core/shared/module-config-api.js';
 import { writeFileContent } from '../../core/shared/path-and-file-utils.js';
 import {
   denormalizeTagFromFile,
@@ -230,6 +230,7 @@ const getBlogConfig = (config: Config): Config & BlogModuleConfig => {
 };
 
 const assertBlogConfig = (config: Config): void => {
+  const configApi = createModuleConfigApi('blog', config);
   const requiredStringKeys: Array<keyof BlogModuleConfig> = [
     'postsContentDirectory',
     'templatePostsPath',
@@ -243,10 +244,7 @@ const assertBlogConfig = (config: Config): void => {
     'publicTagsOutputDirectory',
   ];
   for (const key of requiredStringKeys) {
-    const value = config[key];
-    if (typeof value !== 'string' || !value.trim()) {
-      throw new Error(`Missing or invalid blog config key: ${String(key)}`);
-    }
+    configApi.requireString(String(key));
   }
 
   const requiredExistingPaths: Array<keyof BlogModuleConfig> = [
@@ -256,39 +254,15 @@ const assertBlogConfig = (config: Config): void => {
     'templateMainTagsPath',
   ];
   for (const key of requiredExistingPaths) {
-    const value = config[key] as string;
-    if (!fs.existsSync(value)) {
-      throw new Error(`Blog config path does not exist: ${String(key)} -> ${value}`);
-    }
+    configApi.requireExistingPath(String(key));
   }
 
-  assertPositiveInteger(config.postsPerPage, 'postsPerPage');
-  assertNonNegativeInteger(config.previewLength, 'previewLength');
-  assertPositiveInteger(config.titleTruncationLength, 'titleTruncationLength');
-  assertPositiveInteger(config.titleTruncationLengthBreadcrumb, 'titleTruncationLengthBreadcrumb');
-  assertPositiveInteger(config.paginationWindowSize, 'paginationWindowSize');
-
-  if (config.maxMarkdownFileSize !== undefined) {
-    assertPositiveNumber(config.maxMarkdownFileSize, 'maxMarkdownFileSize');
-  }
-};
-
-const assertPositiveInteger = (value: unknown, key: string): void => {
-  if (!Number.isInteger(value) || (value as number) < 1) {
-    throw new Error(`Missing or invalid blog config key: ${key}`);
-  }
-};
-
-const assertNonNegativeInteger = (value: unknown, key: string): void => {
-  if (!Number.isInteger(value) || (value as number) < 0) {
-    throw new Error(`Missing or invalid blog config key: ${key}`);
-  }
-};
-
-const assertPositiveNumber = (value: unknown, key: string): void => {
-  if (typeof value !== 'number' || value < 1) {
-    throw new Error(`Missing or invalid blog config key: ${key}`);
-  }
+  configApi.requireInteger('postsPerPage', 1);
+  configApi.requireInteger('previewLength', 0);
+  configApi.requireInteger('titleTruncationLength', 1);
+  configApi.requireInteger('titleTruncationLengthBreadcrumb', 1);
+  configApi.requireInteger('paginationWindowSize', 1);
+  configApi.optionalPositiveNumber('maxMarkdownFileSize');
 };
 
 export default blogModule;

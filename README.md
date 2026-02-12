@@ -66,6 +66,7 @@ modules: ['blog'];
 - Module config is only required when the module is enabled.
 - Module contract: default export with `run(context)`, optional `directoryPairs`, optional `validate(config)`.
 - `context.ui` provides slot helpers (`setSlot`, `appendSlot`) for layout placeholder injection.
+- `core/shared/module-config-api.ts` provides reusable helpers for module config validation.
 - See module docs for setup: `modules/blog/README.md`.
 
 ## Content
