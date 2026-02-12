@@ -28,6 +28,12 @@
 - [ ] Add optional module output manifest API (module returns generated paths for diagnostics).
 - [ ] Add module-scoped logger factory (`context.logger`) to standardize naming and levels.
 
+## Phase 5: Shared Utility Convergence
+- [x] Move `filePathToWebPath` into `core/shared` as module-agnostic utility.
+- [x] Replace duplicated path-to-web logic in `core/pipeline/apply-layout.ts`.
+- [x] Replace blog usage of `modules/blog/utils/path-and-file-utils.ts`.
+- [x] Remove module-local duplicate utility and migrate tests to core/shared.
+
 ## Guardrails
 - No module-specific branching in `core/`.
 - If a feature is module-specific, place type/validation/docs under `modules/<name>/`.
