@@ -12,6 +12,7 @@ import {
   ensureDirectoryExists,
   writeFileContent,
 } from '../shared/path-and-file-utils.js';
+import { filePathToWebPath } from '../shared/web-path-utils.js';
 import { minifyHtml } from '../internal/html-minify.js';
 import { logger } from '../shared/logger.js';
 
@@ -149,18 +150,8 @@ const processDirectory = async (
 
       const finalTitle = `${config.siteName} | ${(data.title as string) || ''}`;
 
-      // Generate canonical URL and Open Graph URL from file path
-      // Convert file path relative to public directory to URL path
-      const publicDir = config.publicContentOutputDirectory;
-      let relativePath = path.relative(publicDir, outputFilePath);
-      // Normalize path separators
-      relativePath = relativePath.replace(/\\/g, '/');
-      // Remove index.html for directory URLs, but keep .html for other pages
-      if (relativePath.endsWith('/index.html')) {
-        relativePath = relativePath.replace(/\/index\.html$/, '');
-      }
-      // Ensure it starts with /
-      const urlPath = relativePath.startsWith('/') ? relativePath : '/' + relativePath;
+      // Generate canonical URL and Open Graph URL from output file path.
+      const urlPath = filePathToWebPath(outputFilePath, config.publicContentOutputDirectory);
       // If empty or '/', use base URL. If '/index.html' (root index), also use base URL.
       const canonicalUrl =
         urlPath === '/' || urlPath === '/index.html' ? config.siteUrl : config.siteUrl + urlPath;
