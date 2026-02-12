@@ -6,7 +6,7 @@ import fsPromises from 'fs/promises';
 import path from 'path';
 import { readFileContent, sanitizeFilename } from '../../../core/shared/path-and-file-utils.js';
 import { logger } from '../../../core/shared/logger.js';
-import type { ProcessMarkdownOptions, ParsedFrontMatter, ParsedMarkdown, Post } from '../types.js';
+import type { ProcessMarkdownOptions, ParsedMarkdown, Post } from '../types.js';
 
 /**
  * Constants for content processing
@@ -116,72 +116,6 @@ export const getFirstNthCharacters = (
   }
 
   return truncate(htmlContent, length, { ellipsis: '...' });
-};
-
-/**
- * Injects content into a template.
- * @param templateContent - The template content.
- * @param data - The data to inject.
- * @returns The DOM object with injected content.
- * @throws {Error} If templateContent is not a string or data is not an object.
- */
-export const injectContentIntoTemplate = (
-  templateContent: string,
-  data: Record<string, unknown>,
-): JSDOM => {
-  if (typeof templateContent !== 'string') {
-    throw new Error('Template content must be a string');
-  }
-  if (!data || typeof data !== 'object' || Array.isArray(data)) {
-    throw new Error('Data must be an object');
-  }
-  const tagWrapper = (tag: string) => `<a href="#">${tag}</a>`;
-  const tagsContainerSelector = '[data-hook="tags"]';
-  const tagDividerSelector = '[data-hook="tag-divider"]';
-
-  const dom = new JSDOM(templateContent);
-  const document = dom.window.document;
-
-  // Replace placeholders
-  Object.keys(data).forEach((key) => {
-    const placeholder = new RegExp(`{{{${key}}}}`, 'g');
-    const value = data[key];
-    document.body.innerHTML = document.body.innerHTML.replace(placeholder, String(value));
-  });
-
-  // Handle tags
-  const tagsContainer = document.querySelector(tagsContainerSelector);
-  const tagDivider = document.querySelector(tagDividerSelector);
-  if (tagsContainer) {
-    const tags = data.tags as string[] | undefined;
-    if (tags && tags.length > 0) {
-      const tagsList = tags.map(tagWrapper).join(' ');
-      tagsContainer.innerHTML = tagsList;
-    } else {
-      tagsContainer.remove();
-      if (tagDivider) tagDivider.remove();
-    }
-  }
-
-  return dom;
-};
-
-/**
- * Parses front matter from HTML files.
- * @param fileContent - The HTML file content.
- * @returns The parsed data and HTML content.
- */
-export const parseHtmlFrontMatter = (fileContent: string): ParsedFrontMatter => {
-  if (typeof fileContent !== 'string') {
-    throw new Error('File content must be a string');
-  }
-  try {
-    const { data, content } = matter(fileContent);
-    return { data: data || {}, content: content || '' };
-  } catch (error) {
-    const err = error as Error;
-    throw new Error(`Failed to parse front matter: ${err.message}`);
-  }
 };
 
 /**
@@ -414,31 +348,6 @@ export const processMarkdownFiles = async (
 
   // Filter out null results (skipped files)
   return results.filter((post): post is Partial<Post> => post !== null);
-};
-
-/**
- * Replaces placeholders in a template with corresponding values.
- * @param template - The template content.
- * @param values - The values to replace the placeholders with.
- * @returns The template with placeholders replaced.
- * @throws {Error} If template is not a string or values is not an object.
- */
-export const replacePlaceholders = (template: string, values: Record<string, unknown>): string => {
-  if (typeof template !== 'string') {
-    throw new Error('Template must be a string');
-  }
-  if (!values || typeof values !== 'object' || Array.isArray(values)) {
-    throw new Error('Values must be an object');
-  }
-  return template.replace(/{{(\w+)}}/g, (placeholder, key: string) => {
-    const value = key in values ? values[key] : placeholder;
-    // Strip newlines from page breadcrumb to prevent layout shifts
-    if (key === 'page' && typeof value === 'string') {
-      const cleanedValue = value.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
-      return cleanedValue;
-    }
-    return String(value);
-  });
 };
 
 /**

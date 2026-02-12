@@ -33,6 +33,7 @@
 - [x] Replace duplicated path-to-web logic in `core/pipeline/apply-layout.ts`.
 - [x] Replace blog usage of `modules/blog/utils/path-and-file-utils.ts`.
 - [x] Remove module-local duplicate utility and migrate tests to core/shared.
+- [x] Remove unused duplicate template/frontmatter helpers from `modules/blog/utils/content-utils.ts`.
 
 ## Guardrails
 - No module-specific branching in `core/`.

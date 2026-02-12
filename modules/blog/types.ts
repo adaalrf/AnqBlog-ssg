@@ -56,14 +56,6 @@ export interface Post {
 }
 
 /**
- * Parsed front matter result.
- */
-export interface ParsedFrontMatter {
-  data: Record<string, unknown>;
-  content: string;
-}
-
-/**
  * Parsed markdown result.
  */
 export interface ParsedMarkdown {
