@@ -21,7 +21,6 @@
     --ring: hsl(193, 85%, 55%);
 
     /* Layout tokens */
-    --page-min-width: 18rem;
     --page-max-width-sm: 32rem;
     --page-max-width-md: 48rem;
   }

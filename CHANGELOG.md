@@ -11,6 +11,7 @@ Format is inspired by Keep a Changelog and follows Semantic Versioning intent.
 - Core placeholder replacement now supports non-whitespace keys (for example `{{tags-dropdown}}`) instead of only `\w` keys.
 - Dev server now serves `.jpg` files with the standard `image/jpeg` MIME type.
 - Core document title composition now avoids trailing separators when page title is empty.
+- Main layout container now avoids mobile horizontal overflow from width + horizontal margin interaction.
 
 ## [0.6.0] - 2026-02-12
 
