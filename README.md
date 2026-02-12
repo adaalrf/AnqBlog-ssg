@@ -80,13 +80,14 @@ modules: ['blog'];
 
 - Layout: `templates/layout-template.html`.
 - 404: `templates/404-template.html`.
-- Page templates: `templates/<page>-template.html` with `{{{content}}}`.
+- Page templates: `templates/<page>-template.html` with triple-brace placeholders (for example `{{{content}}}`).
+- Main layout placeholders use double braces (for example `{{title}}`, `{{children}}`).
 - Module templates are documented per module.
 
 ## Theming
 
 - Base + tokens: `styles/base.css`, `styles/tokens.css`.
-- Themes: `styles/themes/*.css` (applied via `data-theme`).
+- Theme overrides: `styles/themes/{dark,rose,mono}.css` (applied via `data-theme`).
 - Toggle logic: `client/toggle-theme.ts`.
 
 ## Output
@@ -101,7 +102,7 @@ core/config/ config + validation
 core/pipeline/ build pipeline
 core/shared/  utilities shared with modules
 core/internal/ core-only helpers
-modules/blog/utils/ blog-only helpers
+modules/blog/{pipeline,domain,utils}/ blog-only helpers
 core/cli/     build + serve entrypoints
 core/types/   shared types
 modules/      optional features (blog)

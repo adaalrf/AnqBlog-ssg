@@ -56,10 +56,10 @@
 - [x] Slice 7.5: extract common layout metadata assembly used by page/404 rendering in core pipeline to reduce drift.
 
 ### Per-slice completion checklist
-- [ ] Code change is minimal and isolated.
-- [ ] Docs updated if contract/behavior changed.
-- [ ] Run: `npx tsc --noEmit`, `npm run lint --silent`, `npm test`, `npm run build`.
-- [ ] Commit with conventional commit message.
+- [x] Code change is minimal and isolated.
+- [x] Docs updated if contract/behavior changed.
+- [x] Run: `npx tsc --noEmit`, `npm run lint --silent`, `npm test`, `npm run build`.
+- [x] Commit with conventional commit message.
 
 ### Notes / ideas parking lot
 - `core/pipeline/generate-imports.ts` still has script-style side effects; consider a pure function + thin CLI wrapper later (optional).

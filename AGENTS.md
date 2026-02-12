@@ -4,7 +4,7 @@ core:
 config: core/config/{config.ts,example.config.ts,validate-config.ts}
 pipeline: core/pipeline/{generate.ts,apply-layout.ts,build-css.ts,generate-imports.ts,generate-robots.ts,generate-rss.ts,generate-sitemap.ts,module-runner.ts}
 shared: core/shared/{logger.ts,date-utils.ts,path-and-file-utils.ts,web-path-utils.ts,module-config-api.ts}
-internal: core/internal/{content-utils.ts,error-utils.ts,html-minify.ts}
+internal: core/internal/{content-utils.ts,layout-placeholders.ts,error-utils.ts,html-minify.ts}
 cli: core/cli/{build.ts,serve.ts}
 types: core/types/{config.ts,module.ts,layout.ts,index.ts}
 modules:
