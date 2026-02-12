@@ -3,7 +3,6 @@ import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
 import { parseDate } from '../../core/shared/date-utils.js';
-import { createModuleConfigApi } from '../../core/shared/module-config-api.js';
 import { writeFileContent } from '../../core/shared/path-and-file-utils.js';
 import {
   denormalizeTagFromFile,
@@ -17,30 +16,14 @@ import { generateIntermediatePostHtmlFiles } from './pipeline/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './pipeline/blog.js';
 import { generateTagPages } from './pipeline/tags.js';
 import type { BlogModuleConfig, Post, Tags } from './types.js';
-import type { LayoutDirectoryPair } from '../../core/types/layout.js';
+import { getBlogConfig, getBlogDirectoryPairs, validateBlogConfig } from './config.js';
 
 const blogModule: Module = {
   name: 'blog',
   validate: (config: Config): void => {
-    getBlogConfig(config);
+    validateBlogConfig(config);
   },
-  directoryPairs: (config: Config): LayoutDirectoryPair[] => {
-    const blogConfig = getBlogConfig(config);
-    return [
-      {
-        inputDir: blogConfig.tempPostsOutputDirectory,
-        outputDir: blogConfig.publicPostsOutputDirectory,
-      },
-      {
-        inputDir: blogConfig.tempTagsOutputDirectory,
-        outputDir: blogConfig.publicTagsOutputDirectory,
-      },
-      {
-        inputDir: blogConfig.tempBlogOutputPath,
-        outputDir: blogConfig.publicBlogOutputPath,
-      },
-    ];
-  },
+  directoryPairs: getBlogDirectoryPairs,
   run: async (context: ModuleContext) => {
     const config = getBlogConfig(context.config);
 
@@ -222,47 +205,6 @@ const buildSitemapPages = (
     }),
     { url: `${config.siteUrl}/blog/tags`, lastmod: new Date() },
   ];
-};
-
-const getBlogConfig = (config: Config): Config & BlogModuleConfig => {
-  assertBlogConfig(config);
-  return config as Config & BlogModuleConfig;
-};
-
-const assertBlogConfig = (config: Config): void => {
-  const configApi = createModuleConfigApi('blog', config);
-  const requiredStringKeys: Array<keyof BlogModuleConfig> = [
-    'postsContentDirectory',
-    'templatePostsPath',
-    'templateBlogPath',
-    'templateMainTagsPath',
-    'tempPostsOutputDirectory',
-    'tempTagsOutputDirectory',
-    'tempBlogOutputPath',
-    'publicBlogOutputPath',
-    'publicPostsOutputDirectory',
-    'publicTagsOutputDirectory',
-  ];
-  for (const key of requiredStringKeys) {
-    configApi.requireString(String(key));
-  }
-
-  const requiredExistingPaths: Array<keyof BlogModuleConfig> = [
-    'postsContentDirectory',
-    'templatePostsPath',
-    'templateBlogPath',
-    'templateMainTagsPath',
-  ];
-  for (const key of requiredExistingPaths) {
-    configApi.requireExistingPath(String(key));
-  }
-
-  configApi.requireInteger('postsPerPage', 1);
-  configApi.requireInteger('previewLength', 0);
-  configApi.requireInteger('titleTruncationLength', 1);
-  configApi.requireInteger('titleTruncationLengthBreadcrumb', 1);
-  configApi.requireInteger('paginationWindowSize', 1);
-  configApi.optionalPositiveNumber('maxMarkdownFileSize');
 };
 
 export default blogModule;
