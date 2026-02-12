@@ -40,6 +40,7 @@
 ## Phase 6: CLI Simplification
 - [x] Remove build mode flags and keep a single deterministic `npm run build` path.
 - [x] Reduce `core/cli/build.ts` orchestration duplication with shared command/path/timing helpers.
+- [x] Add CLI smoke tests for build argument handling and no-flag execution.
 
 ## Guardrails
 - No module-specific branching in `core/`.
