@@ -64,7 +64,7 @@ modules: ['blog'];
 - Modules live under `modules/` and are enabled by name in `core/config/config.ts`.
 - Core works without modules (static pages, `robots.txt`, `404.html`).
 - Module config is only required when the module is enabled.
-- Module contract: default export with `run(context)`, optional `directoryPairs`, optional `validate(config)`.
+- Module contract: default export with `run(context)`, optional `directoryPairs`, optional `validate(config)`, optional lifecycle hooks `beforeRun(context)` and `afterRun(context)`.
 - `context.ui` provides slot helpers (`setSlot`, `appendSlot`) for layout placeholder injection.
 - `core/shared/module-config-api.ts` provides reusable helpers for module config validation.
 - `core/shared/web-path-utils.ts` provides shared file-path to web-path conversion.

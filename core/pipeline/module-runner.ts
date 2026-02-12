@@ -42,15 +42,30 @@ export const createModuleManager = async (config: Config): Promise<ModuleManager
     layoutDirectoryPairs,
     runModules: async (context: ModuleContext) => {
       for (const { module, name } of modules) {
-        try {
-          await module.run(context);
-        } catch (error) {
-          const err = error instanceof Error ? error : new Error(String(error));
-          throw new Error(`Module "${name}" execution failed: ${err.message}`);
-        }
+        await runModuleStep(module.beforeRun, name, 'beforeRun', context);
+        await runModuleStep(module.run, name, 'run', context);
+        await runModuleStep(module.afterRun, name, 'afterRun', context);
       }
     },
   };
+};
+
+const runModuleStep = async (
+  step: ((context: ModuleContext) => Promise<void> | void) | undefined,
+  moduleName: string,
+  stepName: 'beforeRun' | 'run' | 'afterRun',
+  context: ModuleContext,
+): Promise<void> => {
+  if (typeof step !== 'function') {
+    return;
+  }
+
+  try {
+    await step(context);
+  } catch (error) {
+    const err = error instanceof Error ? error : new Error(String(error));
+    throw new Error(`Module "${moduleName}" ${stepName} failed: ${err.message}`);
+  }
 };
 
 const loadModules = async (moduleNames: string[]): Promise<LoadedModule[]> => {

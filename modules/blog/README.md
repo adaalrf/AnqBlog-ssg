@@ -35,6 +35,7 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 
 - The blog module implements `validate(config)` and fails fast if required blog keys are missing or invalid.
 - Blog validation is module-owned and runs through the core module runner before `run(context)`.
+- Core also supports optional `beforeRun(context)` and `afterRun(context)` hooks; this module currently uses `run(context)` only.
 - Validation uses `createModuleConfigApi` from `core/shared/module-config-api.ts`.
 - Blog config helpers live in `modules/blog/config.ts`.
 

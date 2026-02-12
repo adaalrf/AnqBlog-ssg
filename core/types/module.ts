@@ -26,5 +26,7 @@ export interface Module {
   name?: string;
   directoryPairs?: LayoutDirectoryPair[] | ((config: Config) => LayoutDirectoryPair[]);
   validate?: (config: Config) => void;
+  beforeRun?: (context: ModuleContext) => Promise<void> | void;
   run: (context: ModuleContext) => Promise<void> | void;
+  afterRun?: (context: ModuleContext) => Promise<void> | void;
 }

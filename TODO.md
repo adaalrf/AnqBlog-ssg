@@ -24,7 +24,7 @@
 - [x] Reduce orchestration noise in `modules/blog/module.ts` to high-level use cases.
 
 ## Phase 4: API Expansion Candidates
-- [ ] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.
+- [x] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.
 - [ ] Add optional module output manifest API (module returns generated paths for diagnostics).
 - [ ] Add module-scoped logger factory (`context.logger`) to standardize naming and levels.
 
