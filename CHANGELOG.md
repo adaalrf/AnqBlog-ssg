@@ -4,7 +4,11 @@ All notable changes to this project are documented in this file.
 
 Format is inspired by Keep a Changelog and follows Semantic Versioning intent.
 
-## [Unreleased] - 2026-02-12
+## [Unreleased]
+
+- No unreleased changes yet.
+
+## [0.6.0] - 2026-02-12
 
 This entry summarizes the current re-release hardening work (core-first focus).
 
