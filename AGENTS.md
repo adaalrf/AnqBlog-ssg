@@ -23,7 +23,7 @@ core: CoreConfig = CoreSiteConfig + CorePathConfig + ThemeConfig + ModuleConfig
 blog: modules/blog/types.ts::BlogModuleConfig (required only when 'blog' is enabled)
 module_contract:
 file: modules/<name>/module.ts
-exports: default Module { run(context), directoryPairs?, validate?(config), beforeRun?(context), afterRun?(context) }
+exports: default Module { run(context) => void | { generatedPaths: string[] }, directoryPairs?, validate?(config), beforeRun?(context), afterRun?(context) }
 context: { config, ui.setSlot(slot, content), ui.appendSlot(slot, content) }
 outputs:
 core: public/robots.txt, public/404.html

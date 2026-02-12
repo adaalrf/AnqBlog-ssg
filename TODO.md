@@ -25,7 +25,7 @@
 
 ## Phase 4: API Expansion Candidates
 - [x] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.
-- [ ] Add optional module output manifest API (module returns generated paths for diagnostics).
+- [x] Add optional module output manifest API (module returns generated paths for diagnostics).
 - [ ] Add module-scoped logger factory (`context.logger`) to standardize naming and levels.
 
 ## Phase 5: Shared Utility Convergence

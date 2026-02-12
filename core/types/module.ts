@@ -9,6 +9,10 @@ export interface ModuleUiApi {
   appendSlot: (slot: string, content: string) => void;
 }
 
+export interface ModuleOutputManifest {
+  generatedPaths: string[];
+}
+
 /**
  * Context passed to module functions.
  * @property config - The merged SSG configuration.
@@ -27,6 +31,8 @@ export interface Module {
   directoryPairs?: LayoutDirectoryPair[] | ((config: Config) => LayoutDirectoryPair[]);
   validate?: (config: Config) => void;
   beforeRun?: (context: ModuleContext) => Promise<void> | void;
-  run: (context: ModuleContext) => Promise<void> | void;
+  run: (
+    context: ModuleContext,
+  ) => Promise<ModuleOutputManifest | void> | ModuleOutputManifest | void;
   afterRun?: (context: ModuleContext) => Promise<void> | void;
 }

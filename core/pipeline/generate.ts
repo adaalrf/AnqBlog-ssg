@@ -14,6 +14,7 @@ import { logger } from '../shared/logger.js';
 import { minifyHtml } from '../internal/html-minify.js';
 import type { ModuleContext } from '../types/module.js';
 import type { LayoutDirectoryPair } from '../types/layout.js';
+import type { ModuleRunResult } from './module-runner.js';
 
 const getLayoutDirectoryPairs = (
   modulePairs: LayoutDirectoryPair[] = [],
@@ -52,12 +53,27 @@ const generateAllHtmlFiles = async (): Promise<void> => {
     },
   };
 
-  await moduleManager.runModules(context);
+  const moduleRunResults = await moduleManager.runModules(context);
+  logModuleOutputManifests(moduleRunResults);
 
   const layoutDirectoryPairs = getLayoutDirectoryPairs(moduleManager.layoutDirectoryPairs);
   await applyLayoutToHtmlFiles(layoutDirectoryPairs, layoutData);
 
   await generateCoreOutputs(context, layoutData);
+};
+
+const logModuleOutputManifests = (moduleRunResults: ModuleRunResult[]): void => {
+  for (const result of moduleRunResults) {
+    const outputCount = result.outputManifest?.generatedPaths.length ?? 0;
+    if (outputCount === 0) {
+      continue;
+    }
+
+    logger.info(
+      'generate.ts',
+      `Module "${result.moduleName}" reported ${outputCount} generated output path${outputCount === 1 ? '' : 's'}`,
+    );
+  }
 };
 
 const generateCoreOutputs = async (

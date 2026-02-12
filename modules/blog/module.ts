@@ -1,5 +1,6 @@
 import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
+import path from 'path';
 import { logger } from '../../core/shared/logger.js';
 import { generateIntermediatePostHtmlFiles } from './pipeline/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './pipeline/blog.js';
@@ -68,6 +69,16 @@ const blogModule: Module = {
 
     await writeBlogSitemap(fullPosts, tags, config);
     logger.info('blog-module', 'Generated sitemap -> sitemap.xml');
+
+    return {
+      generatedPaths: [
+        config.publicBlogOutputPath,
+        config.publicPostsOutputDirectory,
+        config.publicTagsOutputDirectory,
+        path.join(config.publicContentOutputDirectory, 'rss.xml'),
+        path.join(config.publicContentOutputDirectory, 'sitemap.xml'),
+      ],
+    };
   },
 };
 

@@ -3,7 +3,7 @@ import path from 'path';
 import { pathToFileURL } from 'url';
 import type { Config } from '../types/config.js';
 import type { LayoutDirectoryPair } from '../types/layout.js';
-import type { Module, ModuleContext } from '../types/module.js';
+import type { Module, ModuleContext, ModuleOutputManifest } from '../types/module.js';
 
 interface LoadedModule {
   module: Module;
@@ -12,7 +12,12 @@ interface LoadedModule {
 
 export interface ModuleManager {
   layoutDirectoryPairs: LayoutDirectoryPair[];
-  runModules: (context: ModuleContext) => Promise<void>;
+  runModules: (context: ModuleContext) => Promise<ModuleRunResult[]>;
+}
+
+export interface ModuleRunResult {
+  moduleName: string;
+  outputManifest?: ModuleOutputManifest;
 }
 
 /**
@@ -41,31 +46,62 @@ export const createModuleManager = async (config: Config): Promise<ModuleManager
   return {
     layoutDirectoryPairs,
     runModules: async (context: ModuleContext) => {
+      const results: ModuleRunResult[] = [];
+
       for (const { module, name } of modules) {
         await runModuleStep(module.beforeRun, name, 'beforeRun', context);
-        await runModuleStep(module.run, name, 'run', context);
+        const runResult = await runModuleStep(module.run, name, 'run', context);
         await runModuleStep(module.afterRun, name, 'afterRun', context);
+
+        const manifest = normalizeOutputManifest(runResult, name);
+        results.push({ moduleName: name, outputManifest: manifest });
       }
+
+      return results;
     },
   };
 };
 
-const runModuleStep = async (
-  step: ((context: ModuleContext) => Promise<void> | void) | undefined,
+const runModuleStep = async <T>(
+  step: ((context: ModuleContext) => Promise<T> | T) | undefined,
   moduleName: string,
   stepName: 'beforeRun' | 'run' | 'afterRun',
   context: ModuleContext,
-): Promise<void> => {
+): Promise<T | undefined> => {
   if (typeof step !== 'function') {
-    return;
+    return undefined;
   }
 
   try {
-    await step(context);
+    return await step(context);
   } catch (error) {
     const err = error instanceof Error ? error : new Error(String(error));
     throw new Error(`Module "${moduleName}" ${stepName} failed: ${err.message}`);
   }
+};
+
+const normalizeOutputManifest = (
+  result: ModuleOutputManifest | void | undefined,
+  moduleName: string,
+): ModuleOutputManifest | undefined => {
+  if (result === undefined) {
+    return undefined;
+  }
+
+  if (!result || typeof result !== 'object' || !Array.isArray(result.generatedPaths)) {
+    throw new Error(`Module "${moduleName}" run returned an invalid output manifest`);
+  }
+
+  const generatedPaths = result.generatedPaths;
+  for (const outputPath of generatedPaths) {
+    if (typeof outputPath !== 'string' || !outputPath.trim()) {
+      throw new Error(`Module "${moduleName}" output manifest must contain non-empty strings`);
+    }
+  }
+
+  return {
+    generatedPaths: [...new Set(generatedPaths)],
+  };
 };
 
 const loadModules = async (moduleNames: string[]): Promise<LoadedModule[]> => {
