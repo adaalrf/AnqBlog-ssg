@@ -6,8 +6,8 @@ import {
   truncateTextOnWordBoundary,
 } from './content-utils.js';
 import { sanitizeFilename } from '../../../core/shared/path-and-file-utils.js';
+import { filePathToWebPath } from '../../../core/shared/web-path-utils.js';
 import { formatDate, formatDateISO } from '../../../core/shared/date-utils.js';
-import { filePathToWebPath } from './path-and-file-utils.js';
 
 import config from '../../../core/config/config.js';
 import type { Post } from '../types.js';
