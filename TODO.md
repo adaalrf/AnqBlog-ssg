@@ -50,7 +50,7 @@
 
 ### Ordered slices (resume-friendly)
 - [x] Slice 7.1: remove module-specific `posts` skip from `core/pipeline/apply-layout.ts` (core must not know blog folder names).
-- [ ] Slice 7.2: fix malformed list markup in `templates/layout-template.html` mobile menu and add a minimal template sanity test.
+- [x] Slice 7.2: fix malformed list markup in `templates/layout-template.html` mobile menu and add a minimal template sanity test.
 - [ ] Slice 7.3: remove duplicated light theme token definitions (`styles/themes/light.css` vs `styles/tokens.css`) and keep one canonical source.
 - [ ] Slice 7.4: clarify core placeholder contract (`{{key}}` vs `{{{key}}}`) in code comments/docs and add focused tests around the selected behavior.
 - [ ] Slice 7.5: extract common layout metadata assembly used by page/404 rendering in core pipeline to reduce drift.
