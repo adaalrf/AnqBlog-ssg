@@ -49,7 +49,7 @@
 - Keep KISS/YAGNI: no new abstractions unless they remove concrete duplication or leakage.
 
 ### Ordered slices (resume-friendly)
-- [ ] Slice 7.1: remove module-specific `posts` skip from `core/pipeline/apply-layout.ts` (core must not know blog folder names).
+- [x] Slice 7.1: remove module-specific `posts` skip from `core/pipeline/apply-layout.ts` (core must not know blog folder names).
 - [ ] Slice 7.2: fix malformed list markup in `templates/layout-template.html` mobile menu and add a minimal template sanity test.
 - [ ] Slice 7.3: remove duplicated light theme token definitions (`styles/themes/light.css` vs `styles/tokens.css`) and keep one canonical source.
 - [ ] Slice 7.4: clarify core placeholder contract (`{{key}}` vs `{{{key}}}`) in code comments/docs and add focused tests around the selected behavior.

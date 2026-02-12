@@ -88,10 +88,6 @@ const processDirectory = async (
     const inputFilePath = path.join(inputDir, file);
     const outputFilePath = path.join(outputDir, file);
 
-    if (file === 'posts') {
-      continue;
-    }
-
     const stats = await fsPromises.stat(inputFilePath);
     if (stats.isDirectory()) {
       ensureDirectoryExists(outputFilePath);
