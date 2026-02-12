@@ -15,7 +15,7 @@
 - [x] Add slot-based UI API: `context.ui.setSlot` / `appendSlot`.
 - [x] Add module config helper API: `createModuleConfigApi`.
 - [x] Adopt config helper API in blog module.
-- [ ] Add unit tests for `core/shared/module-config-api.ts`.
+- [x] Add unit tests for `core/shared/module-config-api.ts`.
 
 ## Phase 3: Blog Module Internal Simplification
 - [x] Extract blog config validation into `modules/blog/config.ts`.
