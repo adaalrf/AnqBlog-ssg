@@ -24,10 +24,6 @@ Open `http://localhost:8080` (set `PORT=3000` to change).
 
 ```bash
 npm run build
-npm run build -- --dry-run
-npm run build -- --incremental
-npm run build -- --clean
-npm run build -- --version
 
 npm run serve
 npm test

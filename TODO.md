@@ -37,6 +37,9 @@
 - [x] Remove module-local duplicate utility and migrate tests to core/shared.
 - [x] Remove unused duplicate template/frontmatter helpers from `modules/blog/utils/content-utils.ts`.
 
+## Phase 6: CLI Simplification
+- [x] Remove build mode flags and keep a single deterministic `npm run build` path.
+
 ## Guardrails
 - No module-specific branching in `core/`.
 - If a feature is module-specific, place type/validation/docs under `modules/<name>/`.

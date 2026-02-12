@@ -20,7 +20,7 @@ import fs from 'fs/promises';
 import path from 'path';
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { readFileSync, existsSync } from 'fs';
+import { existsSync } from 'fs';
 import { pathToFileURL } from 'url';
 
 const execAsync = promisify(exec);
@@ -57,20 +57,6 @@ interface BuildStep {
 }
 
 const buildSteps: BuildStep[] = [];
-
-/**
- * Gets the version from package.json
- */
-function getVersion(): string {
-  try {
-    const packageJson = JSON.parse(readFileSync(path.join(rootDir, 'package.json'), 'utf8')) as {
-      version?: string;
-    };
-    return packageJson.version || 'unknown';
-  } catch {
-    return 'unknown';
-  }
-}
 
 /**
  * Times a build step
@@ -129,47 +115,24 @@ async function ensureConfigExists(): Promise<void> {
 
 void (async (): Promise<void> => {
   try {
-    // Handle command line arguments
     const args = process.argv.slice(2);
-
-    if (args.includes('--version') || args.includes('-v')) {
-      console.log(getVersion());
-      process.exit(0);
+    if (args.length > 0) {
+      throw new Error(`Unexpected build arguments: ${args.join(' ')}. Run build with no flags.`);
     }
 
     // Check and create config if missing (before TypeScript compilation)
     await ensureConfigExists();
 
-    const isDryRun = args.includes('--dry-run');
-    const isIncremental = args.includes('--incremental');
-    // Dry runs should not delete or write build outputs.
-    const shouldClean = !isDryRun && (!isIncremental || args.includes('--clean'));
-
-    if (isDryRun) {
-      preCompileLogger.info(
-        'build.ts',
-        'Dry run: compiling + validating config — TypeScript will emit to dist/ but final outputs (e.g. public/) will NOT be generated',
-      );
-    }
-
     const overallStartTime = Date.now();
 
-    // Remove the public directory (unless incremental build)
+    // Start from a clean output state.
     const publicDir = path.join(rootDir, 'public');
-    if (shouldClean) {
-      const stepIndex = buildSteps.length;
-      startStep('Clean directories');
-      await fs.rm(publicDir, { recursive: true, force: true });
-      const tempDir = path.join(rootDir, '.build');
-      await fs.rm(tempDir, { recursive: true, force: true });
-      endStep(stepIndex);
-    } else {
-      if (isDryRun) {
-        preCompileLogger.info('build.ts', 'Dry run: skipping clean...');
-      } else {
-        preCompileLogger.info('build.ts', 'Using incremental build (skipping clean)...');
-      }
-    }
+    const stepIndex = buildSteps.length;
+    startStep('Clean directories');
+    await fs.rm(publicDir, { recursive: true, force: true });
+    const tempDir = path.join(rootDir, '.build');
+    await fs.rm(tempDir, { recursive: true, force: true });
+    endStep(stepIndex);
 
     // Compile TypeScript first (with incremental compilation)
     // This build orchestrator runs from `dist/build.js` (after `tsc`).
@@ -218,12 +181,6 @@ void (async (): Promise<void> => {
     };
     validateConfigModule.validateConfig();
     endStep(validateStepIndex);
-
-    if (isDryRun) {
-      logger.info('build.ts', '✓ Dry run complete (no outputs generated)');
-      printBuildBreakdown();
-      process.exit(0);
-    }
 
     // Generate dynamic imports
     logger.info('build.ts', 'Generating dynamic imports...');
@@ -356,7 +313,7 @@ void (async (): Promise<void> => {
       };
       await countFiles(publicDir);
     } catch {
-      // Ignore counting errors (directory might not exist in incremental builds)
+      // Ignore counting errors if output directory is missing.
     }
 
     endStep(verifyStepIndex);
