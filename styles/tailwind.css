@@ -8,7 +8,6 @@
 @config "../tailwind.config.js";
 @import 'tailwindcss';
 @import './tokens.css';
-@import './themes/light.css';
 @import './themes/dark.css';
 @import './themes/rose.css';
 @import './themes/mono.css';
