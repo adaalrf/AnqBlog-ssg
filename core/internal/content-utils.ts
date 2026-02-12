@@ -2,8 +2,13 @@ import { JSDOM } from 'jsdom';
 import matter from 'gray-matter';
 import type { ParsedFrontMatter } from '../types/index.js';
 
+const DOUBLE_BRACE_PLACEHOLDER_REGEX = /(?<!{){{(\w+)}}(?!})/g;
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
 /**
  * Injects content into a template.
+ * Uses triple-brace placeholders (`{{{key}}}`) for content-template injection.
  * @param templateContent - The template content.
  * @param data - The data to inject.
  * @returns The DOM object with injected content.
@@ -24,7 +29,7 @@ export const injectContentIntoTemplate = (
   const document = dom.window.document;
 
   Object.keys(data).forEach((key) => {
-    const placeholder = new RegExp(`{{{${key}}}}`, 'g');
+    const placeholder = new RegExp(`{{{${escapeRegExp(key)}}}}`, 'g');
     const value = data[key];
     document.body.innerHTML = document.body.innerHTML.replace(placeholder, String(value));
   });
@@ -52,6 +57,7 @@ export const parseHtmlFrontMatter = (fileContent: string): ParsedFrontMatter => 
 
 /**
  * Replaces placeholders in a template with corresponding values.
+ * Uses double-brace placeholders (`{{key}}`) and intentionally ignores triple-brace placeholders.
  * @param template - The template content.
  * @param values - The values to replace the placeholders with.
  * @returns The template with placeholders replaced.
@@ -64,7 +70,7 @@ export const replacePlaceholders = (template: string, values: Record<string, unk
   if (!values || typeof values !== 'object' || Array.isArray(values)) {
     throw new Error('Values must be an object');
   }
-  return template.replace(/{{(\w+)}}/g, (_placeholder, key: string) => {
+  return template.replace(DOUBLE_BRACE_PLACEHOLDER_REGEX, (_placeholder, key: string) => {
     const value = key in values ? values[key] : '';
     if (key === 'page' && typeof value === 'string') {
       const cleanedValue = value.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
