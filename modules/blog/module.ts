@@ -1,15 +1,13 @@
 import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
-import { parseDate } from '../../core/shared/date-utils.js';
-import { processMarkdownFiles } from './utils/content-utils.js';
 import { generateIntermediatePostHtmlFiles } from './pipeline/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './pipeline/blog.js';
 import { generateTagPages } from './pipeline/tags.js';
-import type { Post } from './types.js';
 import { getBlogConfig, getBlogDirectoryPairs, validateBlogConfig } from './config.js';
 import { writeBlogRss, writeBlogSitemap } from './domain/seo.js';
 import { collectTags, renderTagsDropdown } from './domain/navigation.js';
+import { processAndSortMarkdownFiles } from './domain/posts.js';
 
 const blogModule: Module = {
   name: 'blog',
@@ -71,46 +69,6 @@ const blogModule: Module = {
     await writeBlogSitemap(fullPosts, tags, config);
     logger.info('blog-module', 'Generated sitemap -> sitemap.xml');
   },
-};
-
-const processAndSortMarkdownFiles = async (
-  directory: string,
-  options: { previewLength?: number; maxFileSize?: number } = {},
-): Promise<Post[]> => {
-  const posts = await processMarkdownFiles(directory, options);
-  return posts
-    .map((post): Post => {
-      if (!post.title) {
-        logger.warn('blog-module', `Post missing title: ${post.htmlFileName || 'unknown'}`);
-      }
-      if (!post.content) {
-        logger.warn('blog-module', `Post missing content: ${post.htmlFileName || 'unknown'}`);
-      }
-
-      let postDate = new Date();
-      if (post.date) {
-        try {
-          postDate = typeof post.date === 'string' ? parseDate(post.date) : new Date(post.date);
-        } catch (error) {
-          const err = error instanceof Error ? error : new Error(String(error));
-          logger.warn(
-            'blog-module',
-            `Post has invalid date "${String(post.date)}" (${post.htmlFileName || 'unknown'}): ${err.message}. Using current date.`,
-          );
-        }
-      }
-
-      return {
-        ...post,
-        title: (post.title as string) || 'Untitled',
-        date: postDate,
-        tags: Array.isArray(post.tags) ? post.tags : [],
-        content: (post.content as string) || '',
-        previewContent: (post.previewContent as string) || '',
-        htmlFileName: (post.htmlFileName as string) || '',
-      } as Post;
-    })
-    .sort((a, b) => b.date.getTime() - a.date.getTime());
 };
 
 export default blogModule;
