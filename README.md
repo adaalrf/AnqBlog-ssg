@@ -47,6 +47,7 @@ npm run format
 Example (`core` only):
 
 ```ts
+// Core config keys still required.
 modules: [];
 ```
 
@@ -62,6 +63,7 @@ modules: ['blog'];
 - Modules live under `modules/` and are enabled by name in `core/config/config.ts`.
 - Core works without modules (static pages, `robots.txt`, `404.html`).
 - Module config is only required when the module is enabled.
+- Module contract: default export with `run(context)`, optional `directoryPairs`, optional `validate(config)`.
 - See module docs for setup: `modules/blog/README.md`.
 
 ## Content

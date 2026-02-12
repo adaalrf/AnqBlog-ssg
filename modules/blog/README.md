@@ -31,6 +31,11 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - `titleTruncationLengthBreadcrumb`
 - `maxMarkdownFileSize` (optional)
 
+## Validation
+
+- The blog module implements `validate(config)` and fails fast if required blog keys are missing or invalid.
+- Core config validation remains in `core/config/validate-config.ts`; blog validation runs only when `'blog'` is enabled.
+
 ## Content
 
 - Posts: `content/blog/posts/*.md`

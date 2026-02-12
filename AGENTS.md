@@ -18,9 +18,12 @@ assets: assets/\*
 config:
 location: core/config/config.ts
 modules: config.modules list
+types:
+core: CoreConfig = CoreSiteConfig + CorePathConfig + ThemeConfig + ModuleConfig
+blog: BlogModuleConfig (required only when 'blog' is enabled)
 module_contract:
 file: modules/<name>/module.ts
-exports: default Module { run(context), directoryPairs? }
+exports: default Module { run(context), directoryPairs?, validate?(config) }
 context: { config, layoutData? }
 outputs:
 core: public/robots.txt, public/404.html
