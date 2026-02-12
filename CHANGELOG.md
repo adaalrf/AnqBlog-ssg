@@ -6,6 +6,10 @@ Format is inspired by Keep a Changelog and follows Semantic Versioning intent.
 
 ## [Unreleased]
 
+### Changed
+
+- Refreshed demo blog posts into a current showcase set (guide/how-to + dev-diary mix) with up-to-date project paths and workflow references.
+
 ### Fixed
 
 - Core placeholder replacement now supports non-whitespace keys (for example `{{tags-dropdown}}`) instead of only `\w` keys.
