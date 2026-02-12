@@ -48,8 +48,7 @@ const corePathConfig: CorePathConfig = {
  * Module configuration settings for the static site generator.
  *
  * Add module-specific config keys in this file when enabling modules.
- * Example: for blog, add BlogModuleConfig keys documented in modules/blog/README.md
- * (and typed in modules/blog/types.ts).
+ * See the enabled module README(s) for required keys and optional typing helpers.
  */
 const modulesConfig: ModuleConfig = {
   modules: [],
