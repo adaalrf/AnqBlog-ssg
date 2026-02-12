@@ -31,6 +31,9 @@ npm run lint
 npm run format
 ```
 
+- `npm run serve` is a local development server for the generated `public/` directory only.
+- Do not use `npm run serve` in production.
+
 ## Configuration
 
 - Edit `core/config/config.ts` (typed by `core/types/config.ts`).
@@ -118,6 +121,7 @@ public/      build output
 ## Deployment
 
 Deploy `public/` to any static host.
+Do not deploy the Node-based `npm run serve` script; it is intended for local development only.
 
 ## License
 
