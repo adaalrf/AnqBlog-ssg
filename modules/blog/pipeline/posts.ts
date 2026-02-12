@@ -1,6 +1,5 @@
 import path from 'path';
 import { JSDOM } from 'jsdom';
-import config from '../../../core/config/config.js';
 import {
   generateFrontMatter,
   truncateText,
@@ -24,12 +23,14 @@ import type { Post } from '../types.js';
  * @param posts - The array of posts.
  * @param postTemplatePath - The path to the post template.
  * @param tempPostsOutputDirectory - The directory to save the generated files.
+ * @param titleTruncationLengthBreadcrumb - Max breadcrumb title length.
  * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generateIntermediatePostHtmlFiles = async (
   posts: Post[],
   postTemplatePath: string,
   tempPostsOutputDirectory: string,
+  titleTruncationLengthBreadcrumb: number,
 ): Promise<void> => {
   ensureDirectoryExists(tempPostsOutputDirectory);
 
@@ -96,7 +97,7 @@ export const generateIntermediatePostHtmlFiles = async (
       // Use plain text truncation for breadcrumb (escape to prevent XSS)
       const truncatedTitle = truncateText(
         post.title || 'Untitled',
-        config.titleTruncationLengthBreadcrumb,
+        titleTruncationLengthBreadcrumb,
       );
       const escapedTruncatedTitle = escapeHtml(truncatedTitle);
       const modifiedPathBar = `/ <a href="/blog">Blog</a> / <em>${escapedTruncatedTitle}</em>`

@@ -1,6 +1,5 @@
 import path from 'path';
 import { JSDOM } from 'jsdom';
-import config from '../../../core/config/config.js';
 import { paginatePosts, createPostItem, updatePaginationLinks } from '../utils/pagination-utils.js';
 import {
   generateFrontMatter,
@@ -33,6 +32,10 @@ interface TagLink {
  * @param postsPerPage - The number of posts per page.
  * @param templateMainTagsPath - The path to the main tags index template.
  * @param tempTagsOutputDirectory - The directory to save the paginated tag pages.
+ * @param titleTruncationLength - Max rendered title length for listing cards.
+ * @param paginationWindowSize - Number of numeric page links to render.
+ * @param publicTagsOutputDirectory - Public tags output root used for pagination links.
+ * @param publicContentOutputDirectory - Public site root used for web path generation.
  * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generateTagPages = async (
@@ -41,6 +44,10 @@ export const generateTagPages = async (
   postsPerPage: number,
   templateMainTagsPath: string,
   tempTagsOutputDirectory: string,
+  titleTruncationLength: number,
+  paginationWindowSize: number,
+  publicTagsOutputDirectory: string,
+  publicContentOutputDirectory: string,
 ): Promise<void> => {
   ensureDirectoryExists(tempTagsOutputDirectory); // Ensure the directory exists
 
@@ -106,7 +113,13 @@ export const generateTagPages = async (
 
       // Add each post to the post links container
       pagePosts.forEach((post) => {
-        const postItem = createPostItem(post, postItemTemplate, '/blog/posts', '/blog/tags');
+        const postItem = createPostItem(
+          post,
+          postItemTemplate,
+          titleTruncationLength,
+          '/blog/posts',
+          '/blog/tags',
+        );
         postLinksDiv.appendChild(postItem);
       });
 
@@ -115,9 +128,10 @@ export const generateTagPages = async (
         document,
         pageIndex,
         tagContent,
+        paginationWindowSize,
         tag,
-        config.publicTagsOutputDirectory,
-        config.publicContentOutputDirectory,
+        publicTagsOutputDirectory,
+        publicContentOutputDirectory,
       );
 
       // Save the tag page

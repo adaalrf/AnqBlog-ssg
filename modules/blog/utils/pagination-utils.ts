@@ -8,8 +8,6 @@ import {
 import { sanitizeFilename } from '../../../core/shared/path-and-file-utils.js';
 import { filePathToWebPath } from '../../../core/shared/web-path-utils.js';
 import { formatDate, formatDateISO } from '../../../core/shared/date-utils.js';
-
-import config from '../../../core/config/config.js';
 import type { Post } from '../types.js';
 
 /**
@@ -30,6 +28,7 @@ export const paginatePosts = (posts: Post[], postsPerPage: number): Post[][] => 
  * Creates a post item element.
  * @param post - The post data.
  * @param postItemTemplate - The post item template.
+ * @param titleTruncationLength - Max rendered title length for listings.
  * @param postsPath - The base path for the posts links.
  * @param tagsPath - The base path for the tags links.
  * @returns The post item element.
@@ -37,6 +36,7 @@ export const paginatePosts = (posts: Post[], postsPerPage: number): Post[][] => 
 export const createPostItem = (
   post: Post,
   postItemTemplate: Element,
+  titleTruncationLength: number,
   postsPath: string = '',
   tagsPath: string = '',
 ): Element => {
@@ -62,12 +62,7 @@ export const createPostItem = (
   const normalizedFileName = sanitizeFilename(htmlFileName);
   // Escape title to prevent XSS attacks
   // Truncate on word boundaries to avoid cutting mid-word
-  const escapedTitle = escapeHtml(
-    truncateTextOnWordBoundary(
-      title,
-      (config as { titleTruncationLength: number }).titleTruncationLength,
-    ),
-  );
+  const escapedTitle = escapeHtml(truncateTextOnWordBoundary(title, titleTruncationLength));
   const titleLink = `<a href="${postsWebPath}/${normalizedFileName}">${escapedTitle}</a>`;
 
   const postItem = postItemTemplate.cloneNode(true) as Element;
@@ -121,6 +116,7 @@ export const createPostItem = (
  * @param document - The DOM document.
  * @param pageIndex - The current page index.
  * @param paginatedPosts - The array of paginated posts.
+ * @param paginationWindowSize - Number of numeric page links to render.
  * @param tag - The tag (if any).
  * @param outputDir - The output directory path (e.g., config.publicBlogOutputPath).
  * @param publicDir - The public directory path (e.g., config.publicContentOutputDirectory).
@@ -129,6 +125,7 @@ export const updatePaginationLinks = (
   document: Document,
   pageIndex: number,
   paginatedPosts: Post[][],
+  paginationWindowSize: number,
   tag: string = '',
   outputDir: string | null = null,
   publicDir: string | null = null,
@@ -221,17 +218,8 @@ export const updatePaginationLinks = (
       pageLink.classList.remove('hidden');
     }
   };
-  const startPage = Math.max(
-    0,
-    Math.min(
-      totalPages - (config as { paginationWindowSize: number }).paginationWindowSize,
-      pageIndex - 2,
-    ),
-  );
-  const endPage = Math.min(
-    totalPages,
-    startPage + (config as { paginationWindowSize: number }).paginationWindowSize,
-  );
+  const startPage = Math.max(0, Math.min(totalPages - paginationWindowSize, pageIndex - 2));
+  const endPage = Math.min(totalPages, startPage + paginationWindowSize);
 
   // Remove any previously generated links (defensive; templates should start clean)
   paginationDiv.querySelectorAll('[data-generated="page-link"]').forEach((el) => el.remove());

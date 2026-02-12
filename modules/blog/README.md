@@ -46,6 +46,7 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - `modules/blog/domain/navigation.ts`: tags aggregation and dropdown rendering.
 - `modules/blog/domain/seo.ts`: RSS and sitemap generation helpers.
 - Pagination uses `filePathToWebPath` from `core/shared/web-path-utils.ts` (shared utility).
+- Blog pipeline helpers consume module config passed from `run(context)` rather than importing `core/config/config.ts` directly.
 
 ## UI Slots
 

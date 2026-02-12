@@ -1,6 +1,5 @@
 import path from 'path';
 import { JSDOM } from 'jsdom';
-import config from '../../../core/config/config.js';
 import { paginatePosts, createPostItem, updatePaginationLinks } from '../utils/pagination-utils.js';
 import { getListingTemplatePath, getCachedTemplate } from '../utils/template-utils.js';
 import { generateFrontMatter } from '../utils/content-utils.js';
@@ -18,6 +17,10 @@ import type { Post } from '../types.js';
  * @param postsPerPage - The number of posts per page.
  * @param templateBlogPath - The path to the blog template.
  * @param tempBlogOutputPath - The directory to save the paginated blog pages.
+ * @param titleTruncationLength - Max rendered title length for listing cards.
+ * @param paginationWindowSize - Number of numeric page links to render.
+ * @param publicBlogOutputPath - Public blog output root used for pagination links.
+ * @param publicContentOutputDirectory - Public site root used for web path generation.
  * @throws {Error} If template is missing required elements or file writing fails.
  */
 export const generatePaginatedBlogHtmlFiles = async (
@@ -25,6 +28,10 @@ export const generatePaginatedBlogHtmlFiles = async (
   postsPerPage: number,
   templateBlogPath: string,
   tempBlogOutputPath: string,
+  titleTruncationLength: number,
+  paginationWindowSize: number,
+  publicBlogOutputPath: string,
+  publicContentOutputDirectory: string,
 ): Promise<void> => {
   ensureDirectoryExists(tempBlogOutputPath);
 
@@ -74,7 +81,13 @@ export const generatePaginatedBlogHtmlFiles = async (
 
     // Add only posts for the current page
     pagePosts.forEach((post) => {
-      const postItem = createPostItem(post, postItemTemplate, '/blog/posts', '/blog/tags');
+      const postItem = createPostItem(
+        post,
+        postItemTemplate,
+        titleTruncationLength,
+        '/blog/posts',
+        '/blog/tags',
+      );
       postLinksDiv.appendChild(postItem);
     });
 
@@ -84,9 +97,10 @@ export const generatePaginatedBlogHtmlFiles = async (
       document,
       pageIndex,
       blogContent,
+      paginationWindowSize,
       '',
-      config.publicBlogOutputPath,
-      config.publicContentOutputDirectory,
+      publicBlogOutputPath,
+      publicContentOutputDirectory,
     );
     const blogElement = document.querySelector('[data-container-id="blog"]');
     if (!blogElement) {

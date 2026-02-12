@@ -22,6 +22,7 @@
 - [x] Extract blog feed/sitemap generation into `modules/blog/domain/seo.ts`.
 - [x] Extract tag/dropdown rendering into `modules/blog/domain/navigation.ts`.
 - [x] Reduce orchestration noise in `modules/blog/module.ts` to high-level use cases.
+- [x] Remove direct `core/config/config.ts` imports from blog pipeline/helpers (pass config explicitly).
 
 ## Phase 4: API Expansion Candidates
 - [x] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.

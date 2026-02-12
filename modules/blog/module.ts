@@ -47,6 +47,7 @@ const blogModule: Module = {
       fullPosts,
       config.templatePostsPath,
       config.tempPostsOutputDirectory,
+      config.titleTruncationLengthBreadcrumb,
     );
 
     await generatePaginatedBlogHtmlFiles(
@@ -54,6 +55,10 @@ const blogModule: Module = {
       config.postsPerPage,
       config.templateBlogPath,
       config.tempBlogOutputPath,
+      config.titleTruncationLength,
+      config.paginationWindowSize,
+      config.publicBlogOutputPath,
+      config.publicContentOutputDirectory,
     );
 
     await generateTagPages(
@@ -62,6 +67,10 @@ const blogModule: Module = {
       config.postsPerPage,
       config.templateMainTagsPath,
       config.tempTagsOutputDirectory,
+      config.titleTruncationLength,
+      config.paginationWindowSize,
+      config.publicTagsOutputDirectory,
+      config.publicContentOutputDirectory,
     );
 
     await writeBlogRss(fullPosts, config);
