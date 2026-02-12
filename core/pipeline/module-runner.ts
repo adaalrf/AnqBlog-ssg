@@ -41,8 +41,13 @@ export const createModuleManager = async (config: Config): Promise<ModuleManager
   return {
     layoutDirectoryPairs,
     runModules: async (context: ModuleContext) => {
-      for (const { module } of modules) {
-        await module.run(context);
+      for (const { module, name } of modules) {
+        try {
+          await module.run(context);
+        } catch (error) {
+          const err = error instanceof Error ? error : new Error(String(error));
+          throw new Error(`Module "${name}" execution failed: ${err.message}`);
+        }
       }
     },
   };

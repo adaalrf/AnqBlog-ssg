@@ -104,25 +104,21 @@ export function validateConfig(): void {
 }
 
 function validateBlogModuleConfig(cfg: Config, errors: string[]): void {
-  const blogNumericFields: Array<{
-    key: keyof BlogModuleConfig;
-    min: number;
-    zeroAllowed?: boolean;
-  }> = [
+  const blogNumericFields: Array<{ key: keyof BlogModuleConfig; min: number }> = [
     { key: 'postsPerPage', min: 1 },
-    { key: 'previewLength', min: 0, zeroAllowed: true },
+    { key: 'previewLength', min: 0 },
     { key: 'titleTruncationLength', min: 1 },
     { key: 'titleTruncationLengthBreadcrumb', min: 1 },
     { key: 'paginationWindowSize', min: 1 },
   ];
 
-  for (const { key, min, zeroAllowed } of blogNumericFields) {
+  for (const { key, min } of blogNumericFields) {
     const value = cfg[key];
-    if (typeof value !== 'number' || (!zeroAllowed && !Number.isInteger(value))) {
-      errors.push(`${String(key)} is required and must be a number`);
+    if (!Number.isInteger(value)) {
+      errors.push(`${String(key)} is required and must be an integer`);
       continue;
     }
-    if (value < min) {
+    if ((value as number) < min) {
       errors.push(`${String(key)} must be >= ${min}, got: ${String(value)}`);
     }
   }

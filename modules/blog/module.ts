@@ -249,7 +249,7 @@ const assertBlogConfig = (config: Config): void => {
   }
 
   assertPositiveInteger(config.postsPerPage, 'postsPerPage');
-  assertNonNegativeNumber(config.previewLength, 'previewLength');
+  assertNonNegativeInteger(config.previewLength, 'previewLength');
   assertPositiveInteger(config.titleTruncationLength, 'titleTruncationLength');
   assertPositiveInteger(config.titleTruncationLengthBreadcrumb, 'titleTruncationLengthBreadcrumb');
   assertPositiveInteger(config.paginationWindowSize, 'paginationWindowSize');
@@ -265,8 +265,8 @@ const assertPositiveInteger = (value: unknown, key: string): void => {
   }
 };
 
-const assertNonNegativeNumber = (value: unknown, key: string): void => {
-  if (typeof value !== 'number' || value < 0) {
+const assertNonNegativeInteger = (value: unknown, key: string): void => {
+  if (!Number.isInteger(value) || (value as number) < 0) {
     throw new Error(`Missing or invalid blog config key: ${key}`);
   }
 };
