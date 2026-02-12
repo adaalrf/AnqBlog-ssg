@@ -10,6 +10,7 @@ import {
 import { parseHtmlFrontMatter, replacePlaceholders } from '../internal/content-utils.js';
 import { generateRobotsTxt } from './generate-robots.js';
 import { formatError } from '../internal/error-utils.js';
+import { buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
 import { logger } from '../shared/logger.js';
 import { minifyHtml } from '../internal/html-minify.js';
 import type { ModuleContext } from '../types/module.js';
@@ -106,25 +107,17 @@ const generate404Page = async (layoutData: Record<string, string>): Promise<bool
     const canonicalUrl = `${config.siteUrl}/404.html`;
     const ogUrl = canonicalUrl;
 
-    let finalHtml = replacePlaceholders(mainLayoutContent, {
-      ...layoutData,
+    const placeholders = buildLayoutPlaceholders({
+      config,
+      layoutData,
       title: finalTitle,
       page: '<a href="/">Home</a> / <span>404</span>',
       children: content,
-      siteName: config.siteName || '',
-      siteDescription: config.siteDescription || '',
-      githubUrl: config.githubUrl || '',
-      authorName: config.authorName || '',
-      copyrightYear: config.copyrightYear || new Date().getFullYear(),
-      siteLanguage: config.siteLanguage || 'en',
       canonicalUrl,
       ogUrl,
       ogType: 'website',
-      stylesPath: '/styles/styles.css',
-      faviconPath: '/assets/favicon.ico',
-      scriptPath: '/js/bundle.js',
-      gitLogoPath: '/assets/github-icon.svg',
     });
+    let finalHtml = replacePlaceholders(mainLayoutContent, placeholders);
 
     finalHtml = minifyHtml(finalHtml);
     await writeFileContent(output404Path, finalHtml);

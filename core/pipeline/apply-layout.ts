@@ -6,6 +6,7 @@ import {
   injectContentIntoTemplate,
   parseHtmlFrontMatter,
 } from '../internal/content-utils.js';
+import { buildLayoutPlaceholders } from '../internal/layout-placeholders.js';
 import {
   fpr,
   readFileContent,
@@ -155,30 +156,18 @@ const processDirectory = async (
 
       const ogType = (data.ogType as string) || 'website';
 
-      // Replace placeholders in the main layout - all assets are at root
-      // Provide defaults for missing fields
-      let finalHtml = replacePlaceholders(mainLayoutContent, {
-        ...data,
-        ...layoutData,
+      const placeholders = buildLayoutPlaceholders({
+        config,
+        data,
+        layoutData,
         title: finalTitle,
-        page: (data.page as string) || '', // Default to empty if not provided
+        page: (data.page as string) || '',
         children: mainContent,
-        siteName: config.siteName || '',
-        siteDescription: config.siteDescription || '',
-        githubUrl: config.githubUrl || '',
-        authorName: config.authorName || '',
-        copyrightYear: config.copyrightYear || new Date().getFullYear(),
-        siteLanguage: config.siteLanguage || 'en',
-        canonicalUrl: canonicalUrl,
-        ogUrl: ogUrl,
-        ogType: ogType,
-        stylesPath: '/styles/styles.css',
-        faviconPath: '/assets/favicon.ico',
-        scriptPath: '/js/bundle.js',
-        gitLogoPath: '/assets/github-icon.svg',
-        themesList: (config.themes || ['dark', 'light', 'rose', 'mono']).join(' '),
-        defaultTheme: config.defaultTheme || 'dark',
+        canonicalUrl,
+        ogUrl,
+        ogType,
       });
+      let finalHtml = replacePlaceholders(mainLayoutContent, placeholders);
 
       // Minify HTML for smaller file sizes
       finalHtml = minifyHtml(finalHtml);
