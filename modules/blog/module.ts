@@ -2,18 +2,14 @@ import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
 import { parseDate } from '../../core/shared/date-utils.js';
-import {
-  denormalizeTagFromFile,
-  escapeHtml,
-  getTagSlug,
-  processMarkdownFiles,
-} from './utils/content-utils.js';
+import { processMarkdownFiles } from './utils/content-utils.js';
 import { generateIntermediatePostHtmlFiles } from './pipeline/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './pipeline/blog.js';
 import { generateTagPages } from './pipeline/tags.js';
-import type { Post, Tags } from './types.js';
+import type { Post } from './types.js';
 import { getBlogConfig, getBlogDirectoryPairs, validateBlogConfig } from './config.js';
 import { writeBlogRss, writeBlogSitemap } from './domain/seo.js';
+import { collectTags, renderTagsDropdown } from './domain/navigation.js';
 
 const blogModule: Module = {
   name: 'blog',
@@ -44,7 +40,7 @@ const blogModule: Module = {
       logger.info('blog-module', `Found ${tagCount} tag${tagCount !== 1 ? 's' : ''}`);
     }
 
-    const tagsDropdown = generateTagsDropdown(tags);
+    const tagsDropdown = renderTagsDropdown(tags);
 
     context.ui.setSlot('tagsDropdown', tagsDropdown);
 
@@ -115,37 +111,6 @@ const processAndSortMarkdownFiles = async (
       } as Post;
     })
     .sort((a, b) => b.date.getTime() - a.date.getTime());
-};
-
-const collectTags = (posts: Post[]): Tags => {
-  const tags: Tags = {};
-  posts.forEach((post) => {
-    if (post.tags && Array.isArray(post.tags)) {
-      post.tags.forEach((tag) => {
-        const normalizedTag = typeof tag === 'string' ? tag.trim() : String(tag).trim();
-        if (!normalizedTag) {
-          return;
-        }
-        if (!tags[normalizedTag]) {
-          tags[normalizedTag] = [];
-        }
-        tags[normalizedTag].push(post);
-      });
-    }
-  });
-  return tags;
-};
-
-const generateTagsDropdown = (tags: Tags): string => {
-  return Object.keys(tags)
-    .map((tag) => {
-      const filesWithDash = getTagSlug(tag);
-      const filesWithoutDash = denormalizeTagFromFile(tag);
-      return `<li><a href="/blog/tags/${filesWithDash}.html" class="dropdown-item">${escapeHtml(
-        filesWithoutDash,
-      )}</a></li>`;
-    })
-    .join('\n');
 };
 
 export default blogModule;
