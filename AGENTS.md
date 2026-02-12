@@ -24,7 +24,7 @@ blog: BlogModuleConfig (required only when 'blog' is enabled)
 module_contract:
 file: modules/<name>/module.ts
 exports: default Module { run(context), directoryPairs?, validate?(config) }
-context: { config, layoutData? }
+context: { config, ui.setSlot(slot, content), ui.appendSlot(slot, content) }
 outputs:
 core: public/robots.txt, public/404.html
 blog: public/blog/\*\*, public/rss.xml, public/sitemap.xml

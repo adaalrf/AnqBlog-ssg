@@ -64,6 +64,7 @@ modules: ['blog'];
 - Core works without modules (static pages, `robots.txt`, `404.html`).
 - Module config is only required when the module is enabled.
 - Module contract: default export with `run(context)`, optional `directoryPairs`, optional `validate(config)`.
+- `context.ui` provides slot helpers (`setSlot`, `appendSlot`) for layout placeholder injection.
 - See module docs for setup: `modules/blog/README.md`.
 
 ## Content

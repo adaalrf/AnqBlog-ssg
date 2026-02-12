@@ -64,8 +64,8 @@ export const replacePlaceholders = (template: string, values: Record<string, unk
   if (!values || typeof values !== 'object' || Array.isArray(values)) {
     throw new Error('Values must be an object');
   }
-  return template.replace(/{{(\w+)}}/g, (placeholder, key: string) => {
-    const value = key in values ? values[key] : placeholder;
+  return template.replace(/{{(\w+)}}/g, (_placeholder, key: string) => {
+    const value = key in values ? values[key] : '';
     if (key === 'page' && typeof value === 'string') {
       const cleanedValue = value.replace(/\n/g, ' ').replace(/\s+/g, ' ').trim();
       return cleanedValue;

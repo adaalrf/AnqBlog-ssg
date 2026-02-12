@@ -65,7 +65,7 @@ const blogModule: Module = {
 
     const tagsDropdown = generateTagsDropdown(tags);
 
-    context.layoutData = { ...context.layoutData, tagsDropdown };
+    context.ui.setSlot('tagsDropdown', tagsDropdown);
 
     await generateIntermediatePostHtmlFiles(
       fullPosts,

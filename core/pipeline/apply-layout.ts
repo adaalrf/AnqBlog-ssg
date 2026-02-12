@@ -167,13 +167,12 @@ const processDirectory = async (
       const ogUrl = canonicalUrl;
 
       const ogType = (data.ogType as string) || 'website';
-      const mergedLayoutData = { tagsDropdown: '', ...layoutData };
 
       // Replace placeholders in the main layout - all assets are at root
       // Provide defaults for missing fields
       let finalHtml = replacePlaceholders(mainLayoutContent, {
         ...data,
-        ...mergedLayoutData,
+        ...layoutData,
         title: finalTitle,
         page: (data.page as string) || '', // Default to empty if not provided
         children: mainContent,

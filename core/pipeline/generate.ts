@@ -38,13 +38,23 @@ const ensureDirectories = (modulePairs: LayoutDirectoryPair[] = []): void => {
 const generateAllHtmlFiles = async (): Promise<void> => {
   const moduleManager = await createModuleManager(config);
   ensureDirectories(moduleManager.layoutDirectoryPairs);
+  const layoutData: Record<string, string> = {};
 
-  const context: ModuleContext = { config };
+  const context: ModuleContext = {
+    config,
+    ui: {
+      setSlot: (slot: string, content: string): void => {
+        layoutData[slot] = content;
+      },
+      appendSlot: (slot: string, content: string): void => {
+        layoutData[slot] = `${layoutData[slot] || ''}${content}`;
+      },
+    },
+  };
 
   await moduleManager.runModules(context);
 
   const layoutDirectoryPairs = getLayoutDirectoryPairs(moduleManager.layoutDirectoryPairs);
-  const layoutData = context.layoutData ?? {};
   await applyLayoutToHtmlFiles(layoutDirectoryPairs, layoutData);
 
   await generateCoreOutputs(context, layoutData);
@@ -79,10 +89,9 @@ const generate404Page = async (layoutData: Record<string, string>): Promise<bool
     const finalTitle = `${config.siteName} | Page Not Found`;
     const canonicalUrl = `${config.siteUrl}/404.html`;
     const ogUrl = canonicalUrl;
-    const mergedLayoutData = { tagsDropdown: '', ...layoutData };
 
     let finalHtml = replacePlaceholders(mainLayoutContent, {
-      ...mergedLayoutData,
+      ...layoutData,
       title: finalTitle,
       page: '<a href="/">Home</a> / <span>404</span>',
       children: content,

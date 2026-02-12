@@ -2,13 +2,21 @@ import type { Config } from './config.js';
 import type { LayoutDirectoryPair } from './layout.js';
 
 /**
+ * UI slot API exposed by core for modules to inject layout fragments.
+ */
+export interface ModuleUiApi {
+  setSlot: (slot: string, content: string) => void;
+  appendSlot: (slot: string, content: string) => void;
+}
+
+/**
  * Context passed to module functions.
  * @property config - The merged SSG configuration.
- * @property layoutData - Extra layout placeholder values (optional).
+ * @property ui - Slot-based UI injection API.
  */
 export interface ModuleContext {
   config: Config;
-  layoutData?: Record<string, string>;
+  ui: ModuleUiApi;
 }
 
 /**

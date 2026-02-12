@@ -36,6 +36,11 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - The blog module implements `validate(config)` and fails fast if required blog keys are missing or invalid.
 - Core config validation remains in `core/config/validate-config.ts`; blog validation runs only when `'blog'` is enabled.
 
+## UI Slots
+
+- The module injects tag links through `context.ui.setSlot('tagsDropdown', html)`.
+- Core leaves unspecified placeholders empty, so this slot is optional when blog is disabled.
+
 ## Content
 
 - Posts: `content/blog/posts/*.md`
