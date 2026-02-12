@@ -47,44 +47,12 @@ export interface CorePathConfig {
 }
 
 /**
- * Blog module site configuration settings.
- */
-export interface BlogSiteConfig {
-  postsPerPage: number;
-  previewLength: number;
-  titleTruncationLength: number;
-  titleTruncationLengthBreadcrumb: number;
-  paginationWindowSize: number;
-  maxMarkdownFileSize?: number; // Maximum file size in bytes (default: 5MB)
-}
-
-/**
- * Blog module path configuration settings.
- */
-export interface BlogPathConfig {
-  postsContentDirectory: string;
-  templatePostsPath: string;
-  templateBlogPath: string;
-  templateMainTagsPath: string;
-  tempPostsOutputDirectory: string;
-  tempTagsOutputDirectory: string;
-  tempBlogOutputPath: string;
-  publicBlogOutputPath: string;
-  publicPostsOutputDirectory: string;
-  publicTagsOutputDirectory: string;
-}
-
-/**
- * Blog module combined config settings.
- */
-export type BlogModuleConfig = BlogSiteConfig & BlogPathConfig;
-
-/**
  * Core configuration that is always required.
  */
 export type CoreConfig = CoreSiteConfig & CorePathConfig & ThemeConfig & ModuleConfig;
 
 /**
  * Final merged configuration used by the build system.
+ * Modules can extend this with additional keys in user config.
  */
-export type Config = CoreConfig & Partial<BlogModuleConfig>;
+export type Config = CoreConfig & Record<string, unknown>;

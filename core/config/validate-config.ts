@@ -1,6 +1,6 @@
 import fs from 'fs';
 import config from './config.js';
-import type { BlogModuleConfig, Config, CorePathConfig } from '../types/config.js';
+import type { Config, CorePathConfig } from '../types/config.js';
 
 /**
  * Validates the site configuration and path configuration.
@@ -10,7 +10,6 @@ import type { BlogModuleConfig, Config, CorePathConfig } from '../types/config.j
 export function validateConfig(): void {
   const errors: string[] = [];
   const cfg = config as Config;
-  const modules = Array.isArray(cfg.modules) ? cfg.modules : [];
 
   // Validate required site config
   if (!cfg.siteName || typeof cfg.siteName !== 'string' || !cfg.siteName.trim()) {
@@ -94,72 +93,7 @@ export function validateConfig(): void {
     }
   }
 
-  if (modules.includes('blog')) {
-    validateBlogModuleConfig(cfg, errors);
-  }
-
   if (errors.length > 0) {
     throw new Error(`Configuration errors:\n${errors.map((e) => `  - ${e}`).join('\n')}`);
-  }
-}
-
-function validateBlogModuleConfig(cfg: Config, errors: string[]): void {
-  const blogNumericFields: Array<{ key: keyof BlogModuleConfig; min: number }> = [
-    { key: 'postsPerPage', min: 1 },
-    { key: 'previewLength', min: 0 },
-    { key: 'titleTruncationLength', min: 1 },
-    { key: 'titleTruncationLengthBreadcrumb', min: 1 },
-    { key: 'paginationWindowSize', min: 1 },
-  ];
-
-  for (const { key, min } of blogNumericFields) {
-    const value = cfg[key];
-    if (!Number.isInteger(value)) {
-      errors.push(`${String(key)} is required and must be an integer`);
-      continue;
-    }
-    if ((value as number) < min) {
-      errors.push(`${String(key)} must be >= ${min}, got: ${String(value)}`);
-    }
-  }
-
-  if (
-    cfg.maxMarkdownFileSize !== undefined &&
-    (typeof cfg.maxMarkdownFileSize !== 'number' || cfg.maxMarkdownFileSize < 1)
-  ) {
-    errors.push(`maxMarkdownFileSize must be a positive number, got: ${cfg.maxMarkdownFileSize}`);
-  }
-
-  const requiredBlogPaths: Array<keyof BlogModuleConfig> = [
-    'postsContentDirectory',
-    'templatePostsPath',
-    'templateBlogPath',
-    'templateMainTagsPath',
-    'tempPostsOutputDirectory',
-    'tempTagsOutputDirectory',
-    'tempBlogOutputPath',
-    'publicBlogOutputPath',
-    'publicPostsOutputDirectory',
-    'publicTagsOutputDirectory',
-  ];
-
-  for (const pathKey of requiredBlogPaths) {
-    const pathValue = cfg[pathKey];
-    if (!pathValue || typeof pathValue !== 'string') {
-      errors.push(`${String(pathKey)} is required when blog module is enabled`);
-      continue;
-    }
-
-    // Only validate source/template paths exist. Output directories may not exist yet.
-    if (
-      pathKey === 'postsContentDirectory' ||
-      pathKey === 'templatePostsPath' ||
-      pathKey === 'templateBlogPath' ||
-      pathKey === 'templateMainTagsPath'
-    ) {
-      if (!fs.existsSync(pathValue)) {
-        errors.push(`${String(pathKey)} path does not exist: ${pathValue}`);
-      }
-    }
   }
 }

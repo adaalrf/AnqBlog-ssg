@@ -34,7 +34,7 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 ## Validation
 
 - The blog module implements `validate(config)` and fails fast if required blog keys are missing or invalid.
-- Core config validation remains in `core/config/validate-config.ts`; blog validation runs only when `'blog'` is enabled.
+- Blog validation is module-owned and runs through the core module runner before `run(context)`.
 
 ## UI Slots
 

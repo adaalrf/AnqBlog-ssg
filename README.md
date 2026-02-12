@@ -40,7 +40,7 @@ npm run format
 - Edit `core/config/config.ts` (typed by `core/types/config.ts`).
 - Core config is split into:
   - `CoreSiteConfig` + `CorePathConfig` + `ThemeConfig` + `ModuleConfig`.
-  - Module configs (for example `BlogModuleConfig`) enabled via `modules`.
+  - Module configs (for example `BlogModuleConfig` in `modules/blog/types.ts`) enabled via `modules`.
 - `modules` enables optional modules (see module READMEs).
 - `core/config/config.ts` is gitignored by default.
 
@@ -55,7 +55,8 @@ Example (`core` + blog):
 
 ```ts
 modules: ['blog'];
-// include BlogModuleConfig keys documented in modules/blog/README.md
+// include BlogModuleConfig keys from modules/blog/types.ts
+// see modules/blog/README.md for required fields
 ```
 
 ## Modules

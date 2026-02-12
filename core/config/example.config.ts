@@ -1,6 +1,5 @@
 import { fpr } from '../shared/path-and-file-utils.js';
 import type {
-  BlogModuleConfig,
   Config,
   CorePathConfig,
   CoreSiteConfig,
@@ -47,32 +46,13 @@ const corePathConfig: CorePathConfig = {
 
 /**
  * Module configuration settings for the static site generator.
+ *
+ * Add module-specific config keys in this file when enabling modules.
+ * Example: for blog, add BlogModuleConfig keys documented in modules/blog/README.md
+ * (and typed in modules/blog/types.ts).
  */
 const modulesConfig: ModuleConfig = {
-  modules: ['blog'],
-};
-
-/**
- * Blog module configuration settings.
- * Required when modules includes 'blog'.
- */
-const blogModuleConfig: BlogModuleConfig = {
-  postsPerPage: 5, // Number of posts per paginated page
-  previewLength: 200, // Character length for post previews
-  titleTruncationLength: 25, // Max title length in post listings
-  titleTruncationLengthBreadcrumb: 20, // Max title length in breadcrumbs
-  paginationWindowSize: 5, // Number of page links in pagination
-  maxMarkdownFileSize: 5 * 1024 * 1024, // Maximum markdown file size in bytes (default: 5MB)
-  postsContentDirectory: fpr('content/blog/posts'),
-  templatePostsPath: fpr('templates/post-template.html'),
-  templateBlogPath: fpr('templates/listing-template.html'),
-  templateMainTagsPath: fpr('templates/main-tags-template.html'),
-  tempPostsOutputDirectory: fpr('.build/blog/posts'),
-  tempTagsOutputDirectory: fpr('.build/blog/tags'),
-  tempBlogOutputPath: fpr('.build/blog'),
-  publicBlogOutputPath: fpr('public/blog'),
-  publicPostsOutputDirectory: fpr('public/blog/posts'),
-  publicTagsOutputDirectory: fpr('public/blog/tags'),
+  modules: [],
 };
 
 /**
@@ -83,7 +63,6 @@ const config = {
   ...corePathConfig,
   ...themeConfig,
   ...modulesConfig,
-  ...blogModuleConfig,
 } satisfies Config;
 
 export default config;

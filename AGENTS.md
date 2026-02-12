@@ -20,7 +20,7 @@ location: core/config/config.ts
 modules: config.modules list
 types:
 core: CoreConfig = CoreSiteConfig + CorePathConfig + ThemeConfig + ModuleConfig
-blog: BlogModuleConfig (required only when 'blog' is enabled)
+blog: modules/blog/types.ts::BlogModuleConfig (required only when 'blog' is enabled)
 module_contract:
 file: modules/<name>/module.ts
 exports: default Module { run(context), directoryPairs?, validate?(config) }

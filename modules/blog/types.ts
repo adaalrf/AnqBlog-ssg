@@ -3,6 +3,39 @@
  */
 
 /**
+ * Blog module site configuration settings.
+ */
+export interface BlogSiteConfig {
+  postsPerPage: number;
+  previewLength: number;
+  titleTruncationLength: number;
+  titleTruncationLengthBreadcrumb: number;
+  paginationWindowSize: number;
+  maxMarkdownFileSize?: number; // Maximum file size in bytes (default: 5MB)
+}
+
+/**
+ * Blog module path configuration settings.
+ */
+export interface BlogPathConfig {
+  postsContentDirectory: string;
+  templatePostsPath: string;
+  templateBlogPath: string;
+  templateMainTagsPath: string;
+  tempPostsOutputDirectory: string;
+  tempTagsOutputDirectory: string;
+  tempBlogOutputPath: string;
+  publicBlogOutputPath: string;
+  publicPostsOutputDirectory: string;
+  publicTagsOutputDirectory: string;
+}
+
+/**
+ * Blog module combined config settings.
+ */
+export type BlogModuleConfig = BlogSiteConfig & BlogPathConfig;
+
+/**
  * Options for processing markdown files.
  */
 export interface ProcessMarkdownOptions {

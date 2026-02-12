@@ -1,5 +1,6 @@
 import path from 'path';
-import type { BlogModuleConfig, Config } from '../../core/types/config.js';
+import fs from 'fs';
+import type { Config } from '../../core/types/config.js';
 import type { Module, ModuleContext } from '../../core/types/module.js';
 import { logger } from '../../core/shared/logger.js';
 import { parseDate } from '../../core/shared/date-utils.js';
@@ -15,7 +16,7 @@ import { generateSitemap } from '../../core/pipeline/generate-sitemap.js';
 import { generateIntermediatePostHtmlFiles } from './pipeline/posts.js';
 import { generatePaginatedBlogHtmlFiles } from './pipeline/blog.js';
 import { generateTagPages } from './pipeline/tags.js';
-import type { Post, Tags } from './types.js';
+import type { BlogModuleConfig, Post, Tags } from './types.js';
 import type { LayoutDirectoryPair } from '../../core/types/layout.js';
 
 const blogModule: Module = {
@@ -245,6 +246,19 @@ const assertBlogConfig = (config: Config): void => {
     const value = config[key];
     if (typeof value !== 'string' || !value.trim()) {
       throw new Error(`Missing or invalid blog config key: ${String(key)}`);
+    }
+  }
+
+  const requiredExistingPaths: Array<keyof BlogModuleConfig> = [
+    'postsContentDirectory',
+    'templatePostsPath',
+    'templateBlogPath',
+    'templateMainTagsPath',
+  ];
+  for (const key of requiredExistingPaths) {
+    const value = config[key] as string;
+    if (!fs.existsSync(value)) {
+      throw new Error(`Blog config path does not exist: ${String(key)} -> ${value}`);
     }
   }
 
