@@ -2,7 +2,7 @@ import { JSDOM } from 'jsdom';
 import matter from 'gray-matter';
 import type { ParsedFrontMatter } from '../types/index.js';
 
-const DOUBLE_BRACE_PLACEHOLDER_REGEX = /(?<!{){{(\w+)}}(?!})/g;
+const DOUBLE_BRACE_PLACEHOLDER_REGEX = /(?<!{){{([^{}\s]+)}}(?!})/g;
 
 const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 

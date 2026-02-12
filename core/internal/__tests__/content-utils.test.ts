@@ -28,3 +28,17 @@ test('replacePlaceholders: replaces double-brace placeholders and preserves trip
   assert.match(output, /missing=/);
   assert.match(output, /page=\/home section/);
 });
+
+test('replacePlaceholders: supports non-whitespace placeholder keys such as kebab and dotted names', () => {
+  const output = replacePlaceholders(
+    'nav={{tags-dropdown}} profile={{author.name}} untouched={{{tags-dropdown}}}',
+    {
+      'tags-dropdown': '<li>tag</li>',
+      'author.name': 'adaalrf',
+    },
+  );
+
+  assert.match(output, /nav=<li>tag<\/li>/);
+  assert.match(output, /profile=adaalrf/);
+  assert.match(output, /untouched=\{\{\{tags-dropdown\}\}\}/);
+});

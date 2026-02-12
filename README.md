@@ -82,7 +82,7 @@ modules: ['blog'];
 - Layout: `templates/layout-template.html`.
 - 404: `templates/404-template.html`.
 - Page templates: `templates/<page>-template.html` with triple-brace placeholders (for example `{{{content}}}`).
-- Main layout placeholders use double braces (for example `{{title}}`, `{{children}}`).
+- Main layout placeholders use double braces (for example `{{title}}`, `{{children}}`, `{{tags-dropdown}}`).
 - Module templates are documented per module.
 
 ## Theming
