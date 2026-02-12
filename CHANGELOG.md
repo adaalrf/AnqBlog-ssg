@@ -16,6 +16,7 @@ Format is inspired by Keep a Changelog and follows Semantic Versioning intent.
 - Dev server now serves `.jpg` files with the standard `image/jpeg` MIME type.
 - Core document title composition now avoids trailing separators when page title is empty.
 - Main layout container now avoids mobile horizontal overflow from width + horizontal margin interaction.
+- Mobile and desktop header dropdown menus now include viewport height clamping and internal scrolling, with slightly increased trigger spacing.
 
 ## [0.6.0] - 2026-02-12
 

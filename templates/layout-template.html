@@ -50,7 +50,7 @@
             ></button>
             <ul
               data-hook="menu-dropdown"
-              class="flex flex-col gap-3 absolute left-0 mt-3 p-4 transform min-w-40 w-fit bg-background border border-border rounded-sm shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent"
+              class="flex flex-col gap-3 absolute left-0 mt-4 p-4 transform min-w-40 w-fit max-w-[calc(100vw-2rem)] max-h-[min(60vh,22rem)] overflow-y-auto overscroll-contain bg-background border border-border rounded-sm shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-6 before:left-0 before:right-0 before:h-6 before:bg-transparent"
             >
               <li class="dropdown-item">
                 <a href="/" class="block py-1.5 px-1 rounded-sm focus-ring">Home</a>
@@ -126,7 +126,7 @@
               >
               <ul
                 data-hook="tags-dropdown-menu"
-                class="flex flex-col gap-2 absolute left-1/2 mt-3 p-3 transform -translate-x-1/2 min-w-40 w-fit bg-background border border-border rounded-sm shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-5 before:left-0 before:right-0 before:h-5 before:bg-transparent"
+                class="flex flex-col gap-2 absolute left-1/2 mt-4 p-3 transform -translate-x-1/2 min-w-40 w-fit max-w-[calc(100vw-2rem)] max-h-[min(60vh,22rem)] overflow-y-auto overscroll-contain bg-background border border-border rounded-sm shadow-xl z-20 dropdown-menu opacity-0 -translate-y-2 invisible before:absolute before:-top-6 before:left-0 before:right-0 before:h-6 before:bg-transparent"
               >
                 {{tagsDropdown}}
               </ul>
