@@ -8,7 +8,7 @@ internal: core/internal/{content-utils.ts,error-utils.ts,html-minify.ts}
 cli: core/cli/{build.ts,serve.ts}
 types: core/types/{config.ts,module.ts,layout.ts,index.ts}
 modules:
-blog: modules/blog/{module.ts,types.ts,README.md,pipeline/_,utils/_}
+blog: modules/blog/{module.ts,config.ts,types.ts,README.md,pipeline/_,utils/_,__tests__/_}
 app:
 content: content/pages + content/blog/posts
 templates: templates/_
@@ -37,6 +37,7 @@ notes:
 core is standalone; modules extend it
 shared utilities are for core+modules only
 module docs are SSoT for module config
+expanded roadmap/todos: TODO.md
 last_checks:
 build: pass
 test: pass

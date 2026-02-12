@@ -69,6 +69,10 @@ modules: ['blog'];
 - `core/shared/module-config-api.ts` provides reusable helpers for module config validation.
 - See module docs for setup: `modules/blog/README.md`.
 
+## Plan
+
+- Active plan and expanded TODOs live in `TODO.md`.
+
 ## Content
 
 - Pages: `content/pages/*.html` (front matter supported).
