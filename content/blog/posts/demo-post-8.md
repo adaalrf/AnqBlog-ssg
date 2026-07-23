@@ -1,5 +1,5 @@
 ---
-title: "Dev Diary: Finishing the Core/Module Split"
+title: 'Dev Diary: Finishing the Core/Module Split'
 date: 10.02.2026
 tags: [dev-diary, architecture, core]
 ---

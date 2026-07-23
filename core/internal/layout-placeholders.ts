@@ -10,6 +10,7 @@ interface BuildLayoutPlaceholdersInput {
   canonicalUrl: string;
   ogUrl?: string;
   ogType?: string;
+  robots?: string;
 }
 
 /**
@@ -38,25 +39,31 @@ export const buildLayoutPlaceholders = ({
   canonicalUrl,
   ogUrl = canonicalUrl,
   ogType = 'website',
-}: BuildLayoutPlaceholdersInput): Record<string, unknown> => ({
-  ...data,
-  ...layoutData,
-  title,
-  page,
-  children,
-  siteName: config.siteName || '',
-  siteDescription: config.siteDescription || '',
-  githubUrl: config.githubUrl || '',
-  authorName: config.authorName || '',
-  copyrightYear: config.copyrightYear || new Date().getFullYear(),
-  siteLanguage: config.siteLanguage || 'en',
-  canonicalUrl,
-  ogUrl,
-  ogType,
-  stylesPath: '/styles/styles.css',
-  faviconPath: '/assets/favicon.ico',
-  scriptPath: '/js/bundle.js',
-  gitLogoPath: '/assets/github-icon.svg',
-  themesList: (config.themes || ['dark', 'light', 'rose', 'mono']).join(' '),
-  defaultTheme: config.defaultTheme || 'dark',
-});
+  robots,
+}: BuildLayoutPlaceholdersInput): Record<string, unknown> => {
+  const pageRobots = typeof data.robots === 'string' ? data.robots : undefined;
+
+  return {
+    ...data,
+    ...layoutData,
+    title,
+    page,
+    children,
+    siteName: config.siteName || '',
+    siteDescription: config.siteDescription || '',
+    githubUrl: config.githubUrl || '',
+    authorName: config.authorName || '',
+    copyrightYear: config.copyrightYear || new Date().getFullYear(),
+    siteLanguage: config.siteLanguage || 'en',
+    canonicalUrl,
+    ogUrl,
+    ogType,
+    robots: robots ?? pageRobots ?? 'index, follow',
+    stylesPath: '/styles/styles.css',
+    faviconPath: '/assets/favicon.ico',
+    scriptPath: '/js/bundle.js',
+    gitLogoPath: '/assets/github-icon.svg',
+    themesList: (config.themes || ['dark', 'light', 'rose', 'mono']).join(' '),
+    defaultTheme: config.defaultTheme || 'dark',
+  };
+};

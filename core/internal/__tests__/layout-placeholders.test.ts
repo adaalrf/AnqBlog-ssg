@@ -50,6 +50,7 @@ test('buildLayoutPlaceholders: builds stable shared placeholder payload', () => 
   assert.equal(placeholders.canonicalUrl, 'https://example.com/page');
   assert.equal(placeholders.ogUrl, 'https://example.com/page');
   assert.equal(placeholders.ogType, 'website');
+  assert.equal(placeholders.robots, 'index, follow');
 });
 
 test('buildLayoutPlaceholders: accepts explicit og overrides', () => {
@@ -61,10 +62,25 @@ test('buildLayoutPlaceholders: accepts explicit og overrides', () => {
     canonicalUrl: 'https://example.com/404.html',
     ogUrl: 'https://cdn.example.com/404.html',
     ogType: 'article',
+    robots: 'noindex, follow',
   });
 
   assert.equal(placeholders.ogUrl, 'https://cdn.example.com/404.html');
   assert.equal(placeholders.ogType, 'article');
+  assert.equal(placeholders.robots, 'noindex, follow');
+});
+
+test('buildLayoutPlaceholders: accepts a page robots value', () => {
+  const placeholders = buildLayoutPlaceholders({
+    config: createConfig(),
+    data: { robots: 'noindex, nofollow' },
+    title: 'Private',
+    page: '/ private',
+    children: '<section>Private</section>',
+    canonicalUrl: 'https://example.com/private',
+  });
+
+  assert.equal(placeholders.robots, 'noindex, nofollow');
 });
 
 test('buildDocumentTitle: omits separator for missing page title', () => {

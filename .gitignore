@@ -4,9 +4,6 @@ public/
 .build/
 legacy/
 
-# Ignore all files in content and templates directories
-content/*
-
 # Files
 deploy.sh
 
@@ -63,7 +60,3 @@ client/**/*.js
 !webpack.config.js
 !postcss.config.js
 !tailwind.config.js
-
-# Site-specific configuration (copy example.config.ts to config.ts)
-core/config/config.ts
-core/config/config.js

@@ -1,5 +1,5 @@
 ---
-title: "Core vs Modules: The Architecture Boundary"
+title: 'Core vs Modules: The Architecture Boundary'
 date: 04.02.2026
 tags: [guide, architecture, modules]
 ---

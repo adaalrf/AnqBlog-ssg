@@ -1,5 +1,5 @@
 ---
-title: "Quickstart: Build and Ship with anq-blog-ssg"
+title: 'Quickstart: Build and Ship with anq-blog-ssg'
 date: 03.02.2026
 tags: [guide, quickstart, core]
 ---
@@ -10,11 +10,7 @@ This generator is intentionally simple: build static files once, then deploy the
 
 ## 1) Configure the project
 
-Copy the example config and edit values:
-
-```bash
-cp core/config/example.config.ts core/config/config.ts
-```
+Edit the tracked `core/config/config.ts` starter values.
 
 Set at least:
 
@@ -39,8 +35,7 @@ Run:
 
 ```bash
 npm run build
-npm test
-npm run lint
+npm run check
 ```
 
 The build writes static output to `public/`.
@@ -57,6 +52,6 @@ This is local-dev only. Production should serve static files directly from `publ
 
 ## 5) Deploy
 
-Upload `public/` to GitHub Pages, Netlify, Cloudflare Pages, or any static host.
+Upload the contents of `public/` to any static host.
 
 That is the entire workflow: configure, write, build, deploy.

@@ -116,6 +116,7 @@ const generate404Page = async (layoutData: Record<string, string>): Promise<bool
       canonicalUrl,
       ogUrl,
       ogType: 'website',
+      robots: 'noindex, follow',
     });
     let finalHtml = replacePlaceholders(mainLayoutContent, placeholders);
 

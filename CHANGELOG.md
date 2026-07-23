@@ -2,67 +2,104 @@
 
 All notable changes to this project are documented in this file.
 
-Format is inspired by Keep a Changelog and follows Semantic Versioning intent.
+The format is inspired by Keep a Changelog and follows Semantic Versioning
+intent.
 
 ## [Unreleased]
 
-### Changed
-
-- Refreshed demo blog posts into a current showcase set (guide/how-to + dev-diary mix) with up-to-date project paths and workflow references.
-
-### Fixed
-
-- Core placeholder replacement now supports non-whitespace keys (for example `{{tags-dropdown}}`) instead of only `\w` keys.
-- Dev server now serves `.jpg` files with the standard `image/jpeg` MIME type.
-- Core document title composition now avoids trailing separators when page title is empty.
-- Main layout container now avoids mobile horizontal overflow from width + horizontal margin interaction.
-- Mobile and desktop header dropdown menus now include viewport height clamping and internal scrolling, with slightly increased trigger spacing.
-
-## [0.6.0] - 2026-02-12
-
-This entry summarizes the current re-release hardening work (core-first focus).
-
-### Breaking Changes
-
-- Module config boundaries were split: blog-specific config ownership and validation moved into `modules/blog` instead of core-owned blog typing.
-- Build CLI mode flags were removed; `npm run build` now uses one deterministic build path.
+## [0.7.0] - 2026-07-23
 
 ### Added
 
-- Core module UI slot API (`context.ui.setSlot`, `context.ui.appendSlot`) for layout placeholder injection without core/module coupling.
-- Core module lifecycle hooks support (`beforeRun`, `afterRun`) in the module runner.
-- Core module output manifest support (`generatedPaths`) for diagnostics and reporting.
-- Reusable module config helper API in `core/shared/module-config-api.ts`.
-- Shared web path utility in `core/shared/web-path-utils.ts`.
-- New focused tests for:
-  - module runner lifecycle/manifest behavior
-  - module config helper API
-  - CLI build smoke coverage
-  - layout/template placeholder behavior and template sanity checks
+- Added a tracked, neutral starter configuration and content set so a fresh
+  clone builds without an initialization step.
+- Added `npm run check` to run formatting validation, linting, tests, and a
+  complete build.
+- Added build integration coverage for required starter output, homepage and
+  404 metadata, and every generated internal `href` and `src`.
+- Added GitHub Actions validation using Node 24, `npm ci`, the complete check,
+  and a tracked-file mutation guard.
 
 ### Changed
 
-- Core pipeline was further generalized:
-  - removed module-specific `posts` branching from layout application
-  - unified shared layout placeholder assembly for page and 404 generation
-  - clarified placeholder contract (`{{key}}` for layout replacement, `{{{key}}}` for raw content insertion)
-- Blog module internals were simplified and made more domain-oriented:
-  - extracted config, SEO/feed/sitemap, navigation, and post orchestration into module-local services
-  - removed direct imports from `core/config/config.ts` inside blog internals (config is passed explicitly)
-- CLI build orchestration was deduplicated and simplified for maintainability.
+- Repositioned the project as a cloneable private source template rather than an
+  installable npm package.
+- Set Node 24 as the supported runtime and aligned Node type definitions.
+- Made `core/config/config.ts` the tracked configuration source of truth.
+- Mapped `content/pages/` directly to the root of `public/`.
+- Refreshed demo blog posts into a current guide, how-to, and development diary
+  showcase.
+- Documented root-only URL generation and host-neutral deployment of the
+  contents of `public/`.
 
 ### Fixed
 
-- Normalized mobile menu list markup in `templates/layout-template.html`.
+- Corrected homepage canonical and Open Graph URLs to use the configured site
+  root.
+- Added a configurable page robots value and marked `404.html` as
+  `noindex, follow`.
+- Core placeholder replacement now supports non-whitespace keys such as
+  `{{tags-dropdown}}`.
+- The local development server now serves `.jpg` files with the standard
+  `image/jpeg` MIME type.
+- Document title composition no longer leaves a trailing separator when the
+  page title is empty.
+- The main layout avoids mobile horizontal overflow from width and horizontal
+  margin interaction.
+- Mobile and desktop header dropdown menus clamp to the viewport and scroll
+  internally, with clearer trigger spacing.
+
+### Removed
+
+- Removed the unreachable configuration-copy bootstrap.
+- Removed stale generated `.build/` artifacts from source control.
+- Removed npm publication metadata that implied a supported installed-package
+  interface.
+- Removed an obsolete theme-label styling TODO.
+
+## [0.6.0] - 2026-02-12
+
+This entry summarizes the core-first re-release hardening work.
+
+### Breaking Changes
+
+- Module config boundaries were split: blog-specific config ownership and
+  validation moved into `modules/blog` instead of core-owned blog typing.
+- Build CLI mode flags were removed; `npm run build` now uses one deterministic
+  build path.
+
+### Added
+
+- Core module UI slot API (`context.ui.setSlot`, `context.ui.appendSlot`) for
+  layout placeholder injection without core/module coupling.
+- Core module lifecycle hooks support (`beforeRun`, `afterRun`) in the module
+  runner.
+- Core module output manifest support (`generatedPaths`) for diagnostics and
+  reporting.
+- Reusable module config helper API in
+  `core/shared/module-config-api.ts`.
+- Shared web path utility in `core/shared/web-path-utils.ts`.
+- Focused tests for module runner behavior, module config helpers, CLI builds,
+  and layout placeholder behavior.
+
+### Changed
+
+- Core layout application no longer contains module-specific post branching.
+- Page and 404 generation share layout metadata assembly.
+- The placeholder contract is `{{key}}` for layout replacement and
+  `{{{key}}}` for raw content insertion.
+- Blog configuration, SEO, navigation, and post orchestration moved into
+  module-local services.
+- Blog internals receive config explicitly instead of importing the site config.
+- CLI build orchestration was deduplicated.
+
+### Fixed
+
+- Normalized mobile menu list markup.
 - Quoted test glob patterns for deterministic module test execution.
 
 ### Removed
 
-- Removed duplicate blog-local utilities that overlapped with core shared utilities.
-- Removed redundant `styles/themes/light.css` overrides (base tokens are the canonical light theme source).
-
-### Documentation
-
-- Synced architecture and roadmap docs with current core/module separation and API surface.
-- Updated README module contract, theming references, and structure notes.
-- Kept `TODO.md` phase tracking current through the latest hardening slices.
+- Removed duplicate blog utilities that overlapped with shared core helpers.
+- Removed redundant light-theme overrides; base tokens are the canonical light
+  theme source.

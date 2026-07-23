@@ -9,17 +9,11 @@ import { pathToFileURL } from 'url';
 const execAsync = promisify(exec);
 const rootDir = process.cwd();
 
-const preCompileLogger = {
-  info: (module: string, message: string): void => {
-    console.log(`[${module}] ${message}`);
-  },
-  warn: (module: string, message: string): void => {
-    console.warn(`[${module}] ⚠ ${message}`);
-  },
-  error: (module: string, message: string): void => {
-    console.error(`[${module}] ❌ ${message}`);
-  },
-};
+interface RuntimeLogger {
+  info(module: string, message: string): void;
+  warn(module: string, message: string): void;
+  error(module: string, message: string): void;
+}
 
 function formatErrorPreCompile(error: Error, context: string): string {
   const isDev = process.env.NODE_ENV === 'development';
@@ -77,31 +71,6 @@ function printBuildBreakdown(): void {
 }
 
 /**
- * Checks if config file exists and creates it from example if missing.
- */
-async function ensureConfigExists(): Promise<void> {
-  const configPath = path.join(rootDir, 'core', 'config', 'config.ts');
-  const exampleConfigPath = path.join(rootDir, 'core', 'config', 'example.config.ts');
-
-  if (!existsSync(configPath)) {
-    if (existsSync(exampleConfigPath)) {
-      preCompileLogger.info('build.ts', '📝 Config file not found. Creating from example...');
-      await fs.copyFile(exampleConfigPath, configPath);
-      preCompileLogger.info('build.ts', '✓ Created core/config/config.ts');
-      preCompileLogger.warn(
-        'build.ts',
-        '⚠️  Please edit core/config/config.ts with your settings and run build again.',
-      );
-      process.exit(0);
-    } else {
-      throw new Error(
-        'Config file (core/config/config.ts) not found and example config (core/config/example.config.ts) is missing.',
-      );
-    }
-  }
-}
-
-/**
  * Ensures a dist output path exists before importing/running compiled code.
  */
 function requireDistPath(distPath: string, label: string): void {
@@ -116,7 +85,7 @@ function requireDistPath(distPath: string, label: string): void {
  * Loads runtime logger + error formatter from compiled dist output.
  */
 async function loadRuntimeUtils(): Promise<{
-  logger: typeof preCompileLogger;
+  logger: RuntimeLogger;
   formatError: (error: Error, context: string) => string;
 }> {
   const loggerPath = path.join(rootDir, 'dist', 'core', 'shared', 'logger.js');
@@ -126,7 +95,7 @@ async function loadRuntimeUtils(): Promise<{
   requireDistPath(errorUtilsPath, 'error-utils module');
 
   const loggerModule = (await import(pathToFileURL(loggerPath).href)) as {
-    logger: typeof preCompileLogger;
+    logger: RuntimeLogger;
   };
   const errorUtilsModule = (await import(pathToFileURL(errorUtilsPath).href)) as {
     formatError: (error: Error, context: string) => string;
@@ -163,8 +132,6 @@ void (async (): Promise<void> => {
     if (args.length > 0) {
       throw new Error(`Unexpected build arguments: ${args.join(' ')}. Run build with no flags.`);
     }
-
-    await ensureConfigExists();
 
     const overallStartTime = Date.now();
 
@@ -234,21 +201,6 @@ void (async (): Promise<void> => {
       'build-css.js failed',
       formatError,
     );
-
-    const pagesIndexPath = path.join(publicDir, 'pages', 'index.html');
-    const rootIndexPath = path.join(publicDir, 'index.html');
-    await withTimedStep('Copy root index', async () => {
-      try {
-        const indexContent = await fs.readFile(pagesIndexPath, 'utf8');
-        const fixedContent = indexContent.replace(/\/pages\//g, '/');
-        await fs.writeFile(rootIndexPath, fixedContent);
-        logger.info('build.ts', 'Created root index.html');
-      } catch {
-        if (process.env.NODE_ENV === 'development') {
-          logger.info('build.ts', 'No pages/index.html found, skipping root index creation');
-        }
-      }
-    });
 
     const criticalFiles = [
       path.join(publicDir, 'styles', 'styles.css'),

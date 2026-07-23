@@ -1,129 +1,149 @@
-# anq-blog-ssg
+# Anq Blog SSG
 
-Minimal static site generator for Markdown blog + HTML pages. Build-time only. Outputs a fully static site in `public/`.
+A cloneable source template for a Markdown blog and HTML pages. It builds a
+complete static site into `public/` with no server-side runtime.
+
+This project is intended to be cloned and customized. It is not an installable
+npm CLI.
 
 ## Requirements
 
-- Node.js 18+
+- Node.js 24+
 - npm
 
 ## Quick Start
 
 ```bash
-git clone https://github.com/adaalrf/anq-blog-ssg.git
+git clone <repository-url> anq-blog-ssg
 cd anq-blog-ssg
-npm install
-cp core/config/example.config.ts core/config/config.ts
+npm ci
+```
+
+Customize the tracked site configuration in `core/config/config.ts`, then edit
+the starter page and blog posts under `content/`.
+
+```bash
 npm run build
+```
+
+The deployable site is now in `public/`. To preview it locally:
+
+```bash
 npm run serve
 ```
 
-Open `http://localhost:8080` (set `PORT=3000` to change).
+Open `http://localhost:8080` (set `PORT=3000` to change the local port).
+`npm run serve` is for local development only.
 
 ## Commands
 
 ```bash
 npm run build
-
 npm run serve
+npm run check
 npm test
 npm run lint
 npm run format
 ```
 
-- `npm run serve` is a local development server for the generated `public/` directory only.
-- Do not use `npm run serve` in production.
+`npm run check` runs formatting validation, linting, tests, and a complete build
+in the same order used by CI.
 
 ## Configuration
 
-- Edit `core/config/config.ts` (typed by `core/types/config.ts`).
-- Core config is split into:
-  - `CoreSiteConfig` + `CorePathConfig` + `ThemeConfig` + `ModuleConfig`.
-  - Module configs (for example `BlogModuleConfig` in `modules/blog/types.ts`) enabled via `modules`.
-- `modules` enables optional modules (see module READMEs).
-- `core/config/config.ts` is gitignored by default.
+`core/config/config.ts` is the tracked source of truth for the starter site. Its
+configuration is composed from:
 
-Example (`core` only):
+- `CoreSiteConfig`, `CorePathConfig`, `ThemeConfig`, and `ModuleConfig` in
+  `core/types/config.ts`
+- `BlogModuleConfig` in `modules/blog/types.ts` while the blog module is enabled
 
-```ts
-// Core config keys still required.
-modules: [];
-```
+The starter enables the blog module and types the complete object against
+`Config & BlogModuleConfig`. Module-specific configuration and outputs are
+documented in each module README.
 
-Example (`core` + blog):
-
-```ts
-modules: ['blog'];
-// include BlogModuleConfig keys from modules/blog/types.ts
-// see modules/blog/README.md for required fields
-```
-
-## Modules
-
-- Modules live under `modules/` and are enabled by name in `core/config/config.ts`.
-- Core works without modules (static pages, `robots.txt`, `404.html`).
-- Module config is only required when the module is enabled.
-- Module contract: default export with `run(context)` (optionally returns `{ generatedPaths: string[] }`), optional `directoryPairs`, optional `validate(config)`, optional lifecycle hooks `beforeRun(context)` and `afterRun(context)`.
-- `context.ui` provides slot helpers (`setSlot`, `appendSlot`) for layout placeholder injection.
-- `core/shared/module-config-api.ts` provides reusable helpers for module config validation.
-- `core/shared/web-path-utils.ts` provides shared file-path to web-path conversion.
-- See module docs for setup: `modules/blog/README.md`.
-
-## Plan
-
-- Active plan and expanded TODOs live in `TODO.md`.
-- Re-release notes and change history live in `CHANGELOG.md`.
+`contentDirectory` is the core page root. Its `index.html` maps directly to
+`public/index.html` and `/`.
 
 ## Content
 
-- Pages: `content/pages/*.html` (front matter supported).
-- `content/pages/index.html` becomes `/`.
-- Blog content lives under the blog module docs.
-- Showcase demo posts are available in `content/blog/posts/demo-post-*.md` (guide/how-to + dev-diary mix).
+- Pages: `content/pages/*.html` (HTML front matter is supported)
+- Homepage: `content/pages/index.html`
+- Blog posts: `content/blog/posts/*.md`
 
-## Templates
+The included `demo-post-*.md` files demonstrate guides, how-to content, and
+development notes. Replace them with your own posts.
 
-- Layout: `templates/layout-template.html`.
-- 404: `templates/404-template.html`.
-- Page templates: `templates/<page>-template.html` with triple-brace placeholders (for example `{{{content}}}`).
-- Main layout placeholders use double braces (for example `{{title}}`, `{{children}}`, `{{tags-dropdown}}`).
-- Module templates are documented per module.
+## Modules
 
-## Theming
+Modules live under `modules/` and are enabled by name in
+`core/config/config.ts`. Core works without modules and still generates static
+pages, `robots.txt`, and `404.html`.
 
-- Base + tokens: `styles/base.css`, `styles/tokens.css`.
-- Theme overrides: `styles/themes/{dark,rose,mono}.css` (applied via `data-theme`).
-- Toggle logic: `client/toggle-theme.ts`.
+Each module exports a default object with:
 
-## Output
+- `run(context)`, optionally returning `{ generatedPaths: string[] }`
+- optional `directoryPairs`
+- optional `validate(config)`, `beforeRun(context)`, and `afterRun(context)`
 
-- Core: `public/robots.txt`, `public/404.html`.
-- Module outputs are documented per module.
+`context.ui` provides `setSlot` and `appendSlot` for layout injection. Shared
+core/module helpers live under `core/shared/`. See
+`modules/blog/README.md` for the included blog module.
+
+## Templates and Themes
+
+- Main layout: `templates/layout-template.html`
+- 404 content: `templates/404-template.html`
+- Page templates: `templates/<page>-template.html`
+- Blog templates: documented in `modules/blog/README.md`
+- Base styling: `styles/base.css` and `styles/tokens.css`
+- Theme overrides: `styles/themes/{dark,rose,mono}.css`
+- Theme switching: `client/toggle-theme.ts`
+
+Page templates use triple-brace placeholders such as `{{{content}}}`. The main
+layout uses double-brace placeholders such as `{{title}}` and `{{children}}`.
+
+## Output and Deployment
+
+Core generates:
+
+- `public/index.html`
+- `public/404.html`
+- `public/robots.txt`
+- `public/styles/styles.css`
+- `public/js/bundle.js`
+
+The blog module adds blog pages, posts, tags, RSS, and sitemap output.
+
+Generated URLs target a domain or subdomain root. Hosting under a URL
+subdirectory or configurable base path is intentionally unsupported in v0.7.0.
+
+Deploy by uploading the contents of `public/` to any static host. Do not deploy
+the Node-based local development server.
 
 ## Project Structure
 
-```
+```text
 core/config/ config + validation
 core/pipeline/ build pipeline
 core/shared/  utilities shared with modules
 core/internal/ core-only helpers
-modules/blog/{pipeline,domain,utils}/ blog-only helpers
-core/cli/     build + serve entrypoints
+core/cli/     build + local serve entrypoints
 core/types/   shared types
-modules/      optional features (blog)
-content/     site content
-templates/   HTML templates
-styles/      Tailwind + tokens
-client/      browser bundle
-assets/      static assets
-public/      build output
+modules/      optional features
+content/      tracked starter content
+templates/    HTML templates
+styles/       Tailwind + theme tokens
+client/       browser bundle source
+assets/       static assets
+public/       generated deployable output
 ```
 
-## Deployment
+## Project Status
 
-Deploy `public/` to any static host.
-Do not deploy the Node-based `npm run serve` script; it is intended for local development only.
+The active release checklist and deferred work live in `TODO.md`. Release
+history lives in `CHANGELOG.md`.
 
 ## License
 
-MIT © adaalrf
+MIT

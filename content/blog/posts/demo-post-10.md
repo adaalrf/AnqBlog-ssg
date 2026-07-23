@@ -1,5 +1,5 @@
 ---
-title: "Dev Diary: Pre-Release Sanity and What Comes Next"
+title: 'Dev Diary: Pre-Release Sanity and What Comes Next'
 date: 12.02.2026
 tags: [dev-diary, release, roadmap]
 ---
@@ -24,4 +24,5 @@ Final sanity pass before the next public push.
 
 ## Next
 
-The likely next step is a patch release cut from this cleaned state, then a focused showcase deployment on GitHub Pages.
+The next step is to customize the tracked starter config and content, run the
+complete check, and upload `public/` to a static host.

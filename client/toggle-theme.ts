@@ -10,7 +10,6 @@ const burgerIcons = {
   light: '/assets/icons/burger-light.svg',
   dark: '/assets/icons/burger-dark.svg',
 };
-/** TODO Make sure the lable has the theme accent color */
 const themeLabel = (theme: string) => `Theme: ${theme}`;
 
 /** Return the configured theme names from the DOM (fallback to defaults). */

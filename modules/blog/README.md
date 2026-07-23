@@ -2,17 +2,15 @@
 
 Adds Markdown posts, tags, pagination, RSS, and sitemap generation.
 
-## Enable
+## Configuration
 
-In `core/config/config.ts`:
+The tracked starter enables this module in `core/config/config.ts`:
 
 ```ts
 modules: ['blog'];
 ```
 
-## Required Config
-
-These keys must be set in `core/config/config.ts` when the module list includes `'blog'`:
+When `'blog'` is enabled, the same config file must provide:
 
 - `postsContentDirectory`
 - `templatePostsPath`
@@ -29,34 +27,42 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - `previewLength`
 - `titleTruncationLength`
 - `titleTruncationLengthBreadcrumb`
-- `maxMarkdownFileSize` (optional)
+- optional `maxMarkdownFileSize`
 
-## Validation
+Type a blog-enabled configuration against `Config & BlogModuleConfig` so all
+required module keys are checked at compile time.
 
-- The blog module implements `validate(config)` and fails fast if required blog keys are missing or invalid.
-- Blog validation is module-owned and runs through the core module runner before `run(context)`.
-- Core also supports optional `beforeRun(context)` and `afterRun(context)` hooks; this module currently uses `run(context)` only.
-- `run(context)` returns an output manifest with generated public output paths for diagnostics.
-- Validation uses `createModuleConfigApi` from `core/shared/module-config-api.ts`.
-- Blog config helpers live in `modules/blog/config.ts`.
+## Validation and Module Contract
+
+- The module owns its configuration validation and fails fast for missing or
+  invalid blog values.
+- Validation runs through the core module runner before `run(context)`.
+- Core supports optional `beforeRun(context)` and `afterRun(context)` hooks; the
+  blog module currently needs only `run(context)`.
+- `run(context)` reports its generated public paths through an output manifest.
+- Configuration helpers live in `modules/blog/config.ts` and use
+  `core/shared/module-config-api.ts`.
 
 ## Domain Services
 
-- `modules/blog/domain/posts.ts`: post normalization/sorting use cases.
-- `modules/blog/domain/navigation.ts`: tags aggregation and dropdown rendering.
-- `modules/blog/domain/seo.ts`: RSS and sitemap generation helpers.
-- Pagination uses `filePathToWebPath` from `core/shared/web-path-utils.ts` (shared utility).
-- Blog pipeline helpers consume module config passed from `run(context)` rather than importing `core/config/config.ts` directly.
+- `modules/blog/domain/posts.ts`: post normalization and sorting
+- `modules/blog/domain/navigation.ts`: tag aggregation and dropdown rendering
+- `modules/blog/domain/seo.ts`: RSS and sitemap generation
+- `core/shared/web-path-utils.ts`: shared file-path to web-path conversion
 
-## UI Slots
-
-- The module injects tag links through `context.ui.setSlot('tagsDropdown', html)`.
-- Core leaves unspecified placeholders empty, so this slot is optional when blog is disabled.
+Blog internals receive configuration through the module context rather than
+importing the site config directly.
 
 ## Content
 
-- Posts: `content/blog/posts/*.md`
-- Front matter fields: `title`, `date`, `tags`
+Posts live in `content/blog/posts/*.md` and require `title`, `date`, and `tags`
+front matter.
+
+## UI Slots
+
+The module injects tag links with
+`context.ui.setSlot('tagsDropdown', html)`. Core leaves unspecified slots empty,
+so the layout also works with the module disabled.
 
 ## Templates
 
@@ -71,3 +77,5 @@ These keys must be set in `core/config/config.ts` when the module list includes 
 - `public/blog/tags/*.html`
 - `public/rss.xml`
 - `public/sitemap.xml`
+
+All generated URLs assume deployment at a domain or subdomain root.

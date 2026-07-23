@@ -40,6 +40,9 @@ export interface ModuleConfig {
 export interface CorePathConfig {
   inputCSS: string;
   outputCSS: string;
+  /**
+   * Root directory for core HTML content. Its `index.html` is emitted at `/`.
+   */
   contentDirectory: string;
   template404Path: string;
   mainLayoutPath: string;

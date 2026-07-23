@@ -1,5 +1,5 @@
 ---
-title: "Module API Primer: validate, run, hooks, outputs"
+title: 'Module API Primer: validate, run, hooks, outputs'
 date: 08.02.2026
 tags: [guide, modules, api]
 ---

@@ -1,6 +1,7 @@
 {
   "name": "anq-blog-ssg",
-  "version": "0.6.0",
+  "version": "0.7.0",
+  "private": true,
   "description": "A static site generator that converts Markdown to HTML. Supports pagination, tag pages, and CSS processing with Tailwind CSS.",
   "type": "module",
   "scripts": {
@@ -11,7 +12,8 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js,json,md}\"",
-    "format:check": "prettier --check \"**/*.{ts,js,json,md}\""
+    "format:check": "prettier --check \"**/*.{ts,js,json,md}\"",
+    "check": "npm run format:check && npm run lint && npm test && npm run build"
   },
   "keywords": [
     "static-site-generator",
@@ -29,28 +31,8 @@
     "url": "https://github.com/adaalrf/anq-blog-ssg.git"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=24.0.0"
   },
-  "exports": {
-    ".": "./core/cli/build.ts",
-    "./core/*": "./core/*.ts"
-  },
-  "files": [
-    "dist",
-    "core",
-    "modules",
-    "content",
-    "templates",
-    "styles",
-    "assets",
-    "client",
-    "webpack.config.js",
-    "postcss.config.js",
-    "tailwind.config.js",
-    "tsconfig.json",
-    "README.md",
-    "LICENSE"
-  ],
   "dependencies": {
     "@tailwindcss/typography": "^0.5.19",
     "gray-matter": "^4.0.3",
@@ -62,7 +44,7 @@
   "devDependencies": {
     "@eslint/js": "^9.39.2",
     "@tailwindcss/postcss": "^4.1.18",
-    "@types/node": "^25.0.3",
+    "@types/node": "^24.0.0",
     "@typescript-eslint/eslint-plugin": "^8.51.0",
     "@typescript-eslint/parser": "^8.51.0",
     "autoprefixer": "^10.4.23",

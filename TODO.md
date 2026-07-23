@@ -1,83 +1,52 @@
-# Plan Of Attack
+# v0.7.0 Release Checklist
 
-## Current Goal
-- Keep `core/` stable and generic.
-- Push domain behavior and validation into module boundaries.
-- Grow reusable module APIs without reintroducing module-specific branches in core.
+## Status
 
-## Phase 1: Core/Module Separation
-- [x] Remove blog-specific runtime behavior from core pipeline.
-- [x] Remove blog-specific config types from core type system.
-- [x] Move blog validation ownership into `modules/blog`.
-- [x] Keep core module loading generic (`Module` contract + runner).
+- State: implementation complete; verification and release pending
+- Target: `v0.7.0`
+- Product: cloneable, private static-site-generator source template
+- Runtime: Node 24
+- Deployment: contents of `public/` at a domain or subdomain root
 
-## Phase 2: Domain API Baseline
-- [x] Add slot-based UI API: `context.ui.setSlot` / `appendSlot`.
-- [x] Add module config helper API: `createModuleConfigApi`.
-- [x] Adopt config helper API in blog module.
-- [x] Add unit tests for `core/shared/module-config-api.ts`.
+## Completed Implementation
 
-## Phase 3: Blog Module Internal Simplification
-- [x] Extract blog config validation into `modules/blog/config.ts`.
-- [x] Extract blog feed/sitemap generation into `modules/blog/domain/seo.ts`.
-- [x] Extract tag/dropdown rendering into `modules/blog/domain/navigation.ts`.
-- [x] Reduce orchestration noise in `modules/blog/module.ts` to high-level use cases.
-- [x] Remove direct `core/config/config.ts` imports from blog pipeline/helpers (pass config explicitly).
+- [x] Track a neutral starter config and all starter content.
+- [x] Enable the blog and current themes in the starter config.
+- [x] Type enabled blog settings against `Config & BlogModuleConfig`.
+- [x] Render `content/pages/index.html` directly to `public/index.html`.
+- [x] Remove generated `.build/` files from source control.
+- [x] Emit `index, follow` for normal pages and `noindex, follow` for the 404
+      page.
+- [x] Mark the npm project private and align metadata with v0.7.0 and Node 24.
+- [x] Add `npm run check` for formatting, linting, tests, and a full build.
+- [x] Verify required outputs, root metadata, 404 metadata, and generated local
+      links in the build integration test.
+- [x] Add Node 24 GitHub Actions CI with a tracked-file mutation check.
+- [x] Synchronize the README, blog module docs, agent guidance, starter content,
+      and changelog.
 
-## Phase 4: API Expansion Candidates
-- [x] Add optional module lifecycle hooks (`beforeRun`, `afterRun`) only if needed by a real module.
-- [x] Add optional module output manifest API (module returns generated paths for diagnostics).
-- [x] Add unit tests for module runner hook/manifest/error behavior.
-- [ ] Add module-scoped logger factory (`context.logger`) to standardize naming and levels.
+## Release Verification
 
-## Phase 5: Shared Utility Convergence
-- [x] Move `filePathToWebPath` into `core/shared` as module-agnostic utility.
-- [x] Replace duplicated path-to-web logic in `core/pipeline/apply-layout.ts`.
-- [x] Replace blog usage of `modules/blog/utils/path-and-file-utils.ts`.
-- [x] Remove module-local duplicate utility and migrate tests to core/shared.
-- [x] Remove unused duplicate template/frontmatter helpers from `modules/blog/utils/content-utils.ts`.
-
-## Phase 6: CLI Simplification
-- [x] Remove build mode flags and keep a single deterministic `npm run build` path.
-- [x] Reduce `core/cli/build.ts` orchestration duplication with shared command/path/timing helpers.
-- [x] Add CLI smoke tests for build argument handling and no-flag execution.
-
-## Phase 7: Core Hardening (Interruption-Safe Plan)
-### Why this phase
-- Core is the product boundary; prioritize correctness and generic behavior over module convenience.
-- Focus on low-risk, high-signal refactors with tests after each small slice.
-- Keep KISS/YAGNI: no new abstractions unless they remove concrete duplication or leakage.
-
-### Ordered slices (resume-friendly)
-- [x] Slice 7.1: remove module-specific `posts` skip from `core/pipeline/apply-layout.ts` (core must not know blog folder names).
-- [x] Slice 7.2: fix malformed list markup in `templates/layout-template.html` mobile menu and add a minimal template sanity test.
-- [x] Slice 7.3: remove duplicated light theme token definitions (`styles/themes/light.css` vs `styles/tokens.css`) and keep one canonical source.
-- [x] Slice 7.4: clarify core placeholder contract (`{{key}}` vs `{{{key}}}`) in code comments/docs and add focused tests around the selected behavior.
-- [x] Slice 7.5: extract common layout metadata assembly used by page/404 rendering in core pipeline to reduce drift.
-
-### Per-slice completion checklist
-- [x] Code change is minimal and isolated.
-- [x] Docs updated if contract/behavior changed.
-- [x] Run: `npx tsc --noEmit`, `npm run lint --silent`, `npm test`, `npm run build`.
-- [x] Commit with conventional commit message.
-
-### Notes / ideas parking lot
-- `core/pipeline/generate-imports.ts` still has script-style side effects; consider a pure function + thin CLI wrapper later (optional).
-- Keep `context.logger` deferred until a real module use case appears (avoid premature API expansion).
-- If template complexity grows, consider a tiny core template context builder helper rather than introducing a full templating engine.
+- [x] Run `npm ci` using Node 24.
+- [x] Run `npm run check`.
+- [ ] Confirm `git diff --exit-code` after a committed release candidate.
+- [ ] Confirm the release commit can fast-forward the remote branch.
+- [ ] Push the release commit and confirm CI passes.
+- [ ] Create and push the annotated `v0.7.0` tag.
 
 ## Guardrails
-- No module-specific branching in `core/`.
-- If a feature is module-specific, place type/validation/docs under `modules/<name>/`.
-- Update `README.md`, `AGENTS.md`, and module README(s) in the same PR as code changes.
 
-## Phase 8: Re-release Polish (Completed)
-- [x] Add and maintain a top-level `CHANGELOG.md` with `0.6.0` cut and post-cut unreleased fixes.
-- [x] Clarify `npm run serve` as local-dev only in `README.md` and deployment notes.
-- [x] Patch UX polish in header dropdowns:
-  - mobile/desktop dropdown viewport clamping and internal scrolling
-  - small trigger-to-menu spacing increase to reduce visual overlap
-- [x] Refresh demo post set as showcase content:
-  - replace outdated path/config references
-  - keep a guide/how-to majority with a smaller dev-diary set
-- [x] Validate final polish slices with `npm run lint --silent`, `npm test`, and `npm run build`.
+- Keep `core/` generic and module-agnostic.
+- Keep blog-specific types, validation, and behavior under `modules/blog/`.
+- Preserve the current module contract until a concrete extension needs more.
+- Keep generated output out of source control.
+
+## Deferred
+
+- Configurable base paths or project-page subdirectories
+- npm package publishing or an installed CLI
+- Host-specific deployment automation
+- Browser end-to-end, screenshot, or visual-regression infrastructure
+- New modules or module APIs
+- Module-scoped logger factory
+- Visual redesign
