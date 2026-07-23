@@ -25,6 +25,7 @@ intent.
 - Repositioned the project as a cloneable private source template rather than an
   installable npm package.
 - Set Node 24 as the supported runtime and aligned Node type definitions.
+- Integrated the remote Webpack and minimatch dependency updates.
 - Made `core/config/config.ts` the tracked configuration source of truth.
 - Mapped `content/pages/` directly to the root of `public/`.
 - Refreshed demo blog posts into a current guide, how-to, and development diary
