@@ -2,7 +2,7 @@
 
 ## Status
 
-- State: implementation complete; verification and release pending
+- State: v0.7.0 release
 - Target: `v0.7.0`
 - Product: cloneable, private static-site-generator source template
 - Runtime: Node 24
@@ -31,8 +31,12 @@
 - [x] Run `npm run check`.
 - [x] Confirm `git diff --exit-code` after a committed release candidate.
 - [x] Confirm the release commit can fast-forward the remote branch.
-- [ ] Push the release commit and confirm CI passes.
-- [ ] Create and push the annotated `v0.7.0` tag.
+- [x] Push the release branch and confirm its pull-request CI passes.
+
+## Publishing
+
+Protected `main` is updated by squash-merging the verified release pull request.
+The annotated `v0.7.0` tag is then created from that verified `main` commit.
 
 ## Guardrails
 
