@@ -1,0 +1,28 @@
+<!-- Main tags index page template -->
+<div data-hook="tags-root">
+  <!-- Introduction section -->
+  <div class="mb-8">
+    <h1 class="text-3xl sm:text-4xl font-bold mb-4">Tags</h1>
+    <p class="text-muted-foreground leading-7">
+      Browse posts by topic. Click on any tag to see all posts with that tag.
+    </p>
+  </div>
+
+  <!-- Tag links container -->
+  <div class="mb-6">
+    <ul data-hook="tag-links" class="flex flex-wrap gap-3 list-none p-0 m-0">
+      <li data-hook="tag-link-item-template" class="hidden">
+        <a href="#" data-hook="tag-link-template" class="tag-link-item"></a>
+      </li>
+      <!-- Links to tag pages will be inserted here -->
+    </ul>
+  </div>
+
+  <!-- Pagination navigation (links updated dynamically by scripts) -->
+  <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
+    <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
+    <a href="#" class="hidden" data-page-style="normal"></a>
+    <a href="#" class="hidden current-page font-bold underline" data-page-style="current" aria-current="page"></a>
+    <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
+  </nav>
+</div>

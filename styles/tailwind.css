@@ -1,0 +1,14 @@
+/**
+ * Tailwind entrypoint
+ * - `tokens.css` defines default design tokens + Tailwind color mapping.
+ * - `themes/*` provides opt-in overrides via `data-theme`.
+ * - `base.css` contains structural styles and components that consume tokens.
+ */
+
+@config "../tailwind.config.js";
+@import 'tailwindcss';
+@import './tokens.css';
+@import './themes/dark.css';
+@import './themes/rose.css';
+@import './themes/mono.css';
+@import './base.css';

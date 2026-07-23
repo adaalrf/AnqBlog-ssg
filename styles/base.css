@@ -1,0 +1,354 @@
+/**
+ * Base styles + components
+ * - Structural/skeleton rules that consume design tokens.
+ * - Avoid hard-coding theme values here; use CSS variables instead.
+ */
+
+@layer base {
+  html {
+    padding-left: calc(100vw - 100%);
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply antialiased text-foreground;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1;
+    text-rendering: optimizeLegibility;
+  }
+
+  /* Typography Scale - Responsive, accessible hierarchy */
+  h1 {
+    @apply text-4xl font-bold leading-tight tracking-tight;
+    @apply mb-4 mt-0 text-foreground;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1,
+      'calt' 1;
+  }
+
+  @media (min-width: 640px) {
+    h1 {
+      @apply text-5xl;
+    }
+  }
+
+  h2 {
+    @apply text-3xl font-bold leading-tight tracking-tight;
+    @apply mb-3 mt-8;
+    font-feature-settings:
+      'kern' 1,
+      'liga' 1;
+  }
+
+  @media (min-width: 640px) {
+    h2 {
+      @apply text-4xl;
+    }
+  }
+
+  h3 {
+    @apply text-2xl font-semibold leading-snug tracking-tight;
+    @apply mb-2 mt-6;
+  }
+
+  @media (min-width: 640px) {
+    h3 {
+      @apply text-3xl;
+    }
+  }
+
+  h4 {
+    @apply text-xl font-semibold leading-snug;
+    @apply mb-2 mt-4;
+  }
+
+  @media (min-width: 640px) {
+    h4 {
+      @apply text-2xl;
+    }
+  }
+
+  h5 {
+    @apply text-lg font-medium leading-snug;
+    @apply mb-2 mt-4;
+  }
+
+  @media (min-width: 640px) {
+    h5 {
+      @apply text-xl;
+    }
+  }
+
+  h6 {
+    @apply text-base font-medium leading-snug;
+    @apply mb-2 mt-3;
+  }
+
+  @media (min-width: 640px) {
+    h6 {
+      @apply text-lg;
+    }
+  }
+
+  p {
+    @apply leading-7 mb-4 text-foreground;
+  }
+
+  /* Interactive Elements - Links, buttons, focus states */
+  a {
+    @apply no-underline text-foreground;
+    @apply transition-colors duration-200 ease-in-out;
+    @apply hover:text-accent focus:text-accent;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply rounded-sm;
+  }
+
+  a:focus-visible {
+    @apply outline-none;
+  }
+
+  button {
+    @apply transition-all duration-200 ease-in-out;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+
+  [data-hook='theme-toggle'],
+  [data-hook='theme-toggle-mobile'] {
+    @apply inline-flex items-center gap-2;
+    @apply cursor-pointer select-none;
+    @apply whitespace-nowrap;
+    @apply text-muted-foreground;
+    @apply leading-none;
+  }
+
+  [data-hook='menu-toggle'] {
+    @apply bg-transparent border-0 p-0 cursor-pointer;
+    @apply text-foreground hover:text-accent;
+    @apply transition-colors duration-200 ease-in-out;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .dropdown-item {
+    @apply hover:text-accent;
+    @apply transition-colors duration-200 ease-in-out;
+  }
+
+  /* Content Elements - Posts, code, lists, etc. */
+  .post-item {
+    @apply pb-8 border-b last:border-0 last:pb-0;
+    border-bottom-color: var(--border);
+    @apply transition-opacity duration-200 ease-in-out;
+  }
+
+  .post-item:not(:last-child) {
+    @apply mb-8;
+  }
+
+  .post-title {
+    @apply text-2xl font-bold leading-tight tracking-tight;
+    @apply mb-3;
+  }
+
+  @media (min-width: 640px) {
+    .post-title {
+      @apply text-3xl;
+    }
+  }
+
+  .post-title a {
+    @apply hover:text-accent;
+    @apply transition-colors duration-200 ease-in-out;
+  }
+
+  .post-date {
+    @apply text-sm text-muted-foreground;
+    @apply font-medium;
+  }
+
+  pre {
+    @apply bg-code text-code-foreground border border-border rounded-sm p-4 overflow-x-auto text-sm font-mono leading-relaxed;
+  }
+
+  pre code {
+    @apply leading-relaxed text-code-foreground bg-transparent;
+  }
+
+  code {
+    @apply font-mono text-sm;
+    @apply px-1.5 py-0.5 rounded-sm;
+    @apply bg-code/70 text-code-foreground;
+  }
+
+  /* Blockquotes */
+  blockquote {
+    @apply border-l-4 border-muted-foreground;
+    @apply pl-4 italic;
+    @apply my-4;
+    @apply text-muted-foreground;
+  }
+
+  /* Horizontal rules */
+  hr {
+    @apply border-0 border-t;
+    @apply border-muted;
+    @apply my-8;
+  }
+}
+
+@layer components {
+  /* ============================================
+     REUSABLE COMPONENT CLASSES
+     ============================================ */
+
+  /* Page layout */
+  .page-width {
+    width: 100%;
+    min-width: 0;
+  }
+
+  @media (min-width: 640px) {
+    .page-width {
+      max-width: var(--page-max-width-sm);
+    }
+  }
+
+  @media (min-width: 768px) {
+    .page-width {
+      max-width: var(--page-max-width-md);
+    }
+  }
+
+  /* Navigation - Smooth, minimal */
+  .nav-link {
+    @apply inline-flex items-center;
+    @apply transition-colors duration-200 ease-in-out;
+    @apply hover:text-accent;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+    @apply rounded-sm;
+  }
+
+  /* Pagination */
+  .pagination a {
+    @apply transition-all duration-200 ease-in-out;
+    @apply hover:text-accent;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+    @apply rounded-sm;
+  }
+
+  .pagination .current-page {
+    @apply text-accent;
+    @apply font-semibold;
+  }
+
+  /* Tags - Chip-like links */
+  .tags a {
+    @apply transition-all duration-200 ease-in-out;
+    @apply hover:text-accent;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-1;
+    @apply rounded-sm;
+  }
+
+  /* Tag link items on tags index page */
+  .tag-link-item {
+    @apply inline-flex items-center gap-1;
+    @apply px-4 py-2;
+    @apply bg-background border border-border rounded-sm;
+    @apply text-foreground no-underline;
+    @apply transition-all duration-200 ease-in-out;
+    @apply hover:bg-accent hover:text-accent-foreground hover:border-accent;
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2;
+  }
+
+  .tag-count {
+    @apply text-muted-foreground text-sm;
+    @apply font-normal;
+  }
+
+  .tag-link-item:hover .tag-count {
+    @apply text-accent-foreground;
+  }
+
+  .post-meta {
+    @apply mb-4 flex items-center space-x-2;
+  }
+
+  /* Prose (Markdown HTML output) */
+  .prose-article {
+    @apply prose max-w-none prose-sm sm:prose-base;
+  }
+
+  .prose-preview {
+    @apply prose max-w-none prose-sm sm:prose-base leading-normal;
+  }
+
+  /* Skip link - Accessible, smooth */
+  .skip-link {
+    @apply sr-only;
+  }
+
+  .skip-link:focus {
+    @apply fixed top-4 left-4 z-50;
+    @apply px-4 py-2;
+    @apply bg-accent text-accent-foreground;
+    @apply rounded-sm shadow-lg;
+    @apply outline-none ring-2 ring-ring ring-offset-2 ring-offset-background;
+    @apply w-auto h-auto m-0 overflow-visible;
+    @apply whitespace-normal;
+    @apply transition-all duration-200 ease-in-out;
+    @apply font-medium;
+  }
+
+  /* Dropdown menus - Smooth animations */
+  .dropdown-menu {
+    @apply transition-all duration-300 ease-out;
+  }
+
+  /* Cards/Containers - Subtle elevation */
+  .card {
+    @apply bg-background border border-border rounded-sm shadow-sm;
+    @apply transition-shadow duration-200 ease-in-out;
+  }
+
+  .card:hover {
+    @apply shadow-md;
+  }
+}
+
+@layer utilities {
+  /* ============================================
+     CUSTOM UTILITY CLASSES
+     ============================================ */
+
+  /* Tailwind Typography plugin theme tokens (opt-in) */
+  .prose-theme {
+    --tw-prose-body: var(--color-foreground);
+    --tw-prose-headings: var(--color-foreground);
+    --tw-prose-lead: var(--color-foreground);
+    --tw-prose-links: var(--color-accent);
+    --tw-prose-bold: var(--color-foreground);
+    --tw-prose-counters: var(--color-muted-foreground);
+    --tw-prose-bullets: var(--color-muted-foreground);
+    --tw-prose-hr: var(--color-border);
+    --tw-prose-quotes: var(--color-foreground);
+    --tw-prose-quote-borders: var(--color-border);
+    --tw-prose-captions: var(--color-muted-foreground);
+    --tw-prose-kbd: var(--color-foreground);
+    --tw-prose-kbd-shadows: var(--color-border);
+    --tw-prose-code: var(--color-code-foreground);
+    --tw-prose-pre-code: var(--color-code-foreground);
+    --tw-prose-pre-bg: var(--color-code);
+    --tw-prose-th-borders: var(--color-border);
+    --tw-prose-td-borders: var(--color-border);
+  }
+
+  .prose-theme a:hover {
+    color: var(--color-accent-hover);
+  }
+
+  /* Accessibility utilities */
+  .focus-ring {
+    @apply focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background;
+  }
+}

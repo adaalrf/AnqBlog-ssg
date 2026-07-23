@@ -2,19 +2,27 @@
   "compilerOptions": {
     "module": "ESNext",
     "target": "ESNext",
-    "moduleResolution": "node",
-    "outDir": "./public",
-    "rootDir": "./src",
+    "moduleResolution": "bundler",
+    "outDir": "./dist",
+    "rootDir": "./",
     "strict": true,
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "declaration": false,
+    "sourceMap": false
   },
-  "include": [
-    "src/**/*.ts",
-    "src/ts/generate-index.js",
-    "src/ts/fetch-posts.ts",
-    "legacy/toggle-theme.ts"
-  ],
-  "exclude": ["node_modules", "public", "legacy"]
+  "include": ["core/**/*.ts", "modules/**/*.ts", "types/**/*.d.ts", "*.ts"],
+  "exclude": [
+    "node_modules",
+    "public",
+    "legacy",
+    "dist",
+    ".build",
+    "client" // Excluded because client files are bundled by Webpack separately
+  ]
 }

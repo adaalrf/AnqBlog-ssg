@@ -1,25 +1,25 @@
-import { resolve as _resolve } from 'path';
+import { resolve } from 'path';
 
 export default {
-  entry: './src/ts/main.ts', // Entry point for the bundle
-  mode: 'production', // Set the mode to production for optimization
+  entry: './client/main.ts',
+  mode: 'production',
   optimization: {
-    usedExports: true, // Enable tree shaking to remove unused exports
+    usedExports: true,
   },
   module: {
     rules: [
       {
-        test: /\.ts$/, // Apply this rule to .ts files
-        use: 'ts-loader', // Use ts-loader to handle TypeScript files
-        exclude: /node_modules/, // Exclude node_modules from being processed
+        test: /\.ts$/,
+        use: 'ts-loader',
+        exclude: /node_modules/,
       },
     ],
   },
   resolve: {
-    extensions: ['.ts', '.js'], // Resolve these extensions in imports
+    extensions: ['.ts', '.js'],
   },
   output: {
-    filename: 'bundle.js', // Output bundle filename
-    path: _resolve('public/js'), // Output path for the bundle
+    filename: 'bundle.js',
+    path: resolve('public/js'),
   },
 };

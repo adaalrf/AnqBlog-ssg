@@ -1,0 +1,17 @@
+@layer base {
+  :root[data-theme='dark'] {
+    --background: hsl(240, 18%, 12%);
+    --foreground: hsl(230, 35%, 92%);
+    --muted: hsla(240, 18%, 12%, 0.7);
+    --muted-foreground: hsla(230, 35%, 92%, 0.7);
+    --accent: hsl(341, 45%, 58%);
+    --accent-foreground: hsl(240, 18%, 12%);
+    --accent-hover: hsl(341, 45%, 63%);
+    --destructive: hsl(0, 70%, 65%);
+    --destructive-foreground: hsl(240, 18%, 12%);
+    --code: hsl(240, 18%, 18%);
+    --code-foreground: hsl(230, 35%, 92%);
+    --border: hsla(230, 35%, 92%, 0.15);
+    --ring: hsl(341, 45%, 58%);
+  }
+}

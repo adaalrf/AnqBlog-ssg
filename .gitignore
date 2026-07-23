@@ -1,18 +1,62 @@
 # Directories
 node_modules/
 public/
-src/temp/
+.build/
 legacy/
-
-# Ignore all files in content and templates directories
-src/content/*
-#src/templates/*
-
-# Except files with "example" in their name in content and templates directories
-#!src/content/**/example*
-#!src/templates/**/example*
 
 # Files
 deploy.sh
-#src/assets/favicon.ico
-#src/assets/favicon.webp
+
+# OS files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+desktop.ini
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# Environment variables
+.env
+.env.local
+.env.*.local
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+*.sublime-project
+*.sublime-workspace
+
+# Temporary files
+*.tmp
+*.temp
+.cache/
+
+# Auto-generated files
+client/main.ts
+
+# Compiled TypeScript files (generated from .ts sources)
+dist/
+dist/**/*.js
+core/**/*.js
+client/**/*.js
+*.tsbuildinfo
+
+# Keep config files that are needed
+!webpack.config.js
+!postcss.config.js
+!tailwind.config.js

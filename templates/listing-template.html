@@ -1,0 +1,26 @@
+<!-- Listing template for blog and tag pages -->
+<div data-hook="listing-root" data-container-id="{{containerId}}">
+    <!-- Post listings section -->
+    <section data-hook="post-links" class="flex flex-col list-none mb-6 gap-4">
+        <!-- Template for individual post items (cloned and populated by scripts) -->
+        <article class="post-item" data-hook="post-item-template">
+            <h2 class="post-title" data-hook="post-title">{{titleLink}}</h2>
+            <div class="post-meta" data-hook="post-meta">
+                <time class="post-date" data-hook="post-date">{{date}}</time>
+                <span class="hidden sm:block" data-hook="tag-divider">|</span>
+                <span class="tags hidden sm:flex gap-2 italic" data-hook="tags">{{tags}}</span>
+            </div>
+            <div class="prose-preview prose-theme" data-hook="post-preview" dir="auto">{{previewContent}}</div>
+            <div>
+                <span class="tags-mobile flex sm:hidden gap-2 mt-4 italic" data-hook="tags-mobile">{{tags}}</span>
+            </div>
+        </article>
+    </section>
+    <!-- Pagination navigation (links updated dynamically by scripts) -->
+    <nav aria-label="Pagination" data-hook="pagination" class="pagination flex justify-center gap-4">
+        <a href="#" class="previous-page hidden" aria-label="Previous page" data-pagination="previous">&lt;</a>
+        <a href="#" class="hidden" data-page-style="normal"></a>
+        <a href="#" class="hidden current-page font-bold underline" data-page-style="current" aria-current="page"></a>
+        <a href="#" class="next-page hidden" aria-label="Next page" data-pagination="next">&gt;</a>
+    </nav>
+</div>
