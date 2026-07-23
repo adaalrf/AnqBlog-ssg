@@ -29,8 +29,8 @@
 
 - [x] Run `npm ci` using Node 24.
 - [x] Run `npm run check`.
-- [ ] Confirm `git diff --exit-code` after a committed release candidate.
-- [ ] Confirm the release commit can fast-forward the remote branch.
+- [x] Confirm `git diff --exit-code` after a committed release candidate.
+- [x] Confirm the release commit can fast-forward the remote branch.
 - [ ] Push the release commit and confirm CI passes.
 - [ ] Create and push the annotated `v0.7.0` tag.
 
