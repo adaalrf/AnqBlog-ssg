@@ -1,10 +1,6 @@
 import path from 'path';
-import {
-  denormalizeTagFromFile,
-  escapeHtml,
-  getTagSlug,
-  truncateTextOnWordBoundary,
-} from './content-utils.js';
+import { JSDOM } from 'jsdom';
+import { denormalizeTagFromFile, getTagSlug, truncateTextOnWordBoundary } from './content-utils.js';
 import { sanitizeFilename } from '../../../core/shared/path-and-file-utils.js';
 import { filePathToWebPath } from '../../../core/shared/web-path-utils.js';
 import { formatDate, formatDateISO } from '../../../core/shared/date-utils.js';
@@ -60,17 +56,16 @@ export const createPostItem = (
   if (!tagsWebPath) tagsWebPath = '/blog/tags';
 
   const normalizedFileName = sanitizeFilename(htmlFileName);
-  // Escape title to prevent XSS attacks
-  // Truncate on word boundaries to avoid cutting mid-word
-  const escapedTitle = escapeHtml(truncateTextOnWordBoundary(title, titleTruncationLength));
-  const titleLink = `<a href="${postsWebPath}/${normalizedFileName}">${escapedTitle}</a>`;
-
   const postItem = postItemTemplate.cloneNode(true) as Element;
+  const ownerDocument = postItem.ownerDocument;
   const getHook = (hook: string) => postItem.querySelector(`[data-hook="${hook}"]`);
 
   const titleElement = getHook('post-title');
   if (titleElement) {
-    titleElement.innerHTML = titleLink;
+    const titleLink = ownerDocument.createElement('a');
+    titleLink.setAttribute('href', `${postsWebPath}/${normalizedFileName}`);
+    titleLink.textContent = truncateTextOnWordBoundary(title, titleTruncationLength);
+    titleElement.replaceChildren(titleLink);
   }
 
   // Update time element with ISO date and formatted display
@@ -82,7 +77,11 @@ export const createPostItem = (
 
   const contentElement = getHook('post-preview');
   if (contentElement) {
-    contentElement.innerHTML = previewContent;
+    const previewDocument = new JSDOM(previewContent).window.document;
+    const previewNodes = Array.from(previewDocument.body.childNodes).map((node) =>
+      ownerDocument.importNode(node, true),
+    );
+    contentElement.replaceChildren(...previewNodes);
   }
 
   const tagsContainer = getHook('tags');
@@ -91,16 +90,22 @@ export const createPostItem = (
 
   if (tagsContainer && tagsContainerMobile) {
     if (tags && tags.length > 0) {
-      // Escape tag display text to prevent XSS attacks
-      const tagsList = tags
-        .map(
-          (tag) =>
-            `<a href="${tagsWebPath}/${getTagSlug(tag)}.html">${escapeHtml(denormalizeTagFromFile(tag))}</a>`,
-        )
-        .join(' ');
+      const createTagLinks = (): DocumentFragment => {
+        const fragment = ownerDocument.createDocumentFragment();
+        tags.forEach((tag, index) => {
+          if (index > 0) {
+            fragment.append(' ');
+          }
+          const link = ownerDocument.createElement('a');
+          link.setAttribute('href', `${tagsWebPath}/${getTagSlug(tag)}.html`);
+          link.textContent = denormalizeTagFromFile(tag);
+          fragment.append(link);
+        });
+        return fragment;
+      };
 
-      tagsContainer.innerHTML = tagsList;
-      tagsContainerMobile.innerHTML = tagsList;
+      tagsContainer.replaceChildren(createTagLinks());
+      tagsContainerMobile.replaceChildren(createTagLinks());
     } else {
       tagsContainer.remove();
       tagsContainerMobile.remove();

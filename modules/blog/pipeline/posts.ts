@@ -54,17 +54,13 @@ export const generateIntermediatePostHtmlFiles = async (
               .join(' ')
           : '';
 
-      // Replace placeholders directly (no title, just date, tags, and content)
-      const dom = new JSDOM(templateContent);
-      const document = dom.window.document;
-
-      // Replace placeholders
-      const bodyHtml = document.body.innerHTML
+      // Post content is sanitized during Markdown parsing before it reaches this renderer.
+      const renderedTemplate = templateContent
         .replace(/\{\{date\}\}/g, formatDate(post.date))
         .replace(/\{\{tags\}\}/g, tagsHtml)
         .replace(/\{\{content\}\}/g, post.content);
-
-      document.body.innerHTML = bodyHtml;
+      const dom = new JSDOM(renderedTemplate);
+      const document = dom.window.document;
 
       // Update time element with ISO date attribute
       const dateElement = document.querySelector('[data-hook="post-date"]');

@@ -25,16 +25,15 @@ export const injectContentIntoTemplate = (
     throw new Error('Data must be an object');
   }
 
-  const dom = new JSDOM(templateContent);
-  const document = dom.window.document;
+  let renderedTemplate = templateContent;
 
   Object.keys(data).forEach((key) => {
     const placeholder = new RegExp(`{{{${escapeRegExp(key)}}}}`, 'g');
     const value = data[key];
-    document.body.innerHTML = document.body.innerHTML.replace(placeholder, String(value));
+    renderedTemplate = renderedTemplate.replace(placeholder, String(value));
   });
 
-  return dom;
+  return new JSDOM(renderedTemplate);
 };
 
 /**

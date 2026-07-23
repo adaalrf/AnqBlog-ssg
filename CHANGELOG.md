@@ -39,6 +39,10 @@ intent.
   root.
 - Added a configurable page robots value and marked `404.html` as
   `noindex, follow`.
+- Reworked trusted build-time HTML composition to avoid unsafe `innerHTML`
+  assignments while preserving rendered output.
+- Updated transitive `js-yaml` releases to resolve denial-of-service
+  advisories.
 - Core placeholder replacement now supports non-whitespace keys such as
   `{{tags-dropdown}}`.
 - The local development server now serves `.jpg` files with the standard
